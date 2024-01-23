@@ -30,7 +30,7 @@ jobs:
     steps:
     - name: 'Set BUILD_TYPE'
       run: |
-        if [ -n "${{ github.event.inputs.build }}" ]; then
+        if ([ -n "${{ github.event.inputs.build }}" ]); then
           echo "Using input value: ${{ github.event.inputs.build }}"
           echo "::set-env name=BUILD_TYPE::${{ github.event.inputs.build }}"
         else
