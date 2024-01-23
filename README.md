@@ -15,4 +15,4 @@ Apache-2.0. Check [LICENSE](https://github.com/Serial-Link/CPP-Bindings/blob/mai
 
 Feel free to contribute to this project.
 
-Copyright 2023 © Max
+Copyright 2024 © Paul & Max
