@@ -1,0 +1,55 @@
+name: 'Build Windows binaries'
+
+on:
+  push:
+    branches: 
+      - 'main'
+      
+    paths:
+      - '.github/workflows/build.yml'
+
+  workflow_dispatch:
+    inputs:
+      build:
+        description: 'Build Windows binaries'
+        required: true
+        default: 'RELEASE'
+        type: choice
+        options:
+          - 'RELEASE'
+          - 'PRE_REPEASE'
+
+env:
+  BUILD_TYPE: 'RELEASE'
+
+jobs:
+  build:
+    name: 'Build Windows binaries'
+    runs-on: windows-latest
+    
+    steps:
+    - name: 'Set BUILD_TYPE'
+      run: |
+        if [ -n "${{ github.event.inputs.build }}" ]; then
+          echo "Using input value: ${{ github.event.inputs.build }}"
+          echo "::set-env name=BUILD_TYPE::${{ github.event.inputs.build }}"
+        else
+          echo "Using default value: ${{ env.BUILD_TYPE }}"
+          echo "::set-env name=BUILD_TYPE::${{ env.BUILD_TYPE }}"
+        fi
+        
+    - name: 'Checkout'
+      uses: actions/checkout@v3
+    
+    - name: 'Configure CMake'
+      run: cmake --build ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+
+    - name: 'Build'
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+      
+    - name: 'Upload artifacts'
+      uses: actions/upload-artifact@v3
+      with:
+        name: 'serial-lib-x64'
+        path: ${{github.workspace}}\build\cpp\Release\serialport.dll
+    
