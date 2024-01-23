@@ -1,4 +1,4 @@
-name: 'Build Linux binaries'
+name: 'Build WASM binary'
 
 on:
   push:
@@ -6,12 +6,12 @@ on:
       - 'main'
       
     paths:
-      - '.github/workflows/build_linux.yml'
+      - '.github/workflows/build.yml'
 
   workflow_dispatch:
     inputs:
       build:
-        description: 'Build Linux binaries'
+        description: 'Build WASM binary'
         required: true
         default: 'RELEASE'
         type: choice
@@ -25,7 +25,7 @@ env:
 
 jobs:
   build:
-    name: 'Build Linux binaries'
+    name: 'Build WASM binary'
     runs-on: ubuntu-latest
     
     steps:
@@ -38,21 +38,3 @@ jobs:
           echo "Using default value: ${{ env.BUILD_TYPE }}"
           echo "::set-env name=BUILD_TYPE::${{ env.BUILD_TYPE }}"
         fi
-
-    - name: 'Checkout'
-      uses: actions/checkout@v3
-    
-    - name: 'Configure CMake'
-      run: cmake --build ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
-
-    - name: 'Build'
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
-      
-    - name: 'Upload artifacts'
-      uses: actions/upload-artifact@v3
-      with:
-        name: 'serial-lib-linux-x64'
-        path: ${{github.workspace}}/build/cpp/libserialport.so
-
-    
-    
