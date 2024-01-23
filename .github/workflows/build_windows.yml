@@ -6,7 +6,7 @@ on:
       - 'main'
       
     paths:
-      - '.github/workflows/build.yml'
+      - '.github/workflows/build_windows.yml'
 
   workflow_dispatch:
     inputs:
@@ -50,6 +50,6 @@ jobs:
     - name: 'Upload artifacts'
       uses: actions/upload-artifact@v3
       with:
-        name: 'serial-lib-x64'
+        name: 'serial-lib-windows-x64'
         path: ${{github.workspace}}\build\cpp\Release\serialport.dll
     
