@@ -68,7 +68,7 @@ extern "C"
 
     MODULE_API int serialWriteLine(int64_t handle, const void* buffer, int bufferSize, int timeoutMs);
 
-    MODULE_API int serialReadUntilSequence(int64_t handle, void* buffer, int bufferSize, int timeout /*ms*/, void* sequence);
+    MODULE_API int serialReadUntilSequence(int64_t handle, void* buffer, int bufferSize, int timeoutMs, void* sequence);
 
     MODULE_API int serialReadFrame(int64_t handle, void* buffer, int bufferSize, int timeout /*ms*/, char startByte, char endByte);
 
