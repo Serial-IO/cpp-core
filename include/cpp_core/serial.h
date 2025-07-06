@@ -64,7 +64,7 @@ extern "C"
     MODULE_API void serialOnWrite(void (*func)(int bytes));
     MODULE_API void serialOnError(void (*func)(int code, const char* message));
 
-    MODULE_API int serialReadLine(int64_t handle, void* buffer, int bufferSize, int timeout /*ms*/);
+    MODULE_API int serialReadLine(int64_t handle, void* buffer, int bufferSize, int timeoutMs);
 
     MODULE_API int serialWriteLine(int64_t handle, const void* buffer, int bufferSize, int timeout /*ms*/);
 
