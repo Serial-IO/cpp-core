@@ -1,9 +1,6 @@
 #pragma once
-#if __has_include(<cpp_core/version.h>)
-#include <cpp_core/version.h>
-#else
 #include "version.h"
-#endif
+
 #include <cstdint>
 
 #if defined(_WIN32) || defined(__CYGWIN__)
