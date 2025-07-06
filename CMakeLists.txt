@@ -8,20 +8,15 @@ project(cpp-core
 # ---------------------------------------------------------------------------
 # Version information - can be overridden by parent project
 # ---------------------------------------------------------------------------
-if(NOT DEFINED CPP_CORE_VERSION_MAJOR)
-    set(CPP_CORE_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
-endif()
-if(NOT DEFINED CPP_CORE_VERSION_MINOR)
-    set(CPP_CORE_VERSION_MINOR ${PROJECT_VERSION_MINOR})
-endif()
-if(NOT DEFINED CPP_CORE_VERSION_PATCH)
-    set(CPP_CORE_VERSION_PATCH ${PROJECT_VERSION_PATCH})
-endif()
+foreach(_part IN ITEMS MAJOR MINOR PATCH)
+    if(NOT DEFINED CPP_CORE_VERSION_${_part} OR CPP_CORE_VERSION_${_part} STREQUAL "")
+        set(CPP_CORE_VERSION_${_part} ${PROJECT_VERSION_${_part}})
+    endif()
+endforeach()
 
-# Generate version header at configure time
 configure_file(
         ${CMAKE_CURRENT_SOURCE_DIR}/include/cpp_core/version.h.in
-        ${CMAKE_CURRENT_BINARY_DIR}/generated/cpp_core/version.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/cpp_core/version.h
         @ONLY)
 
 # Header-only library --------------------------------------------------------
@@ -30,7 +25,6 @@ add_library(cpp_core::cpp_core ALIAS cpp_core)
 
 # Public include directories
 target_include_directories(cpp_core INTERFACE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
@@ -45,10 +39,6 @@ install(TARGETS cpp_core
 
 install(DIRECTORY include/
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-
-# also install the generated version header
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/generated/cpp_core/version.h
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/cpp_core)
 
 # CMake package configuration ------------------------------------------------
 include(CMakePackageConfigHelpers)
