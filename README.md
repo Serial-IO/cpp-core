@@ -27,7 +27,7 @@ set(CPP_LINUX_VERSION_PATCH 0)
 
 CPMAddPackage(
   NAME cpp_core
-  GITHUB_REPOSITORY <yourUser>/cpp-core   # Fork / upstream repo
+  GITHUB_REPOSITORY Serial-IO/cpp-core    # Fork / upstream repo
   GIT_TAG main                            # or a release tag like v0.1.0
   OPTIONS
     "CPP_CORE_VERSION_MAJOR=${CPP_LINUX_VERSION_MAJOR}"
