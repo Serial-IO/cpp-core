@@ -21,7 +21,7 @@ endif()
 # Generate version header at configure time
 configure_file(
         ${CMAKE_CURRENT_SOURCE_DIR}/include/cpp_core/version.h.in
-        ${CMAKE_CURRENT_SOURCE_DIR}/include/cpp_core/version.h
+        ${CMAKE_CURRENT_BINARY_DIR}/generated/cpp_core/version.h
         @ONLY)
 
 # Header-only library --------------------------------------------------------
@@ -30,8 +30,8 @@ add_library(cpp_core::cpp_core ALIAS cpp_core)
 
 # Public include directories
 target_include_directories(cpp_core INTERFACE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
 # Require C++17
