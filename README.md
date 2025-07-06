@@ -17,30 +17,31 @@ Header-only C++ helper library that provides small, cross-platform utilities and
 
 ## Quick Start
 
-### 1. Add *cpp-core* with CPM.cmake
+### 1. Add *cpp-core* with CPM.cmake (empfohlener Weg)
 
 ```cmake
-# Your own project version
-set(CPP_LINUX_VERSION_MAJOR 1)
-set(CPP_LINUX_VERSION_MINOR 4)
-set(CPP_LINUX_VERSION_PATCH 0)
+# Projekt-Version einmal als **Cache-Variablen** setzen –
+# so landen sie garantiert in cpp-core, egal wann CPM konfiguriert.
+set(CPP_CORE_VERSION_MAJOR 1 CACHE STRING "")
+set(CPP_CORE_VERSION_MINOR 0 CACHE STRING "")
+set(CPP_CORE_VERSION_PATCH 3 CACHE STRING "")
 
 CPMAddPackage(
   NAME cpp_core
-  GITHUB_REPOSITORY Serial-IO/cpp-core    # Fork / upstream repo
-  GIT_TAG main                            # or a release tag like v0.1.0
-  OPTIONS
-    "CPP_CORE_VERSION_MAJOR=${CPP_LINUX_VERSION_MAJOR}"
-    "CPP_CORE_VERSION_MINOR=${CPP_LINUX_VERSION_MINOR}"
-    "CPP_CORE_VERSION_PATCH=${CPP_LINUX_VERSION_PATCH}"
+  GITHUB_REPOSITORY Serial-IO/cpp-core    # Fork / Upstream
+  GIT_TAG main                            # oder z. B. v0.1.0
 )
 
 add_executable(my_app src/main.cpp)
-# Link the header-only target – this only sets include paths / compile features
 target_link_libraries(my_app PRIVATE cpp_core::cpp_core)
 ```
 
-> Tip: If you already set the version variables as cache variables in your project (e.g. `set(CPP_CORE_VERSION_MAJOR 1 CACHE STRING "")`), you can omit the three `OPTIONS` entries—CPM will forward the values to *cpp-core* automatically.
+> Warum Cache-Variablen?  
+> Nur so ist sicher­gestellt, dass die Werte bereits **vor** dem
+> `CPMAddPackage()`-Aufruf existieren.  Falls die Variablen erst später oder
+> über `OPTIONS ... "CPP_CORE_VERSION_MAJOR=${FOO}"` gesetzt werden und `FOO`
+> zu diesem Zeitpunkt leer ist, fällt *cpp-core* auf seine Default-Version
+> (0.1.0) zurück.
 
 ### 2. Use in code
 
