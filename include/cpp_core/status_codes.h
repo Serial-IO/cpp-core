@@ -1,5 +1,7 @@
 #pragma once
 
+namespace cpp_core
+{
 enum class StatusCodes
 {
     SUCCESS = 0,
@@ -17,3 +19,4 @@ enum class StatusCodes
     ABORT_READ_ERROR = -12,
     ABORT_WRITE_ERROR = -13,
 };
+} // namespace cpp_core
