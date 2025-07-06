@@ -1,6 +1,6 @@
 # C API Reference
 
-**Scope** – Public interface of `libcpp_unix_bindings` (C-linkable).  
+**Scope** – Public interface of `libcpp_unix_bindings` / `libcpp_windows_bindings` (C-linkable).  
 *Linux fully supported · Windows fully supported*
 
 Every function is declared in `src/serial.h` and follows the same
