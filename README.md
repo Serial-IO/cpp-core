@@ -1,6 +1,6 @@
 # cpp-core
 
-Header-only C++ helper library that provides small, cross-platform utilities and a centrally maintained **Version** struct shared by the *cpp-linux-bindings* and *cpp-windows-bindings* repositories.
+Header-only C++ helper library that provides small, cross-platform utilities and a centrally maintained **Version** struct shared by the *cpp-bindings-linux*, *cpp-bindings-windows* and *cpp-bindings-macos* repositories.
 
 * C++17, zero runtime dependencies
 * Delivered as an INTERFACE target `cpp_core::cpp_core`
