@@ -2,6 +2,18 @@
 
 Header-only C++ helper library that provides small, cross-platform utilities and a centrally maintained **Version** struct shared by the *cpp-bindings-linux*, *cpp-bindings-windows* and *cpp-bindings-macos* repositories.
 
+> ⚠️ **Note for FFI users**: This repository contains **headers only**.  
+> To obtain a working native library (SO / DLL / dylib) build one of the platform-specific projects instead:  
+> • Windows → [cpp-bindings-windows](https://github.com/Serial-IO/cpp-bindings-windows)  
+> • Linux   → [cpp-bindings-linux](https://github.com/Serial-IO/cpp-bindings-linux)  
+> These repositories compile *cpp-core* for you and provide the ready-to-use shared library.
+
+## Documentation
+
+* 📄 **[Overview](docs/overview.md)** – architecture, build & quick start.
+* 📜 **[C API Reference](docs/api_reference.md)** – parameter-by-parameter reference of every exported function.
+* ⚡ **[Deno FFI Guide](docs/deno_ffi.md)** – step-by-step instructions plus full TypeScript examples.
+
 * C++17, zero runtime dependencies
 * Delivered as an INTERFACE target `cpp_core::cpp_core`
 * Fetchable via [CPM.cmake](https://github.com/cpm-cmake/CPM.cmake) or regular `find_package`
@@ -17,11 +29,11 @@ Header-only C++ helper library that provides small, cross-platform utilities and
 
 ## Quick Start
 
-### 1. Add *cpp-core* with CPM.cmake (empfohlener Weg)
+### 1. Add *cpp-core* with CPM.cmake (recommended way)
 
 ```cmake
-# Projekt-Version einmal als **Cache-Variablen** setzen –
-# so landen sie garantiert in cpp-core, egal wann CPM konfiguriert.
+# Set the project version once via **cache variables** –
+# ensures the values end up in cpp-core regardless of when CPM configures.
 set(CPP_CORE_VERSION_MAJOR 1 CACHE STRING "")
 set(CPP_CORE_VERSION_MINOR 0 CACHE STRING "")
 set(CPP_CORE_VERSION_PATCH 3 CACHE STRING "")
@@ -29,19 +41,16 @@ set(CPP_CORE_VERSION_PATCH 3 CACHE STRING "")
 CPMAddPackage(
   NAME cpp_core
   GITHUB_REPOSITORY Serial-IO/cpp-core    # Fork / Upstream
-  GIT_TAG main                            # oder z. B. v0.1.0
+  GIT_TAG main                            # or e.g. v0.1.0
 )
 
 add_executable(my_app src/main.cpp)
 target_link_libraries(my_app PRIVATE cpp_core::cpp_core)
 ```
 
-> Warum Cache-Variablen?  
-> Nur so ist sicher­gestellt, dass die Werte bereits **vor** dem
-> `CPMAddPackage()`-Aufruf existieren.  Falls die Variablen erst später oder
-> über `OPTIONS ... "CPP_CORE_VERSION_MAJOR=${FOO}"` gesetzt werden und `FOO`
-> zu diesem Zeitpunkt leer ist, fällt *cpp-core* auf seine Default-Version
-> (0.1.0) zurück.
+> Why cache variables?  
+> They guarantee the values exist **before** the `CPMAddPackage()` call. If the variables are set later (or via  
+> `OPTIONS ... "CPP_CORE_VERSION_MAJOR=${FOO}"`) and `FOO` is empty at that moment, *cpp-core* falls back to its default version (0.1.0).
 
 ### 2. Use in code
 
