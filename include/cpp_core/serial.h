@@ -18,7 +18,14 @@ extern "C"
 {
 #endif
 
-    MODULE_API void getVersion(cpp_core::Version* out);
+    // Inline definition to keep the library header-only
+    inline MODULE_API void getVersion(cpp_core::Version* out)
+    {
+        if (out != nullptr)
+        {
+            *out = cpp_core::VERSION;
+        }
+    }
 
     // Basic serial API
     MODULE_API intptr_t
