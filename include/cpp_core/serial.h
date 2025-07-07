@@ -19,36 +19,34 @@ extern "C"
 #endif
 
     // Inline definition to keep the library header-only
-    inline MODULE_API void getVersion(cpp_core::Version* out)
+    inline MODULE_API void getVersion(cpp_core::Version *out)
     {
         if (out != nullptr)
         {
-            *out = cpp_core::VERSION;
+            *out = cpp_core::kVersion;
         }
     }
 
     // Basic serial API
-    MODULE_API intptr_t
-    serialOpen(void* port, int baudrate, int dataBits, int parity /*0-none,1-even,2-odd*/ = 0, int stopBits /*0-1bit,2-2bit*/ = 0);
+    MODULE_API auto serialOpen(void *port, int baudrate, int data_bits, int parity /*0-none,1-even,2-odd*/ = 0,
+                               int stop_bits /*0-1bit,2-2bit*/ = 0) -> intptr_t;
 
     MODULE_API void serialClose(int64_t handle);
 
-    MODULE_API int serialRead(int64_t handle, void* buffer, int bufferSize, int timeout /*ms*/, int multiplier);
+    MODULE_API auto serialRead(int64_t handle, void *buffer, int buffer_size, int timeout_ms, int multiplier) -> int;
 
-    MODULE_API int serialReadUntil(int64_t handle, void* buffer, int bufferSize, int timeout, int multiplier, void* untilChar);
+    MODULE_API auto serialReadUntil(int64_t handle, void *buffer, int buffer_size, int timeout_ms, int multiplier,
+                                    void *until_char) -> int;
 
-    MODULE_API int serialWrite(int64_t handle, const void* buffer, int bufferSize, int timeout, int multiplier);
+    MODULE_API auto serialWrite(int64_t handle, const void *buffer, int buffer_size, int timeout_ms, int multiplier)
+        -> int;
 
     // Enumerate ports; callback gets simple COM name first (e.g. "COM3"),
     // followed by the full device path and further meta-data.
-    MODULE_API int serialGetPortsInfo(void (*function)(const char* port,
-                                                       const char* path,
-                                                       const char* manufacturer,
-                                                       const char* serialNumber,
-                                                       const char* pnpId,
-                                                       const char* locationId,
-                                                       const char* productId,
-                                                       const char* vendorId));
+    MODULE_API auto serialGetPortsInfo(void (*function)(const char *port, const char *path, const char *manufacturer,
+                                                        const char *serial_number, const char *pnp_id,
+                                                        const char *location_id, const char *product_id,
+                                                        const char *vendor_id)) -> int;
 
     MODULE_API void serialClearBufferIn(int64_t handle);
     MODULE_API void serialClearBufferOut(int64_t handle);
@@ -56,32 +54,34 @@ extern "C"
     MODULE_API void serialAbortWrite(int64_t handle);
 
     // Optional callback hooks (can be nullptr)
-    extern void (*on_read_callback)(int bytes);
-    extern void (*on_write_callback)(int bytes);
-    extern void (*on_error_callback)(int errorCode, const char* message);
+    extern void (*on_read_callback)(int bytes_read);
+    extern void (*on_write_callback)(int bytes_written);
+    extern void (*on_error_callback)(int error_code, const char *message);
 
-    MODULE_API void serialOnRead(void (*func)(int bytes));
-    MODULE_API void serialOnWrite(void (*func)(int bytes));
-    MODULE_API void serialOnError(void (*func)(int code, const char* message));
+    MODULE_API void serialOnRead(void (*func)(int bytes_read));
+    MODULE_API void serialOnWrite(void (*func)(int bytes_written));
+    MODULE_API void serialOnError(void (*func)(int error_code, const char *message));
 
-    MODULE_API int serialReadLine(int64_t handle, void* buffer, int bufferSize, int timeoutMs);
+    MODULE_API auto serialReadLine(int64_t handle, void *buffer, int buffer_size, int timeout_ms) -> int;
 
-    MODULE_API int serialWriteLine(int64_t handle, const void* buffer, int bufferSize, int timeoutMs);
+    MODULE_API auto serialWriteLine(int64_t handle, const void *buffer, int buffer_size, int timeout_ms) -> int;
 
-    MODULE_API int serialReadUntilSequence(int64_t handle, void* buffer, int bufferSize, int timeoutMs, void* sequence);
+    MODULE_API auto serialReadUntilSequence(int64_t handle, void *buffer, int buffer_size, int timeout_ms,
+                                            void *sequence) -> int;
 
-    MODULE_API int serialReadFrame(int64_t handle, void* buffer, int bufferSize, int timeoutMs, char startByte, char endByte);
+    MODULE_API auto serialReadFrame(int64_t handle, void *buffer, int buffer_size, int timeout_ms, char start_byte,
+                                    char end_byte) -> int;
 
     // Byte statistics
-    MODULE_API int64_t serialOutBytesTotal(int64_t handle);
-    MODULE_API int64_t serialInBytesTotal(int64_t handle);
+    MODULE_API auto serialOutBytesTotal(int64_t handle) -> int64_t;
+    MODULE_API auto serialInBytesTotal(int64_t handle) -> int64_t;
 
     // Drain pending TX bytes (wait until sent)
-    MODULE_API int serialDrain(int64_t handle);
+    MODULE_API auto serialDrain(int64_t handle) -> int;
 
     // Bytes currently queued in the driver buffers
-    MODULE_API int serialInBytesWaiting(int64_t handle);
-    MODULE_API int serialOutBytesWaiting(int64_t handle);
+    MODULE_API auto serialInBytesWaiting(int64_t handle) -> int;
+    MODULE_API auto serialOutBytesWaiting(int64_t handle) -> int;
 
 #ifdef __cplusplus
 }
