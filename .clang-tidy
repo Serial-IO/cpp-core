@@ -14,6 +14,8 @@ Checks:          '*,
                   -llvmlibc-*,
                   -readability-convert-member-functions-to-static,
                   -boost-use-ranges,
+                  -google-objc-function-naming,
+                  -google-objc-global-variable-declaration,
                   -performance-enum-size'
 WarningsAsErrors: ''
 HeaderFilterRegex: '^(?!magic_enum).*$'
