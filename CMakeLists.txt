@@ -49,7 +49,7 @@ write_basic_package_version_file(
         COMPATIBILITY SameMajorVersion)
 
 configure_package_config_file(
-        ${CMAKE_CURRENT_LIST_DIR}/cmake/cpp_coreConfig.cmake.in
+        ${CMAKE_CURRENT_LIST_DIR}/cmake/cpp_core_config.cmake.in
         ${CMAKE_CURRENT_BINARY_DIR}/cpp_coreConfig.cmake
         INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cpp_core)
 
