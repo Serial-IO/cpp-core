@@ -1,6 +1,6 @@
 # cpp-core – Library Overview
 
-Welcome to **cpp-core**, a header-only, cross-platform C++17 helper library that bundles utilities frequently needed in systems programming and embedded scenarios.  Besides multiple compile-time helpers it exposes a fully-featured **C API for serial communication**, making the library consumable from virtually any language (Rust, Python, Deno, …).
+Welcome to **cpp-core**, a header-only, cross-platform C++23 helper library that bundles utilities frequently needed in systems programming and embedded scenarios.  Besides multiple compile-time helpers it exposes a fully-featured **C API for serial communication**, making the library consumable from virtually any language (Rust, Python, Deno, …).
 
 > ⚠️ **Looking for a ready-to-use shared library?** Build one of the platform bindings instead of cpp-core itself:  
 > • Windows → [cpp-bindings-windows](https://github.com/Serial-IO/cpp-bindings-windows)  

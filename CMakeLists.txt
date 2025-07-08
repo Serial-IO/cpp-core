@@ -28,8 +28,8 @@ target_include_directories(cpp_core INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
-# Require C++17
-target_compile_features(cpp_core INTERFACE cxx_std_17)
+# Require C++23
+target_compile_features(cpp_core INTERFACE cxx_std_23)
 
 # Install rules --------------------------------------------------------------
 include(GNUInstallDirs)

@@ -11,10 +11,8 @@ Header-only C++ helper library that provides small, cross-platform utilities and
 ## Documentation
 
 * 📄 **[Overview](docs/overview.md)** – architecture, build & quick start.
-* 📜 **[C API Reference](docs/api_reference.md)** – parameter-by-parameter reference of every exported function.
-* ⚡ **[Deno FFI Guide](docs/deno_ffi.md)** – step-by-step instructions plus full TypeScript examples.
 
-* C++17, zero runtime dependencies
+* C++23, zero runtime dependencies
 * Delivered as an INTERFACE target `cpp_core::cpp_core`
 * Fetchable via [CPM.cmake](https://github.com/cpm-cmake/CPM.cmake) or regular `find_package`
 
@@ -23,7 +21,7 @@ Header-only C++ helper library that provides small, cross-platform utilities and
 ## Requirements
 
 * CMake ≥ 3.14
-* A C++17 compatible compiler (GCC 10+, Clang 11+, MSVC 2019+)
+* A C++23 compatible compiler (GCC 13+, Clang 16+, MSVC 2022+)
 
 ---
 
