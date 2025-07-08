@@ -186,7 +186,7 @@ extern "C"
     MODULE_API void serialSetErrorCallback(void (*callback)(int error_code, const char *message));
 
     /**
-     * @brief Read a line terminated by a newline character ("\n").
+     * @brief Read a line terminated by a newline character ("\n"). This function keeps reading until the newline character is found or the timeout is reached.
      *
      * @param handle       Port handle.
      * @param buffer       Destination buffer.
