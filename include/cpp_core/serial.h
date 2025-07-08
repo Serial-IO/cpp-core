@@ -52,7 +52,13 @@ extern "C"
      * @return           A positive opaque handle on success or a negative value
      *                   from ::cpp_core::StatusCodes on failure.
      */
-    MODULE_API auto serialOpen(void *port, int baudrate, int data_bits, int parity = 0, int stop_bits = 0) -> intptr_t;
+    MODULE_API auto serialOpen(
+        void *port,
+        int   baudrate,
+        int   data_bits,
+        int   parity    = 0,
+        int   stop_bits = 0
+    ) -> intptr_t;
 
     /**
      * @brief Close a previously opened serial port.
@@ -82,7 +88,13 @@ extern "C"
      *                     the first. 0 -> return immediately after the first byte.
      * @return             Bytes read (0 on timeout) or a negative error code.
      */
-    MODULE_API auto serialRead(int64_t handle, void *buffer, int buffer_size, int timeout_ms, int multiplier) -> int;
+    MODULE_API auto serialRead(
+        int64_t handle,
+        void   *buffer,
+        int     buffer_size,
+        int     timeout_ms,
+        int     multiplier
+    ) -> int;
 
     /**
      * @brief Read bytes until a terminator character appears.
@@ -102,8 +114,14 @@ extern "C"
      * @return             Bytes read (including the terminator), 0 on timeout
      *                     or a negative error code.
      */
-    MODULE_API auto serialReadUntil(int64_t handle, void *buffer, int buffer_size, int timeout_ms, int multiplier,
-                                    void *until_char) -> int;
+    MODULE_API auto serialReadUntil(
+        int64_t handle,
+        void   *buffer,
+        int     buffer_size,
+        int     timeout_ms,
+        int     multiplier,
+        void   *until_char
+    ) -> int;
 
     /**
      * @brief Write raw bytes to the serial port.
@@ -120,8 +138,13 @@ extern "C"
      * @param multiplier   Factor applied to the timeout for subsequent bytes.
      * @return             Bytes written (may be 0 on timeout) or a negative error code.
      */
-    MODULE_API auto serialWrite(int64_t handle, const void *buffer, int buffer_size, int timeout_ms, int multiplier)
-        -> int;
+    MODULE_API auto serialWrite(
+        int64_t     handle,
+        const void *buffer,
+        int         buffer_size,
+        int         timeout_ms,
+        int         multiplier
+    ) -> int;
 
     /**
      * @brief Enumerate all available serial ports on the system.
@@ -132,10 +155,18 @@ extern "C"
      * @param function Callback receiving port information.
      * @return         Number of ports found or a negative error code.
      */
-    MODULE_API auto serialGetPortsInfo(void (*function)(const char *port, const char *path, const char *manufacturer,
-                                                        const char *serial_number, const char *pnp_id,
-                                                        const char *location_id, const char *product_id,
-                                                        const char *vendor_id)) -> int;
+    MODULE_API auto serialGetPortsInfo(
+        void (*function)(
+            const char *port,
+            const char *path,
+            const char *manufacturer,
+            const char *serial_number,
+            const char *pnp_id,
+            const char *location_id,
+            const char *product_id,
+            const char *vendor_id
+        )
+    ) -> int;
 
     /**
      * @brief Clear (flush) the device's input buffer.
@@ -202,7 +233,12 @@ extern "C"
      *
      * @param callback Function receiving the error code and a textual description.
      */
-    MODULE_API void serialSetErrorCallback(void (*callback)(int error_code, const char *message));
+    MODULE_API void serialSetErrorCallback(
+        void (*callback)(
+            int         error_code,
+            const char *message
+        )
+    );
 
     /**
      * @brief Read a single line terminated by '\n'.
@@ -219,8 +255,13 @@ extern "C"
      * @param multiplier   Factor applied to the timeout for subsequent bytes.
      * @return             Bytes read (0 on timeout) or a negative error code.
      */
-    MODULE_API auto serialReadLine(int64_t handle, void *buffer, int buffer_size, int timeout_ms, int multiplier)
-        -> int;
+    MODULE_API auto serialReadLine(
+        int64_t handle,
+        void   *buffer,
+        int     buffer_size,
+        int     timeout_ms,
+        int     multiplier
+    ) -> int;
 
     /**
      * @brief Write a buffer followed by a '\n' byte.
@@ -237,8 +278,13 @@ extern "C"
      * @return             Bytes written (including the newline) or a negative
      *                     error code.
      */
-    MODULE_API auto serialWriteLine(int64_t handle, const void *buffer, int buffer_size, int timeout_ms, int multiplier)
-        -> int;
+    MODULE_API auto serialWriteLine(
+        int64_t     handle,
+        const void *buffer,
+        int         buffer_size,
+        int         timeout_ms,
+        int         multiplier
+    ) -> int;
 
     /**
      * @brief Read until a specific byte sequence appears.
@@ -256,8 +302,14 @@ extern "C"
      * @param sequence     Pointer to the terminating byte sequence (must not be `nullptr`).
      * @return             Bytes read (including the terminator) or a negative error code.
      */
-    MODULE_API auto serialReadUntilSequence(int64_t handle, void *buffer, int buffer_size, int timeout_ms,
-                                            int multiplier, void *sequence) -> int;
+    MODULE_API auto serialReadUntilSequence(
+        int64_t handle,
+        void   *buffer,
+        int     buffer_size,
+        int     timeout_ms,
+        int     multiplier,
+        void   *sequence
+    ) -> int;
 
     /**
      * @brief Total number of bytes transmitted since the port was opened.
