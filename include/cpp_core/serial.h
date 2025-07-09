@@ -25,4 +25,3 @@
 #include "interface/serial_set_read_callback.h"
 #include "interface/serial_set_write_callback.h"
 #include "interface/serial_write.h"
-#include "interface/serial_write_line.h"
