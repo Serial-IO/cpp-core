@@ -347,8 +347,7 @@ extern "C"
      * @endcode
      *
      * @param handle Port handle.
-     * @return       0 on success; negative ::cpp_core::StatusCodes value on error
-     *               (e.g. kInvalidHandleError).
+     * @return       0 on success; negative ::cpp_core::StatusCodes value on error.
      */
     MODULE_API auto serialDrain(int64_t handle) -> int;
 
