@@ -11,7 +11,7 @@ extern "C"
      * @brief Total number of bytes received since the port was opened.
      *
      * @param handle Port handle.
-     * @return       Total number of bytes read.
+     * @return Total number of bytes read.
      */
     MODULE_API auto serialInBytesTotal(int64_t handle) -> int64_t;
 

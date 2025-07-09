@@ -5,7 +5,7 @@ AccessModifierOffset: -2
 AlignAfterOpenBracket: BlockIndent
 AlignEscapedNewlines: Right
 AlignOperands:   Align
-AlignTrailingComments: true
+AlignTrailingComments: false
 AlignConsecutiveAssignments: true
 AlignConsecutiveDeclarations: true
 AllowAllArgumentsOnNextLine: true

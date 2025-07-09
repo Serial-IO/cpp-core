@@ -13,7 +13,7 @@ extern "C"
      * parameters may be `nullptr` if the information is unknown.
      *
      * @param function Callback receiving port information.
-     * @return         Number of ports found or a negative error code.
+     * @return Number of ports found or a negative error code.
      */
     MODULE_API auto serialGetPortsInfo(
         void (*function)(
