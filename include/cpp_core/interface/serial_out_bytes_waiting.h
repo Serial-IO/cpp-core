@@ -20,7 +20,7 @@ extern "C"
      * @endcode
      *
      * @param handle Port handle.
-     * @return       Bytes still waiting in the TX FIFO or a negative error code.
+     * @return Bytes still waiting in the TX FIFO or a negative error code.
      */
     MODULE_API auto serialOutBytesWaiting(int64_t handle) -> int;
 

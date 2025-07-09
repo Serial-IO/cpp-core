@@ -22,7 +22,7 @@ extern "C"
      * @endcode
      *
      * @param handle Port handle.
-     * @return       Bytes available for instant reading or a negative error code.
+     * @return Bytes available for instant reading or a negative error code.
      */
     MODULE_API auto serialInBytesWaiting(int64_t handle) -> int;
 

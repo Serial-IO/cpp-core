@@ -14,15 +14,14 @@ extern "C"
      * the FIRST byte. For every subsequent byte the individual timeout is
      * calculated as `timeout_ms * multiplier`.
      *
-     * @param handle       Port handle.
-     * @param buffer       Destination buffer (must not be `nullptr`).
-     * @param buffer_size  Size of @p buffer in bytes (> 0).
-     * @param timeout_ms   Base timeout per byte in milliseconds (applied to the
-     *                     first byte as-is; subsequent bytes use
-     *                     `timeout_ms * multiplier`).
-     * @param multiplier   Factor applied to @p timeout_ms for every byte after
-     *                     the first. 0 -> return immediately after the first byte.
-     * @return             Bytes read (0 on timeout) or a negative error code.
+     * @param handle Port handle.
+     * @param buffer Destination buffer (must not be `nullptr`).
+     * @param buffer_size Size of @p buffer in bytes (> 0).
+     * @param timeout_ms Base timeout per byte in milliseconds (applied to the first byte as-is; subsequent bytes use
+     * `timeout_ms * multiplier`).
+     * @param multiplier Factor applied to @p timeout_ms for every byte after the first. 0 -> return immediately after
+     * the first byte.
+     * @return Bytes read (0 on timeout) or a negative error code.
      */
     MODULE_API auto serialRead(
         int64_t handle,

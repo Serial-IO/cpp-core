@@ -14,16 +14,14 @@ extern "C"
      * byte pointed to by @p until_char has been received. The terminator is part
      * of the returned data.
      *
-     * @param handle       Port handle.
-     * @param buffer       Destination buffer.
-     * @param buffer_size  Capacity of @p buffer in bytes.
-     * @param timeout_ms   Base timeout per byte in milliseconds (applied to the
-     *                     first byte as-is; each additional byte uses
-     *                     `timeout_ms * multiplier`).
-     * @param multiplier   Factor applied to the timeout for every additional byte.
-     * @param until_char   Pointer to the terminator character (must not be `nullptr`).
-     * @return             Bytes read (including the terminator), 0 on timeout
-     *                     or a negative error code.
+     * @param handle Port handle.
+     * @param buffer Destination buffer.
+     * @param buffer_size Capacity of @p buffer in bytes.
+     * @param timeout_ms Base timeout per byte in milliseconds (applied to the first byte as-is; each additional byte
+     * uses `timeout_ms * multiplier`).
+     * @param multiplier Factor applied to the timeout for every additional byte.
+     * @param until_char Pointer to the terminator character (must not be `nullptr`).
+     * @return Bytes read (including the terminator), 0 on timeout or a negative error code.
      */
     MODULE_API auto serialReadUntil(
         int64_t handle,
