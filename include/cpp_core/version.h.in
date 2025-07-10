@@ -1,0 +1,17 @@
+#pragma once
+
+namespace cpp_core
+{
+
+struct Version
+{
+    unsigned int major;
+    unsigned int minor;
+    unsigned int patch;
+};
+
+// Generated at configure time. Parent project can override the numbers via
+// -DCPP_CORE_VERSION_XXX=... or CPM OPTIONS
+inline constexpr Version kVersion{@CPP_CORE_VERSION_MAJOR@U, @CPP_CORE_VERSION_MINOR@U, @CPP_CORE_VERSION_PATCH@U};
+
+} // namespace cpp_core
