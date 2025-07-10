@@ -1,4 +1,5 @@
 #pragma once
+#include "../error_callback.h"
 #include "../module_api.h"
 #include <cstdint>
 
@@ -14,8 +15,12 @@ extern "C"
      * remaining data.
      *
      * @param handle Port handle.
+     * @return 0 on success or a negative error code on failure.
      */
-    MODULE_API void serialClearBufferOut(int64_t handle);
+    MODULE_API auto serialClearBufferOut(
+        int64_t        handle,
+        ErrorCallbackT error_callback = nullptr
+    ) -> int;
 
 #ifdef __cplusplus
 }

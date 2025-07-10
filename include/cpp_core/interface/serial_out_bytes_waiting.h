@@ -1,4 +1,5 @@
 #pragma once
+#include "../error_callback.h"
 #include "../module_api.h"
 #include <cstdint>
 
@@ -22,7 +23,10 @@ extern "C"
      * @param handle Port handle.
      * @return Bytes still waiting in the TX FIFO or a negative error code.
      */
-    MODULE_API auto serialOutBytesWaiting(int64_t handle) -> int;
+    MODULE_API auto serialOutBytesWaiting(
+        int64_t        handle,
+        ErrorCallbackT error_callback = nullptr
+    ) -> int;
 
 #ifdef __cplusplus
 }

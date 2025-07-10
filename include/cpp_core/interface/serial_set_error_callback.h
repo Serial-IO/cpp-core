@@ -1,4 +1,5 @@
 #pragma once
+#include "../error_callback.h"
 #include "../module_api.h"
 
 #ifdef __cplusplus
@@ -13,12 +14,7 @@ extern "C"
      *
      * @param callback Function receiving the error code and a textual description.
      */
-    MODULE_API void serialSetErrorCallback(
-        void (*callback_fn)(
-            int         error_code,
-            const char *message
-        )
-    );
+    MODULE_API void serialSetErrorCallback(ErrorCallbackT error_callback);
 
 #ifdef __cplusplus
 }

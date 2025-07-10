@@ -1,4 +1,5 @@
 #pragma once
+#include "../error_callback.h"
 #include "../module_api.h"
 #include <cstdint>
 
@@ -29,7 +30,10 @@ extern "C"
      * @param handle Port handle.
      * @return 0 on success; negative ::cpp_core::StatusCodes value on error.
      */
-    MODULE_API auto serialDrain(int64_t handle) -> int;
+    MODULE_API auto serialDrain(
+        int64_t        handle,
+        ErrorCallbackT error_callback = nullptr
+    ) -> int;
 
 #ifdef __cplusplus
 }

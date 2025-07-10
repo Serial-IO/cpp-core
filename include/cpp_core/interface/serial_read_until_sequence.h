@@ -1,4 +1,5 @@
 #pragma once
+#include "../error_callback.h"
 #include "../module_api.h"
 #include <cstdint>
 
@@ -23,12 +24,13 @@ extern "C"
      * @return Bytes read (including the terminator) or a negative error code.
      */
     MODULE_API auto serialReadUntilSequence(
-        int64_t handle,
-        void   *buffer,
-        int     buffer_size,
-        int     timeout_ms,
-        int     multiplier,
-        void   *sequence
+        int64_t        handle,
+        void          *buffer,
+        int            buffer_size,
+        int            timeout_ms,
+        int            multiplier,
+        void          *sequence,
+        ErrorCallbackT error_callback = nullptr
     ) -> int;
 
 #ifdef __cplusplus
