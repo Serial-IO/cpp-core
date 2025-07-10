@@ -23,6 +23,7 @@ extern "C"
      * @endcode
      *
      * @param handle Port handle.
+     * @param error_callback [optional] Callback to invoke on error. Defined in error_callback.h. Default is `nullptr`.
      * @return Bytes available for instant reading or a negative error code.
      */
     MODULE_API auto serialInBytesWaiting(

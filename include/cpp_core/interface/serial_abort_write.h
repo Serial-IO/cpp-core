@@ -15,6 +15,7 @@ extern "C"
      * ::cpp_core::StatusCodes::kAbortWriteError.
      *
      * @param handle Port handle.
+     * @param error_callback [optional] Callback to invoke on error. Defined in error_callback.h. Default is `nullptr`.
      * @return 0 on success or a negative error code on failure.
      */
     MODULE_API auto serialAbortWrite(

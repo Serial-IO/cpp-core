@@ -22,6 +22,7 @@ extern "C"
      * `timeout_ms * multiplier`).
      * @param multiplier Factor applied to @p timeout_ms for every byte after the first. 0 -> return immediately after
      * the first byte.
+     * @param error_callback [optional] Callback to invoke on error. Defined in error_callback.h. Default is `nullptr`.
      * @return Bytes read (0 on timeout) or a negative error code.
      */
     MODULE_API auto serialRead(

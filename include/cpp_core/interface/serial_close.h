@@ -15,6 +15,7 @@ extern "C"
      * (≤ 0) handle is a no-op.
      *
      * @param handle Handle obtained from serialOpen().
+     * @param error_callback [optional] Callback to invoke on error. Defined in error_callback.h. Default is `nullptr`.
      * @return 0 on success or a negative error code on failure.
      */
     MODULE_API auto serialClose(
