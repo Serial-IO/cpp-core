@@ -13,7 +13,7 @@ extern "C"
      *
      * @param callback Function receiving the number of bytes that have just been read.
      */
-    MODULE_API void serialSetReadCallback(void (*callback)(int bytes_read));
+    MODULE_API void serialSetReadCallback(void (*callback_fn)(int bytes_read));
 
 #ifdef __cplusplus
 }
