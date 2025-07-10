@@ -12,7 +12,8 @@ extern "C"
      *
      * Pass `nullptr` to disable the callback.
      *
-     * @param callback Function receiving the error code and a textual description.
+     * @param error_callback Callback to invoke on error. Defined in error_callback.h. Default is `nullptr`. Gets
+     * invoked on any error.
      */
     MODULE_API void serialSetErrorCallback(ErrorCallbackT error_callback);
 

@@ -13,7 +13,8 @@ extern "C"
      * The supplied callback is invoked once for every discovered port. All string
      * parameters may be `nullptr` if the information is unknown.
      *
-     * @param function Callback receiving port information.
+     * @param callback_fn Callback receiving port information.
+     * @param error_callback [optional] Callback to invoke on error. Defined in error_callback.h. Default is `nullptr`.
      * @return Number of ports found or a negative error code.
      */
     MODULE_API auto serialGetPortsInfo(

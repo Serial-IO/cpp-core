@@ -20,6 +20,7 @@ extern "C"
      * @param timeout_ms Base timeout per byte in milliseconds (applied to the first byte as-is; subsequent bytes use
      * `timeout_ms * multiplier`).
      * @param multiplier Factor applied to the timeout for subsequent bytes.
+     * @param error_callback [optional] Callback to invoke on error. Defined in error_callback.h. Default is `nullptr`.
      * @return Bytes written (may be 0 on timeout) or a negative error code.
      */
     MODULE_API auto serialWrite(

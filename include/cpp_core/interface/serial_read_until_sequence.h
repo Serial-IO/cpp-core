@@ -21,6 +21,7 @@ extern "C"
      * `timeout_ms * multiplier`).
      * @param multiplier Factor applied to the timeout for subsequent bytes.
      * @param sequence Pointer to the terminating byte sequence (must not be `nullptr`).
+     * @param error_callback [optional] Callback to invoke on error. Defined in error_callback.h. Default is `nullptr`.
      * @return Bytes read (including the terminator) or a negative error code.
      */
     MODULE_API auto serialReadUntilSequence(
