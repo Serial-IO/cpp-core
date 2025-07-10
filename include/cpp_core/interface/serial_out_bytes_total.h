@@ -13,7 +13,7 @@ extern "C"
      *
      * @param handle Port handle.
      * @param error_callback [optional] Callback to invoke on error. Defined in error_callback.h. Default is `nullptr`.
-     * @return Total number of bytes written or a negative error code.
+     * @return Total number of bytes written or a negative error code from ::cpp_core::StatusCodes on error.
      */
     MODULE_API auto serialOutBytesTotal(
         int64_t        handle,

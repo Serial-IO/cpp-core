@@ -16,7 +16,7 @@ extern "C"
      *
      * @param handle Handle obtained from serialOpen().
      * @param error_callback [optional] Callback to invoke on error. Defined in error_callback.h. Default is `nullptr`.
-     * @return 0 on success or a negative error code on failure.
+     * @return 0 on success or a negative error code from ::cpp_core::StatusCodes on error.
      */
     MODULE_API auto serialClose(
         int64_t        handle,

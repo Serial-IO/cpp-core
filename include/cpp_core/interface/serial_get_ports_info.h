@@ -15,7 +15,7 @@ extern "C"
      *
      * @param callback_fn Callback receiving port information.
      * @param error_callback [optional] Callback to invoke on error. Defined in error_callback.h. Default is `nullptr`.
-     * @return Number of ports found or a negative error code.
+     * @return Number of ports found or a negative error code from ::cpp_core::StatusCodes on error.
      */
     MODULE_API auto serialGetPortsInfo(
         void (*callback_fn)(

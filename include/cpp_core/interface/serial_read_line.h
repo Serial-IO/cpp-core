@@ -21,7 +21,7 @@ extern "C"
      * `timeout_ms * multiplier`).
      * @param multiplier Factor applied to the timeout for subsequent bytes.
      * @param error_callback [optional] Callback to invoke on error. Defined in error_callback.h. Default is `nullptr`.
-     * @return Bytes read (0 on timeout) or a negative error code.
+     * @return Bytes read (0 on timeout) or a negative error code from ::cpp_core::StatusCodes on error.
      */
     MODULE_API auto serialReadLine(
         int64_t        handle,

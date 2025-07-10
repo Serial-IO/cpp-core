@@ -23,7 +23,8 @@ extern "C"
      * @param multiplier Factor applied to the timeout for every additional byte.
      * @param until_char Pointer to the terminator character (must not be `nullptr`).
      * @param error_callback [optional] Callback to invoke on error. Defined in error_callback.h. Default is `nullptr`.
-     * @return Bytes read (including the terminator), 0 on timeout or a negative error code.
+     * @return Bytes read (including the terminator), 0 on timeout or a negative error code from ::cpp_core::StatusCodes
+     * on error.
      */
     MODULE_API auto serialReadUntil(
         int64_t        handle,
