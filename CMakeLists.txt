@@ -61,4 +61,4 @@ install(EXPORT cpp_coreTargets
 install(FILES
         ${CMAKE_CURRENT_BINARY_DIR}/cpp_coreConfig.cmake
         ${CMAKE_CURRENT_BINARY_DIR}/cpp_coreConfigVersion.cmake
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cpp_core) 
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cpp_core)
