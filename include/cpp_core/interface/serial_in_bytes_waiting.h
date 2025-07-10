@@ -24,7 +24,7 @@ extern "C"
      *
      * @param handle Port handle.
      * @param error_callback [optional] Callback to invoke on error. Defined in error_callback.h. Default is `nullptr`.
-     * @return Bytes available for instant reading or a negative error code.
+     * @return Bytes available for instant reading or a negative error code from ::cpp_core::StatusCodes on error.
      */
     MODULE_API auto serialInBytesWaiting(
         int64_t        handle,
