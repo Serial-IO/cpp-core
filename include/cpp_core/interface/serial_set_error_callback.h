@@ -14,7 +14,7 @@ extern "C"
      * @param callback Function receiving the error code and a textual description.
      */
     MODULE_API void serialSetErrorCallback(
-        void (*callback)(
+        void (*callback_fn)(
             int         error_code,
             const char *message
         )
