@@ -16,7 +16,7 @@ extern "C"
      * @return Number of ports found or a negative error code.
      */
     MODULE_API auto serialGetPortsInfo(
-        void (*function)(
+        void (*callback_fn)(
             const char *port,
             const char *path,
             const char *manufacturer,
