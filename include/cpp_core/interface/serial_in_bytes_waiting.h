@@ -1,4 +1,5 @@
 #pragma once
+#include "../error_callback.h"
 #include "../module_api.h"
 #include <cstdint>
 
@@ -24,7 +25,10 @@ extern "C"
      * @param handle Port handle.
      * @return Bytes available for instant reading or a negative error code.
      */
-    MODULE_API auto serialInBytesWaiting(int64_t handle) -> int;
+    MODULE_API auto serialInBytesWaiting(
+        int64_t        handle,
+        ErrorCallbackT error_callback = nullptr
+    ) -> int;
 
 #ifdef __cplusplus
 }

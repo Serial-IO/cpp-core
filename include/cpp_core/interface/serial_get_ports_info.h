@@ -1,4 +1,5 @@
 #pragma once
+#include "../error_callback.h"
 #include "../module_api.h"
 
 #ifdef __cplusplus
@@ -25,7 +26,8 @@ extern "C"
             const char *location_id,
             const char *product_id,
             const char *vendor_id
-        )
+        ),
+        ErrorCallbackT error_callback = nullptr
     ) -> int;
 
 #ifdef __cplusplus

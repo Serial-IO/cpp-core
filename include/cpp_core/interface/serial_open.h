@@ -1,4 +1,5 @@
 #pragma once
+#include "../error_callback.h"
 #include "../module_api.h"
 #include <cstdint>
 
@@ -24,11 +25,12 @@ extern "C"
      * @return A positive opaque handle on success or a negative value from ::cpp_core::StatusCodes on failure.
      */
     MODULE_API auto serialOpen(
-        void *port,
-        int   baudrate,
-        int   data_bits,
-        int   parity    = 0,
-        int   stop_bits = 0
+        void          *port,
+        int            baudrate,
+        int            data_bits,
+        int            parity         = 0,
+        int            stop_bits      = 0,
+        ErrorCallbackT error_callback = nullptr
     ) -> intptr_t;
 
 #ifdef __cplusplus

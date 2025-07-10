@@ -1,4 +1,5 @@
 #pragma once
+#include "../error_callback.h"
 #include "../module_api.h"
 #include <cstdint>
 
@@ -22,11 +23,12 @@ extern "C"
      * @return Bytes read (0 on timeout) or a negative error code.
      */
     MODULE_API auto serialReadLine(
-        int64_t handle,
-        void   *buffer,
-        int     buffer_size,
-        int     timeout_ms,
-        int     multiplier
+        int64_t        handle,
+        void          *buffer,
+        int            buffer_size,
+        int            timeout_ms,
+        int            multiplier,
+        ErrorCallbackT error_callback = nullptr
     ) -> int;
 
 #ifdef __cplusplus
