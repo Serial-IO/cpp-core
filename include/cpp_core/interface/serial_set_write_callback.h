@@ -13,7 +13,7 @@ extern "C"
      *
      * @param callback Function receiving the number of bytes that have just been written.
      */
-    MODULE_API void serialSetWriteCallback(void (*callback)(int bytes_written));
+    MODULE_API void serialSetWriteCallback(void (*callback_fn)(int bytes_written));
 
 #ifdef __cplusplus
 }
