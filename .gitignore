@@ -1,0 +1,4 @@
+include/cpp_core/version.h
+build/
+.cache/
+
