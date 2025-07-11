@@ -11,7 +11,7 @@ extern "C"
 
     /**
      * @copydoc getVersion
-     * @note Sequential variant: call executes strictly in the order it was enqueued across threads.
+     * @note Sequential variant: guarantees execution in the exact order the calls were made across threads.
      */
     inline MODULE_API void getVersionSequential(cpp_core::Version *out)
     {
