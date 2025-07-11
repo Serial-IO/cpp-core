@@ -1,0 +1,49 @@
+name: 'Generate & Deploy Doxygen Docs'
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'include/**'
+      - 'Doxyfile'
+      - '.github/workflows/doxygen.yml'
+  workflow_dispatch:
+
+# Required for GitHub Pages deployment
+permissions:
+  contents: write        # to push gh-pages for classic page
+  pages: write           # to deploy using actions/deploy-pages@v1
+  id-token: write        # to authenticate deployment
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    name: 'Build Doxygen HTML'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Doxygen + Graphviz
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y doxygen graphviz
+
+      - name: Generate documentation
+        run: |
+          doxygen -v
+          doxygen Doxyfile
+
+      # Upload the generated site as an artifact for the deploy job
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: docs/html
+
+  deploy:
+    needs: build-docs
+    runs-on: ubuntu-latest
+    name: 'Deploy to GitHub Pages'
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v1 
