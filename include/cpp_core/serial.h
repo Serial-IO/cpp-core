@@ -5,6 +5,7 @@
 
 // Aggregated interface headers
 #include "interface/get_version.h"
+#include "interface/sequential/all.h"
 #include "interface/serial_abort_read.h"
 #include "interface/serial_abort_write.h"
 #include "interface/serial_clear_buffer_in.h"
