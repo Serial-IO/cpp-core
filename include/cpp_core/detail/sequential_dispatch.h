@@ -14,8 +14,8 @@ namespace cpp_core::detail::seq
 
 struct DispatchState
 {
-    std::mutex                        mtx;
-    std::condition_variable           cv;
+    std::mutex                        mutex;
+    std::condition_variable           condition_variable;
     std::queue<std::function<void()>> queue;
     std::once_flag                    worker_started;
 };
@@ -49,8 +49,8 @@ inline void worker()
     {
         std::function<void()> job;
         {
-            std::unique_lock<std::mutex> lock(state().mtx);
-            state().cv.wait(lock, [] { return !state().queue.empty(); });
+            std::unique_lock<std::mutex> lock(state().mutex);
+            state().condition_variable.wait(lock, [] { return !state().queue.empty(); });
             job = std::move(state().queue.front());
             state().queue.pop();
         }
@@ -97,10 +97,10 @@ template <typename FunctionT> auto call(FunctionT &&function) -> decltype(functi
     std::call_once(state().worker_started, startWorker);
 
     {
-        std::lock_guard<std::mutex> lock(state().mtx);
+        std::lock_guard<std::mutex> lock(state().mutex);
         state().queue.emplace([task_ptr]() { (*task_ptr)(); });
     }
-    state().cv.notify_one();
+    state().condition_variable.notify_one();
 
     if constexpr (std::is_void_v<FunctionReturnT>)
     {
