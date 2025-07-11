@@ -11,9 +11,9 @@ on:
 
 # Required for GitHub Pages deployment
 permissions:
-  contents: write        # to push gh-pages for classic page
-  pages: write           # to deploy using actions/deploy-pages@v1
-  id-token: write        # to authenticate deployment
+  contents: write        
+  pages: write           
+  id-token: write        
 
 jobs:
   build-docs:
@@ -33,9 +33,8 @@ jobs:
           doxygen -v
           doxygen Doxyfile
 
-      # Upload the generated site as an artifact for the deploy job
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@v3
         with:
           path: docs/html
 
@@ -46,4 +45,4 @@ jobs:
     steps:
       - name: Deploy
         id: deployment
-        uses: actions/deploy-pages@v1 
+        uses: actions/deploy-pages@v4 
