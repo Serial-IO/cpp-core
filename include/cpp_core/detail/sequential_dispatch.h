@@ -37,16 +37,19 @@ enum class QueueMode
 };
 
 /**
- * @brief Determines how sequential dispatching is applied.
+ * @brief Thread-safe singleton storing the process-wide ::QueueMode flag.
  *
- * @li kGlobal     — All API calls are executed through a single process-wide
- *                   queue. Guarantees strict ordering across every handle
- *                   (legacy behaviour).
- * @li kPerHandle — Each serial handle owns its own queue/worker thread. Calls
- *                   on different handles may run in parallel while calls on
- *                   the same handle remain strictly ordered.
+ * The underlying variable is declared as a local static `std::atomic` to avoid
+ * the static-initialisation-order fiasco. Accessing the flag via this
+ * function guarantees that the object is initialised on first use in a
+ * thread-safe manner (C++11 and later).
+ *
+ * The returned reference enables lock-free loads and stores from any thread.
+ * All public helpers such as ::setQueueMode() and ::getQueueMode() act on the
+ * object obtained here.
+ *
+ * @return Reference to the `std::atomic<QueueMode>` that tracks the active sequential dispatch policy.
  */
-// Holds the current mode – defaults to the former behaviour (global queue)
 inline auto queueMode() -> std::atomic<QueueMode> &
 {
     static std::atomic<QueueMode> mode{QueueMode::kGlobal};
@@ -54,13 +57,13 @@ inline auto queueMode() -> std::atomic<QueueMode> &
 }
 
 /**
- * @brief Thread-safe accessor to the currently selected ::QueueMode.
+ * @brief Select the sequential dispatch policy at runtime.
  *
- * The `std::atomic` wrapper allows lock-free loads/stores from any thread.
- * The variable is a Meyers-singleton to sidestep static initialisation order
- * issues.
+ * Performs a relaxed atomic store on the flag returned by ::queueMode(). The
+ * operation is lock-free and therefore safe to call from any thread at any
+ * time during program execution.
  *
- * @return Reference to the internal atomic holding the active mode.
+ * @param mode The ::QueueMode to activate for subsequent sequential API calls.
  */
 inline void setQueueMode(QueueMode mode)
 {
@@ -79,9 +82,8 @@ namespace detail
 {
 
 /**
- * @brief Global map that stores a dedicated ::DispatchState for each serial
- *        handle encountered during runtime. The map is lazily populated on
- *        first use of a handle.
+ * @brief Global map that stores a dedicated ::DispatchState for each serial handle encountered during runtime. The map
+ * is lazily populated on first use of a handle.
  */
 inline auto handleStates() -> std::unordered_map<
     int64_t,
@@ -131,22 +133,28 @@ inline auto state() -> DispatchState &
 }
 
 /**
- * @brief Execute a callable sequentially on the background thread.
+ * @brief Execute a callable on the *process-global* sequential queue.
  *
- * The function/lambda is enqueued in FIFO order. The calling thread then
- * blocks until completion and returns the result (or propagates an exception).
+ * The callable is enqueued in FIFO order on the dispatcher returned by
+ * ::state(). The calling thread blocks until the job finishes and forwards
+ * the return value or rethrows any exception.
+ *
+ * This overload is primarily used by API wrappers that do not take an explicit
+ * serial handle.  When ::QueueMode::kPerHandle is enabled the global queue
+ * continues to exist; calls routed through this function therefore still run
+ * sequentially with respect to one another but *not* with respect to jobs
+ * dispatched via the per-handle overload.
  *
  * Steps:
  * 1. Wrap the callable in `std::packaged_task` to obtain an associated
  *    `std::future`.
- * 2. Ensure the worker thread is running (`std::call_once`).
- * 3. Push a copyable thunk into the queue and wake the worker via
- *    `notify_one()`.
- * 4. Wait on `future.get()` for completion and forward the return value.
+ * 2. Ensure the background worker servicing the global queue is running.
+ * 3. Enqueue the packaged task and notify the worker.
+ * 4. Wait on the future and return (or propagate) the result.
  *
- * @tparam FunctionT Callable type with no parameters.
- * @param function Function object to be executed sequentially.
- * @return The callable's return value (or `void`).
+ * @tparam FunctionT Zero-argument callable type.
+ * @param function Callable object to execute.
+ * @return Callable’s return value, or `void` if the callable is `void`-returning.
  */
 template <typename FunctionT> auto call(FunctionT &&function) -> decltype(function())
 {
@@ -175,16 +183,13 @@ auto callPerHandle(
 }
 
 /**
- * @brief Dispatch @p function via the global queue or per-handle queue
- *        depending on ::getQueueMode().
+ * @copydoc call(FunctionT &&)
  *
- * This is the entry point used by all *Sequential* API wrappers that accept
- * a serial handle.
+ * Dispatches the callable either through the global queue or, when
+ * ::QueueMode::kPerHandle is active, through the queue dedicated to
+ * @p handle.
  *
- * @tparam FunctionT Callable type with no parameters.
  * @param handle Serial handle identifying the per-handle queue.
- * @param function Callable to execute.
- * @return Callable’s return value (or `void`).
  */
 template <typename FunctionT>
 auto call(
@@ -200,7 +205,15 @@ auto call(
 }
 
 /**
- * @brief Worker thread loop – processes @p state until program termination.
+ * @brief Worker thread loop.
+ *
+ * Processes jobs from @p state.queue until program termination. The function
+ * blocks inside `state.condition_variable.wait()` whenever the queue is empty
+ * and wakes up once new jobs become available.  Each invocation of the
+ * returned thunk is executed in FIFO order and exceptions propagate to the
+ * worker thread (terminating the program if uncaught).
+ *
+ * @param state Dispatcher state whose queue and synchronisation primitives are serviced by this loop.
  */
 inline void workerLoop(DispatchState &state)
 {
@@ -218,7 +231,14 @@ inline void workerLoop(DispatchState &state)
 }
 
 /**
- * @brief Ensure a dedicated worker thread exists for the given @p state.
+ * @brief Launch the background worker for @p state exactly once.
+ *
+ * Internally relies on `std::call_once` to guarantee that a single detached
+ * worker thread is created for a given ::DispatchState instance, independent
+ * of how many times this function is called or from which thread.  If the
+ * worker is already running, the call becomes a no-op.
+ *
+ * @param state Dispatcher state that owns the queue/condition variable which the spawned worker operates on.
  */
 inline void ensureWorkerRunning(DispatchState &state)
 {
@@ -226,7 +246,20 @@ inline void ensureWorkerRunning(DispatchState &state)
 }
 
 /**
- * @brief Enqueue @p function in @p state and wait for completion.
+ * @brief Execute a callable sequentially via the queue stored in @p state.
+ *
+ * The function performs the following steps:
+ * 1. Wrap the provided callable in `std::packaged_task` to obtain a future.
+ * 2. Ensure a worker thread is servicing the queue (lazy initialisation).
+ * 3. Enqueue a thunk that invokes the packaged task.
+ * 4. Notify the worker and block on the associated `std::future`.
+ *
+ * @tparam FunctionT Type of the zero-argument callable.
+ * @param state Dispatcher state backing the queue.
+ * @param function Callable object to execute.
+ * @return Callable’s return value if the callable returns a non-void type. `void` otherwise.
+ *
+ * @note Exceptions thrown by @p function are rethrown in the calling thread when `future.get()` is invoked.
  */
 template <typename FunctionT>
 auto executeInQueue(
