@@ -89,8 +89,8 @@ inline auto handleStates() -> std::unordered_map<
     int64_t,
     DispatchState> &
 {
-    static std::unordered_map<int64_t, DispatchState> states;
-    return states;
+    static std::unordered_map<int64_t, DispatchState> instance;
+    return instance;
 }
 
 /**
@@ -98,8 +98,8 @@ inline auto handleStates() -> std::unordered_map<
  */
 inline auto handleStatesMutex() -> std::mutex &
 {
-    static std::mutex mutex;
-    return mutex;
+    static std::mutex instance;
+    return instance;
 }
 
 /**
