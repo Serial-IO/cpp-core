@@ -22,3 +22,4 @@
 #include "serial_set_read_callback_sequential.h"
 #include "serial_set_write_callback_sequential.h"
 #include "serial_write_sequential.h"
+#include "set_queue_mode_sequential.h"

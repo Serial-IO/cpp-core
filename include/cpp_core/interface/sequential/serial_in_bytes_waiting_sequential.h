@@ -18,7 +18,7 @@ extern "C"
         ErrorCallbackT error_callback = nullptr
     ) -> int
     {
-        return cpp_core::detail::seq::call([=] { return serialInBytesWaiting(handle, error_callback); });
+        return cpp_core::detail::seq::call(handle, [=] { return serialInBytesWaiting(handle, error_callback); });
     }
 
 #ifdef __cplusplus

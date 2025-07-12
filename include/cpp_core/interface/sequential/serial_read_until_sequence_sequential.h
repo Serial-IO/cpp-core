@@ -23,7 +23,7 @@ extern "C"
         ErrorCallbackT error_callback = nullptr
     ) -> int
     {
-        return cpp_core::detail::seq::call([=] {
+        return cpp_core::detail::seq::call(handle, [=] {
             return serialReadUntilSequence(
                 handle, buffer, buffer_size, timeout_ms, multiplier, sequence, error_callback
             );
