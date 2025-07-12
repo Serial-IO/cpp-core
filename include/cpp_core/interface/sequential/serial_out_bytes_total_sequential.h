@@ -18,7 +18,7 @@ extern "C"
         ErrorCallbackT error_callback = nullptr
     ) -> int64_t
     {
-        return cpp_core::detail::seq::call([=] { return serialOutBytesTotal(handle, error_callback); });
+        return cpp_core::detail::seq::call(handle, [=] { return serialOutBytesTotal(handle, error_callback); });
     }
 
 #ifdef __cplusplus

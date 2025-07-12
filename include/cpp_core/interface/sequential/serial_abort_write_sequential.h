@@ -18,7 +18,7 @@ extern "C"
         ErrorCallbackT error_callback = nullptr
     ) -> int
     {
-        return cpp_core::detail::seq::call([=] { return serialAbortWrite(handle, error_callback); });
+        return cpp_core::detail::seq::call(handle, [=] { return serialAbortWrite(handle, error_callback); });
     }
 
 #ifdef __cplusplus
