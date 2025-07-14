@@ -30,54 +30,6 @@ struct DispatchState
     std::once_flag worker_started;
 };
 
-enum class QueueMode
-{
-    kGlobal,
-    kPerHandle
-};
-
-/**
- * @brief Thread-safe singleton storing the process-wide ::QueueMode flag.
- *
- * The underlying variable is declared as a local static `std::atomic` to avoid
- * the static-initialisation-order fiasco. Accessing the flag via this
- * function guarantees that the object is initialised on first use in a
- * thread-safe manner (C++11 and later).
- *
- * The returned reference enables lock-free loads and stores from any thread.
- * All public helpers such as ::setQueueMode() and ::getQueueMode() act on the
- * object obtained here.
- *
- * @return Reference to the `std::atomic<QueueMode>` that tracks the active sequential dispatch policy.
- */
-inline auto queueMode() -> std::atomic<QueueMode> &
-{
-    static std::atomic<QueueMode> mode{QueueMode::kGlobal};
-    return mode;
-}
-
-/**
- * @brief Select the sequential dispatch policy at runtime.
- *
- * Performs a relaxed atomic store on the flag returned by ::queueMode(). The
- * operation is lock-free and therefore safe to call from any thread at any
- * time during program execution.
- *
- * @param mode The ::QueueMode to activate for subsequent sequential API calls.
- */
-inline void setQueueMode(QueueMode mode)
-{
-    queueMode().store(mode, std::memory_order_relaxed);
-}
-
-/**
- * @brief Retrieve the currently active sequential dispatch mode.
- */
-inline auto getQueueMode() -> QueueMode
-{
-    return queueMode().load(std::memory_order_relaxed);
-}
-
 namespace detail
 {
 
@@ -117,79 +69,16 @@ inline auto stateForHandle(int64_t handle) -> DispatchState &
 } // namespace detail
 
 /**
- * @brief Access the global dispatcher state (singleton).
+ * @brief Execute @p function sequentially on the queue dedicated to @p handle.
  *
- * Implements the C++11 *Meyers-Singleton* idiom: the static local variable is
- * initialised on first use in a thread-safe manner and subsequently reused.
- * This ensures exactly one queue / mutex / condition_variable exists per
- * process while avoiding the static-initialisation-order problem.
- *
- * @return Reference to the sole ::DispatchState instance.
- */
-inline auto state() -> DispatchState &
-{
-    static DispatchState instance;
-    return instance;
-}
-
-/**
- * @brief Execute a callable on the *process-global* sequential queue.
- *
- * The callable is enqueued in FIFO order on the dispatcher returned by
- * ::state(). The calling thread blocks until the job finishes and forwards
- * the return value or rethrows any exception.
- *
- * This overload is primarily used by API wrappers that do not take an explicit
- * serial handle.  When ::QueueMode::kPerHandle is enabled the global queue
- * continues to exist; calls routed through this function therefore still run
- * sequentially with respect to one another but *not* with respect to jobs
- * dispatched via the per-handle overload.
- *
- * Steps:
- * 1. Wrap the callable in `std::packaged_task` to obtain an associated
- *    `std::future`.
- * 2. Ensure the background worker servicing the global queue is running.
- * 3. Enqueue the packaged task and notify the worker.
- * 4. Wait on the future and return (or propagate) the result.
+ * Each serial handle owns its own FIFO queue and background worker thread.
+ * Calls executed on the same handle are strictly ordered, while calls on
+ * different handles may run concurrently.
  *
  * @tparam FunctionT Zero-argument callable type.
- * @param function Callable object to execute.
- * @return Callable’s return value, or `void` if the callable is `void`-returning.
- */
-template <typename FunctionT> auto call(FunctionT &&function) -> decltype(function())
-{
-    return executeInQueue(state(), std::forward<FunctionT>(function));
-}
-
-/**
- * @brief Execute @p function on the *handle-local* worker thread.
- *
- * Helper used by the public `call(handle, fn)` overload when
- * ::QueueMode::kPerHandle is active. All semantics are identical to the global
- * variant but the queue/worker are scoped to the given handle.
- *
- * @tparam FunctionT Callable type with no parameters.
- * @param handle Serial handle used to select the queue.
- * @param function Callable object to execute.
- * @return Callable’s return value (or `void`).
- */
-template <typename FunctionT>
-auto callPerHandle(
-    int64_t     handle,
-    FunctionT &&function
-) -> decltype(function())
-{
-    return executeInQueue(detail::stateForHandle(handle), std::forward<FunctionT>(function));
-}
-
-/**
- * @copydoc call(FunctionT &&)
- *
- * Dispatches the callable either through the global queue or, when
- * ::QueueMode::kPerHandle is active, through the queue dedicated to
- * @p handle.
- *
- * @param handle Serial handle identifying the per-handle queue.
+ * @param handle     Serial handle identifying the queue/worker.
+ * @param function   Callable object to execute.
+ * @return           Callable’s return value (or `void`).
  */
 template <typename FunctionT>
 auto call(
@@ -197,11 +86,7 @@ auto call(
     FunctionT &&function
 ) -> decltype(function())
 {
-    if (getQueueMode() == QueueMode::kPerHandle)
-    {
-        return callPerHandle(handle, std::forward<FunctionT>(function));
-    }
-    return call(std::forward<FunctionT>(function));
+    return executeInQueue(detail::stateForHandle(handle), std::forward<FunctionT>(function));
 }
 
 /**
