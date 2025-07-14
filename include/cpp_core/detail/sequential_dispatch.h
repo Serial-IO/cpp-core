@@ -26,7 +26,7 @@ struct DispatchState
     /** FIFO containing packaged thunks (jobs). */
     std::queue<std::function<void()>> queue;
 
-    /** Ensures the worker thread is launched exactly once. */
+    /** Indicates if the worker thread is already launched. */
     std::once_flag worker_started;
 };
 
