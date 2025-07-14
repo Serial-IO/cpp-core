@@ -36,6 +36,7 @@ namespace detail
 /**
  * @brief Global map that stores a dedicated ::DispatchState for each serial handle encountered during runtime. The map
  * is lazily populated on first use of a handle.
+ * @return Reference to the global map instance mapping handles to their dispatch states
  */
 inline auto handleStates() -> std::unordered_map<
     int64_t,
@@ -47,6 +48,7 @@ inline auto handleStates() -> std::unordered_map<
 
 /**
  * @brief Mutex guarding access to ::handleStates() (adds/removes look-ups).
+ * @return Reference to the global mutex instance protecting handleStates()
  */
 inline auto handleStatesMutex() -> std::mutex &
 {
@@ -76,9 +78,9 @@ inline auto stateForHandle(int64_t handle) -> DispatchState &
  * different handles may run concurrently.
  *
  * @tparam FunctionT Zero-argument callable type.
- * @param handle     Serial handle identifying the queue/worker.
- * @param function   Callable object to execute.
- * @return           Callable’s return value (or `void`).
+ * @param handle Serial handle identifying the queue/worker.
+ * @param function Callable object to execute.
+ * @return Callable's return value (or `void`).
  */
 template <typename FunctionT>
 auto call(
@@ -142,7 +144,7 @@ inline void ensureWorkerRunning(DispatchState &state)
  * @tparam FunctionT Type of the zero-argument callable.
  * @param state Dispatcher state backing the queue.
  * @param function Callable object to execute.
- * @return Callable’s return value if the callable returns a non-void type. `void` otherwise.
+ * @return Callable's return value if the callable returns a non-void type. `void` otherwise.
  *
  * @note Exceptions thrown by @p function are rethrown in the calling thread when `future.get()` is invoked.
  */
