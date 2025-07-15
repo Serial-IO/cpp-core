@@ -12,7 +12,7 @@
 #include <type_traits>
 #include <unordered_map>
 
-namespace cpp_core::detail::seq
+namespace cpp_core::internal::seq
 {
 
 struct DispatchState
@@ -177,4 +177,4 @@ auto executeInQueue(
     }
 }
 
-} // namespace cpp_core::detail::seq
+} // namespace cpp_core::internal::seq

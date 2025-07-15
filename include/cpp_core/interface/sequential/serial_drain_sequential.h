@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../../detail/sequential_dispatch.h"
 #include "../../error_callback.h"
+#include "../../internal/sequential_dispatch.h"
 #include "../serial_drain.h"
 
 #ifdef __cplusplus
@@ -18,7 +18,7 @@ extern "C"
         ErrorCallbackT error_callback = nullptr
     ) -> int
     {
-        return cpp_core::detail::seq::call(handle, [=] { return serialDrain(handle, error_callback); });
+        return cpp_core::internal::seq::call(handle, [=] { return serialDrain(handle, error_callback); });
     }
 
 #ifdef __cplusplus
