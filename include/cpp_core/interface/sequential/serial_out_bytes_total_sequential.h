@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../error_callback.h"
-#include "../../internal/sequential_dispatch.h"
+#include "../../internal/sequential/call.h"
 #include "../serial_out_bytes_total.h"
 
 #ifdef __cplusplus
@@ -18,7 +18,9 @@ extern "C"
         ErrorCallbackT error_callback = nullptr
     ) -> int64_t
     {
-        return cpp_core::internal::seq::call(handle, [=] { return serialOutBytesTotal(handle, error_callback); });
+        return cpp_core::internal::sequential::call(handle, [=] {
+            return serialOutBytesTotal(handle, error_callback);
+        });
     }
 
 #ifdef __cplusplus

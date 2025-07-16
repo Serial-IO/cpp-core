@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../error_callback.h"
-#include "../../internal/sequential_dispatch.h"
+#include "../../internal/sequential/call.h"
 #include "../serial_read_until_sequence.h"
 
 #ifdef __cplusplus
@@ -23,7 +23,7 @@ extern "C"
         ErrorCallbackT error_callback = nullptr
     ) -> int
     {
-        return cpp_core::internal::seq::call(handle, [=] {
+        return cpp_core::internal::sequential::call(handle, [=] {
             return serialReadUntilSequence(
                 handle, buffer, buffer_size, timeout_ms, multiplier, sequence, error_callback
             );
