@@ -1,7 +1,5 @@
 #pragma once
 
-#include "module_api.h"
-#include "version.h"
 
 // Missing from the sequential interface
 #include "interface/get_version.h"
