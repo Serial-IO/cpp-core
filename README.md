@@ -12,24 +12,19 @@ Header-only C++ helper library that provides small, cross-platform utilities and
 
 ## Documentation
 
-* 📄 **[Overview](docs/overview.md)** – architecture, build & quick start.
-
+* [Overview](docs/overview.md): Architecture, Build & Quick Start.
 * C++23, zero runtime dependencies
 * Delivered as an INTERFACE target `cpp_core::cpp_core`
 * Fetchable via [CPM.cmake](https://github.com/cpm-cmake/CPM.cmake) or regular `find_package`
-
----
 
 ## Requirements
 
 * CMake ≥ 3.14
 * A C++23 compatible compiler (GCC 13+, Clang 16+, MSVC 2022+)
 
----
-
 ## Quick Start
 
-### 1. Add *cpp-core* with CPM.cmake (recommended way)
+1. Add *cpp-core* with CPM.cmake (recommended way)
 
 ```cmake
 # Set the project version once via **cache variables** –
@@ -52,7 +47,7 @@ target_link_libraries(my_app PRIVATE cpp_core::cpp_core)
 > They guarantee the values exist **before** the `CPMAddPackage()` call. If the variables are set later (or via  
 > `OPTIONS ... "CPP_CORE_VERSION_MAJOR=${FOO}"`) and `FOO` is empty at that moment, *cpp-core* falls back to its default version (0.1.0).
 
-### 2. Use in code
+2. Use in code
 
 ```cpp
 #include <cpp_core/version.h>
@@ -63,8 +58,6 @@ int main() {
 }
 ```
 
----
-
 ## Alternative: add_subdirectory
 
 If you include the source code directly as a sub-repository, simply do:
@@ -73,8 +66,6 @@ If you include the source code directly as a sub-repository, simply do:
 add_subdirectory(externals/cpp-core)
 # the same version variables can be set before the call
 ```
-
----
 
 ## Using the package with `find_package`
 
@@ -85,8 +76,6 @@ find_package(cpp_core REQUIRED)
 add_executable(my_app src/main.cpp)
 target_link_libraries(my_app PRIVATE cpp_core::cpp_core)
 ```
-
----
 
 ## License
 Apache-2.0 – see [LICENSE](LICENSE).
