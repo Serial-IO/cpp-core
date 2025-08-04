@@ -78,4 +78,4 @@ target_link_libraries(my_app PRIVATE cpp_core::cpp_core)
 ```
 
 ## License
-Apache-2.0, Check [LICENSE](https://github.com/Serial-IO/cpp-core/blob/main/LICENSE) for more details.
+Apache-2.0 Check [LICENSE](https://github.com/Serial-IO/cpp-core/blob/main/LICENSE) for more details.
