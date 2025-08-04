@@ -2,10 +2,12 @@
 
 Header-only C++ helper library that provides small, cross-platform utilities and a centrally maintained **Version** struct shared by the *cpp-bindings-linux*, *cpp-bindings-windows* and *cpp-bindings-macos* repositories.
 
-> ⚠️ **Note for FFI users**: This repository contains **headers only**.  
-> To obtain a working native library (SO / DLL / dylib) build one of the platform-specific projects instead:  
-> • Windows → [cpp-bindings-windows](https://github.com/Serial-IO/cpp-bindings-windows)  
-> • Linux   → [cpp-bindings-linux](https://github.com/Serial-IO/cpp-bindings-linux)  
+> [!NOTE]
+>
+> This repository contains **headers only**. To obtain a working native library (SO / DLL / dylib) build one of the platform-specific projects instead:
+> - [C++ bindings (Windows)](https://github.com/Serial-IO/cpp-bindings-windows)
+> - [C++ bindings (Linux)](https://github.com/Serial-IO/cpp-bindings-linux)
+> 
 > These repositories compile *cpp-core* for you and provide the ready-to-use shared library.
 
 ## Documentation
