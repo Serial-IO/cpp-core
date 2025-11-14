@@ -1,9 +1,12 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.30)
 
 project(cpp-core
         VERSION 0.1.0
         DESCRIPTION "Cross-platform helper library shared by cpp-linux-bindings and cpp-windows-bindings"
         LANGUAGES CXX)
+
+# Export compile commands to root directory
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # ---------------------------------------------------------------------------
 # Version information - can be overridden by parent project
@@ -30,6 +33,10 @@ target_include_directories(cpp_core INTERFACE
 
 # Require C++23
 target_compile_features(cpp_core INTERFACE cxx_std_23)
+
+# Enable C++23 module support
+set(CMAKE_CXX_MODULE_STD 23)
+set(CMAKE_CXX_MODULE_EXTENSIONS OFF)
 
 # Install rules --------------------------------------------------------------
 include(GNUInstallDirs)
@@ -62,3 +69,21 @@ install(FILES
         ${CMAKE_CURRENT_BINARY_DIR}/cpp_coreConfig.cmake
         ${CMAKE_CURRENT_BINARY_DIR}/cpp_coreConfigVersion.cmake
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cpp_core)
+
+# Module test ----------------------------------------------------------------
+add_library(hello_module STATIC)
+target_sources(hello_module
+    PUBLIC FILE_SET cxx_modules TYPE CXX_MODULES
+    FILES test/hello.cxx
+)
+
+add_executable(module_test test/main.cpp)
+target_link_libraries(module_test PRIVATE hello_module)
+
+add_custom_target(copy-compile-commands ALL
+    ${CMAKE_COMMAND} -E copy_if_different
+    ${CMAKE_BINARY_DIR}/compile_commands.json
+    ${CMAKE_SOURCE_DIR}/compile_commands.json
+    DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
+    COMMENT "Copying compile_commands.json to project root"
+)

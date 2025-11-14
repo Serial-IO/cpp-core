@@ -18,5 +18,6 @@ set(CMAKE_CXX_FLAGS_INIT "-Wall -Wextra -Wpedantic")
 set(CMAKE_CXX_FLAGS_DEBUG_INIT "-g -O0")
 set(CMAKE_CXX_FLAGS_RELEASE_INIT "-O3 -DNDEBUG")
 
-# Enable C++23 features
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++23")
+# Enable C++23 module support
+set(CMAKE_CXX_MODULE_STD 23)
+set(CMAKE_CXX_MODULE_EXTENSIONS OFF)
