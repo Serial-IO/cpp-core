@@ -2,7 +2,6 @@
 # Usage: cmake -DCMAKE_TOOLCHAIN_FILE=cmake/msvc-toolchain.cmake ..
 
 set(CMAKE_SYSTEM_NAME Windows)
-set(CMAKE_SYSTEM_PROCESSOR ${CMAKE_HOST_SYSTEM_PROCESSOR})
 
 # Set the C++ compiler
 set(CMAKE_CXX_COMPILER "cl")

@@ -2,7 +2,6 @@
 # Usage: cmake -DCMAKE_TOOLCHAIN_FILE=cmake/clang-toolchain.cmake ..
 
 set(CMAKE_SYSTEM_NAME Generic)
-set(CMAKE_SYSTEM_PROCESSOR ${CMAKE_HOST_SYSTEM_PROCESSOR})
 
 # Set the C++ compiler
 set(CMAKE_CXX_COMPILER "clang++-21")
