@@ -1,12 +1,11 @@
 cmake_minimum_required(VERSION 3.30)
 
-project(cpp-core
-        VERSION 0.1.0
-        DESCRIPTION "Cross-platform helper library shared by cpp-linux-bindings and cpp-windows-bindings"
-        LANGUAGES CXX)
-
-# Export compile commands to root directory
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+project(
+    cpp-core
+    VERSION 0.1.0
+    DESCRIPTION "Core library with header interface files."
+    LANGUAGES CXX
+)
 
 # ---------------------------------------------------------------------------
 # Version information - can be overridden by parent project
@@ -34,56 +33,44 @@ target_include_directories(cpp_core INTERFACE
 # Require C++23
 target_compile_features(cpp_core INTERFACE cxx_std_23)
 
-# Enable C++23 module support
-set(CMAKE_CXX_MODULE_STD 23)
-set(CMAKE_CXX_MODULE_EXTENSIONS OFF)
-
 # Install rules --------------------------------------------------------------
 include(GNUInstallDirs)
 
-install(TARGETS cpp_core
-        EXPORT cpp_coreTargets)
+install(
+    TARGETS cpp_core
+    EXPORT cpp_coreTargets
+)
 
-install(DIRECTORY include/
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(
+    DIRECTORY include/
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
 
 # CMake package configuration ------------------------------------------------
 include(CMakePackageConfigHelpers)
 
 write_basic_package_version_file(
-        ${CMAKE_CURRENT_BINARY_DIR}/cpp_coreConfigVersion.cmake
-        VERSION ${PROJECT_VERSION}
-        COMPATIBILITY SameMajorVersion)
-
-configure_package_config_file(
-        ${CMAKE_CURRENT_LIST_DIR}/cmake/cpp_core_config.cmake.in
-        ${CMAKE_CURRENT_BINARY_DIR}/cpp_coreConfig.cmake
-        INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cpp_core)
-
-install(EXPORT cpp_coreTargets
-        FILE cpp_coreTargets.cmake
-        NAMESPACE cpp_core::
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cpp_core)
-
-install(FILES
-        ${CMAKE_CURRENT_BINARY_DIR}/cpp_coreConfig.cmake
-        ${CMAKE_CURRENT_BINARY_DIR}/cpp_coreConfigVersion.cmake
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cpp_core)
-
-# Module test ----------------------------------------------------------------
-add_library(hello_module STATIC)
-target_sources(hello_module
-    PUBLIC FILE_SET cxx_modules TYPE CXX_MODULES
-    FILES test/hello.cxx
+    ${CMAKE_CURRENT_BINARY_DIR}/cpp_coreConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
 )
 
-add_executable(module_test test/main.cpp)
-target_link_libraries(module_test PRIVATE hello_module)
+configure_package_config_file(
+    ${CMAKE_CURRENT_LIST_DIR}/cmake/cpp_core_config.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/cpp_coreConfig.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cpp_core
+)
 
-add_custom_target(copy-compile-commands ALL
-    ${CMAKE_COMMAND} -E copy_if_different
-    ${CMAKE_BINARY_DIR}/compile_commands.json
-    ${CMAKE_SOURCE_DIR}/compile_commands.json
-    DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
-    COMMENT "Copying compile_commands.json to project root"
+install(
+    EXPORT cpp_coreTargets
+    FILE cpp_coreTargets.cmake
+    NAMESPACE cpp_core::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cpp_core
+)
+
+install(
+    FILES
+        ${CMAKE_CURRENT_BINARY_DIR}/cpp_coreConfig.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/cpp_coreConfigVersion.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cpp_core
 )

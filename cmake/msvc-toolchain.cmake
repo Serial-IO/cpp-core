@@ -1,7 +1,7 @@
 # MSVC Toolchain file for cpp-core
 # Usage: cmake -DCMAKE_TOOLCHAIN_FILE=cmake/msvc-toolchain.cmake ..
 
-set(CMAKE_SYSTEM_NAME Windows)
+set(CMAKE_SYSTEM_NAME Generic)
 
 # Set the C++ compiler
 set(CMAKE_CXX_COMPILER "cl")
@@ -26,4 +26,4 @@ set(CMAKE_CXX_FLAGS_DEBUG_INIT "/Zi /Od /MDd")
 set(CMAKE_CXX_FLAGS_RELEASE_INIT "/O2 /DNDEBUG /MD")
 
 # MSVC-specific definitions
-add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
