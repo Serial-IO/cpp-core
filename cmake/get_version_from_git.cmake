@@ -31,13 +31,6 @@ function(get_version_from_git)
     )
 
     # Get short commit hash
-    execute_process(
-        COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        OUTPUT_VARIABLE GIT_COMMIT_HASH
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-        ERROR_QUIET
-    )
 
     if(GIT_TAG)
         # Extract version from tag (remove 'v' prefix if present)
