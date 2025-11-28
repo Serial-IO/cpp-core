@@ -10,8 +10,11 @@ struct Version
     unsigned int patch;
 };
 
-// Generated at configure time. Parent project can override the numbers via
-// -DCPP_CORE_VERSION_XXX=... or CPM OPTIONS
-inline constexpr Version kVersion{@CPP_CORE_VERSION_MAJOR@U, @CPP_CORE_VERSION_MINOR@U, @CPP_CORE_VERSION_PATCH@U};
+// Generated at configure time from Git tags (or dirty build version if no tag).
+// Version is determined automatically from Git tags and cannot be overridden.
+inline constexpr Version kVersion
+{
+    @CPP_CORE_VERSION_MAJOR@U, @CPP_CORE_VERSION_MINOR@U, @CPP_CORE_VERSION_PATCH@U
+};
 
 } // namespace cpp_core

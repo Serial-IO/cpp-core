@@ -19,7 +19,7 @@
         },
         {
             "name": "clang",
-            "displayName": "Clang (clang++-21)",
+            "displayName": "Clang (clang++)",
             "description": "Build using Clang compiler",
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/build/clang",

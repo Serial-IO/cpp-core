@@ -1,20 +1,9 @@
 # MSVC Toolchain file for cpp-core
 # Usage: cmake -DCMAKE_TOOLCHAIN_FILE=cmake/msvc-toolchain.cmake ..
 
-set(CMAKE_SYSTEM_NAME Windows)
-
 # Set the C++ compiler
 set(CMAKE_CXX_COMPILER "cl")
 set(CMAKE_C_COMPILER "cl")
-
-# Set C++ standard
-set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
-# Enable C++23 module support
-set(CMAKE_CXX_MODULE_STD 23)
-set(CMAKE_CXX_MODULE_EXTENSIONS OFF)
 
 # MSVC-specific flags
 # /W4 = Enable all warnings
