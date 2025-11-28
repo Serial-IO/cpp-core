@@ -82,10 +82,12 @@ install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/cpp_coreConfigVersion.cmake
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cpp_core)
 
-add_custom_target(copy-compile-commands ALL
-    ${CMAKE_COMMAND} -E copy_if_different
-    ${CMAKE_BINARY_DIR}/compile_commands.json
-    ${CMAKE_SOURCE_DIR}/compile_commands.json
-    DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
-    COMMENT "Copying compile_commands.json to project root"
-)
+if(CMAKE_EXPORT_COMPILE_COMMANDS AND EXISTS "${CMAKE_BINARY_DIR}/compile_commands.json")
+    add_custom_target(copy-compile-commands ALL
+        ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_BINARY_DIR}/compile_commands.json
+        ${CMAKE_SOURCE_DIR}/compile_commands.json
+        DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
+        COMMENT "Copying compile_commands.json to project root"
+    )
+endif()
