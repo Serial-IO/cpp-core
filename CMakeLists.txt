@@ -37,9 +37,12 @@ add_library(cpp_core INTERFACE)
 add_library(cpp_core::cpp_core ALIAS cpp_core)
 
 # Public include directories
-target_include_directories(cpp_core INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+target_include_directories(
+    cpp_core
+    INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 23)
@@ -56,11 +59,15 @@ set(CMAKE_CXX_MODULE_EXTENSIONS OFF)
 # Install rules --------------------------------------------------------------
 include(GNUInstallDirs)
 
-install(TARGETS cpp_core
-    EXPORT cpp_coreTargets)
+install(
+    TARGETS cpp_core
+    EXPORT cpp_coreTargets
+)
 
-install(DIRECTORY include/
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(
+    DIRECTORY include/
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
 
 # CMake package configuration ------------------------------------------------
 include(CMakePackageConfigHelpers)
@@ -77,15 +84,19 @@ configure_package_config_file(
     INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cpp_core
 )
 
-install(EXPORT cpp_coreTargets
+install(
+    EXPORT cpp_coreTargets
     FILE cpp_coreTargets.cmake
     NAMESPACE cpp_core::
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cpp_core)
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cpp_core
+)
 
-install(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/cpp_coreConfig.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/cpp_coreConfigVersion.cmake
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cpp_core)
+install(
+    FILES
+        ${CMAKE_CURRENT_BINARY_DIR}/cpp_coreConfig.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/cpp_coreConfigVersion.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cpp_core
+)
 
 if(CMAKE_EXPORT_COMPILE_COMMANDS AND EXISTS "${CMAKE_BINARY_DIR}/compile_commands.json")
     add_custom_target(
