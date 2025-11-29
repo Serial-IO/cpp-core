@@ -1,81 +1,76 @@
 # C++ Core
 
-Header-only C++ helper library that provides small, cross-platform utilities and a centrally maintained **Version** struct shared by the *cpp-bindings-linux*, *cpp-bindings-windows* and *cpp-bindings-macos* repositories.
+Header-only API definition library for cross-platform serial communication. Defines the **API contract** and **version information** shared by all platform-specific binding implementations.
 
-> [!NOTE]
+> [!IMPORTANT]
 >
-> This repository contains **headers only**. To obtain a working native library (SO / DLL / dylib) build one of the platform-specific projects instead:
-> - [C++ bindings (Windows)](https://github.com/Serial-IO/cpp-bindings-windows)
-> - [C++ bindings (Linux)](https://github.com/Serial-IO/cpp-bindings-linux)
-> 
-> These repositories compile *cpp-core* for you and provide the ready-to-use shared library.
+> **API definitions only** (headers). For implementations and ready-to-use shared libraries:
+> - [cpp-bindings-windows](https://github.com/Serial-IO/cpp-bindings-windows) - Windows (DLL)
+> - [cpp-bindings-linux](https://github.com/Serial-IO/cpp-bindings-linux) - Linux (SO)
+> - [cpp-bindings-macos](https://github.com/Serial-IO/cpp-bindings-macos) - macOS (dylib)
 
-## Documentation
+## Features
 
-* [Overview](docs/overview.md): Architecture, Build & Quick Start.
-* C++23, zero runtime dependencies
-* Delivered as an INTERFACE target `cpp_core::cpp_core`
-* Fetchable via [CPM.cmake](https://github.com/cpm-cmake/CPM.cmake) or regular `find_package`
+* **C++23** header-only API definitions
+* **Cross-platform serial I/O API** (POSIX/Windows compatible)
+* **Centralized version information** from Git tags (`cpp_core::kVersion`)
+* **Status codes** enum for error handling
+* **C-compatible API** for FFI bindings (Rust, Python, Deno, etc.)
 
 ## Requirements
 
-* CMake ≥ 3.14
+* CMake ≥ 3.30
 * A C++23 compatible compiler (GCC 13+, Clang 16+, MSVC 2022+)
+* Git (for automatic version detection)
 
-## Quick Start
+## Version Information
 
-1. Add *cpp-core* with CPM.cmake (recommended way)
+The version is **automatically extracted from Git tags** during CMake configuration and cannot be overridden:
 
-```cmake
-# Set the project version once via **cache variables** –
-# ensures the values end up in cpp-core regardless of when CPM configures.
-set(CPP_CORE_VERSION_MAJOR 1 CACHE STRING "")
-set(CPP_CORE_VERSION_MINOR 0 CACHE STRING "")
-set(CPP_CORE_VERSION_PATCH 3 CACHE STRING "")
+* **With Git tag** (e.g., `v1.2.3`): Version is `1.2.3` (or `1.2.3-dirty` if working tree has uncommitted changes)
+* **Without Git tag**: Version is `0.0.0` (or `0.0.0-dirty` if working tree has uncommitted changes)
 
-CPMAddPackage(
-  NAME cpp_core
-  GITHUB_REPOSITORY Serial-IO/cpp-core    # Fork / Upstream
-  GIT_TAG main                            # or e.g. v0.1.0
-)
-
-add_executable(my_app src/main.cpp)
-target_link_libraries(my_app PRIVATE cpp_core::cpp_core)
-```
-
-> Why cache variables?  
-> They guarantee the values exist **before** the `CPMAddPackage()` call. If the variables are set later (or via  
-> `OPTIONS ... "CPP_CORE_VERSION_MAJOR=${FOO}"`) and `FOO` is empty at that moment, *cpp-core* falls back to its default version (0.1.0).
-
-2. Use in code
+All binding repositories that include this repository will use the same version information, ensuring consistency across platforms.
 
 ```cpp
 #include <cpp_core/version.h>
-#include <cpp_core/helpers.h>
 
-int main() {
-    constexpr auto v = cpp_core::VERSION;            // {1,4,0}
+constexpr auto v = cpp_core::kVersion;  // v.major, v.minor, v.patch
+```
+
+## Usage in Binding Repositories
+
+Binding repositories typically include this repository as a dependency:
+
+```cmake
+CPMAddPackage(
+  NAME cpp_core
+  GITHUB_REPOSITORY Serial-IO/cpp-core
+  GIT_TAG v1.2.3  # Version tag determines the API version
+)
+
+target_link_libraries(my_binding_library PRIVATE cpp_core::cpp_core)
+```
+
+The binding implementation then uses the API definitions:
+
+```cpp
+#include <cpp_core/serial.h>
+#include <cpp_core/version.h>
+
+// Implement platform-specific functions matching the API
+intptr_t serialOpen(
+    void *port,
+    int baudrate,
+    int data_bits,
+    int parity,
+    int stop_bits,
+    ErrorCallbackT error_callback
+) {
+    // Platform-specific implementation (Windows/Linux/macOS)
 }
 ```
 
-## Alternative: add_subdirectory
-
-If you include the source code directly as a sub-repository, simply do:
-
-```cmake
-add_subdirectory(externals/cpp-core)
-# the same version variables can be set before the call
-```
-
-## Using the package with `find_package`
-
-After running `cmake --install` (or `make install`) you can locate the package system-wide:
-
-```cmake
-find_package(cpp_core REQUIRED)
-add_executable(my_app src/main.cpp)
-target_link_libraries(my_app PRIVATE cpp_core::cpp_core)
-```
-
 ## License
-`Apache-2.0` Check [LICENSE](https://github.com/Serial-IO/cpp-core/blob/main/LICENSE) for more details.
+
+`Apache-2.0` - Check [LICENSE](LICENSE) for more details.
