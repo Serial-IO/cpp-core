@@ -59,7 +59,14 @@ The binding implementation then uses the API definitions:
 #include <cpp_core/version.h>
 
 // Implement platform-specific functions matching the API
-intptr_t serialOpen(void *port, int baudrate, int data_bits, int parity, int stop_bits, ErrorCallbackT error_callback) {
+intptr_t serialOpen(
+    void *port,
+    int baudrate,
+    int data_bits,
+    int parity,
+    int stop_bits,
+    ErrorCallbackT error_callback
+) {
     // Platform-specific implementation (Windows/Linux/macOS)
 }
 ```

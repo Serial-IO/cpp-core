@@ -19,15 +19,18 @@ set(CPP_CORE_VERSION_STRING ${VERSION_STRING} CACHE STRING "Full version string"
 # Set PROJECT_VERSION for CMake package config (only MAJOR.MINOR.PATCH, no suffix)
 set(PROJECT_VERSION "${CPP_CORE_VERSION_MAJOR}.${CPP_CORE_VERSION_MINOR}.${CPP_CORE_VERSION_PATCH}")
 
-project(cpp-core
+project(
+    cpp-core
     VERSION ${PROJECT_VERSION}
     DESCRIPTION "Cross-platform helper library shared by cpp-linux-bindings and cpp-windows-bindings"
-    LANGUAGES CXX)
+    LANGUAGES CXX
+)
 
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/include/cpp_core/version.h.in
     ${CMAKE_CURRENT_SOURCE_DIR}/include/cpp_core/version.h
-    @ONLY)
+    @ONLY
+)
 
 # Header-only library --------------------------------------------------------
 add_library(cpp_core INTERFACE)
@@ -65,12 +68,14 @@ include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
     ${CMAKE_CURRENT_BINARY_DIR}/cpp_coreConfigVersion.cmake
     VERSION ${PROJECT_VERSION}
-    COMPATIBILITY SameMajorVersion)
+    COMPATIBILITY SameMajorVersion
+ )
 
 configure_package_config_file(
     ${CMAKE_CURRENT_LIST_DIR}/cmake/cpp_core_config.cmake.in
     ${CMAKE_CURRENT_BINARY_DIR}/cpp_coreConfig.cmake
-    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cpp_core)
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cpp_core
+)
 
 install(EXPORT cpp_coreTargets
     FILE cpp_coreTargets.cmake
@@ -83,10 +88,12 @@ install(FILES
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cpp_core)
 
 if(CMAKE_EXPORT_COMPILE_COMMANDS AND EXISTS "${CMAKE_BINARY_DIR}/compile_commands.json")
-    add_custom_target(copy-compile-commands ALL
-        ${CMAKE_COMMAND} -E copy_if_different
-        ${CMAKE_BINARY_DIR}/compile_commands.json
-        ${CMAKE_SOURCE_DIR}/compile_commands.json
+    add_custom_target(
+        copy-compile-commands
+        ALL
+            ${CMAKE_COMMAND} -E copy_if_different
+            ${CMAKE_BINARY_DIR}/compile_commands.json
+            ${CMAKE_SOURCE_DIR}/compile_commands.json
         DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
         COMMENT "Copying compile_commands.json to project root"
     )
