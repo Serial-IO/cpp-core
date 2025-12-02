@@ -1,7 +1,7 @@
 #pragma once
 
 #include "module_api.h"
-#include "version.h"
+#include "version.hpp"
 
 // Aggregated interface headers
 #include "interface/get_version.h"

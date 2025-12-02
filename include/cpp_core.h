@@ -15,4 +15,4 @@
 #include "cpp_core/error_callback.h"
 #include "cpp_core/serial.h"
 #include "cpp_core/status_codes.h"
-#include "cpp_core/version.h"
+#include "cpp_core/version.hpp"

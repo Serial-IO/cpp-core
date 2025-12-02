@@ -1,11 +1,21 @@
 #pragma once
 #include "../module_api.h"
-#include "../version.h"
+#include "../version.hpp"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
+
+    namespace cpp_core
+    {
+    struct Version
+    {
+        int major = version::MAJOR;
+        int minor = version::MINOR;
+        int patch = version::PATCH;
+    };
+    } // namespace cpp_core
 
     /**
      * @brief Copy the compile-time version of the cpp_core library.
@@ -20,7 +30,7 @@ extern "C"
     {
         if (out != nullptr)
         {
-            *out = cpp_core::kVersion;
+            *out = cpp_core::Version();
         }
     }
 
