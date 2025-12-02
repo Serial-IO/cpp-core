@@ -3,33 +3,26 @@ cmake_minimum_required(VERSION 3.30)
 # Export compile commands to root directory
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# ---------------------------------------------------------------------------
-# Version information from Git tags
-# Version is determined automatically from Git tags and cannot be overridden
-# ---------------------------------------------------------------------------
-include(${CMAKE_CURRENT_LIST_DIR}/cmake/get_version_from_git.cmake)
+include(cmake/CPM.cmake)
 
-# Get version from Git tags
-get_version_from_git()
-set(CPP_CORE_VERSION_MAJOR ${VERSION_MAJOR} CACHE STRING "Major version number" FORCE)
-set(CPP_CORE_VERSION_MINOR ${VERSION_MINOR} CACHE STRING "Minor version number" FORCE)
-set(CPP_CORE_VERSION_PATCH ${VERSION_PATCH} CACHE STRING "Patch version number" FORCE)
-set(CPP_CORE_VERSION_STRING ${VERSION_STRING} CACHE STRING "Full version string" FORCE)
+CPMAddPackage(
+    NAME cmake-git-versioning
+    GITHUB_REPOSITORY Katze719/cmake-git-versioning
+    GIT_TAG v1.0.0
+)
 
-# Set PROJECT_VERSION for CMake package config (only MAJOR.MINOR.PATCH, no suffix)
-set(PROJECT_VERSION "${CPP_CORE_VERSION_MAJOR}.${CPP_CORE_VERSION_MINOR}.${CPP_CORE_VERSION_PATCH}")
+# Include the cmake-git-versioning module
+include(${cmake-git-versioning_SOURCE_DIR}/cmake/cmake-git-versioning.cmake)
+
+# Get git version info (sets CMake variables)
+get_git_version_info()
+generate_git_version(OUTPUT_DIR ${CMAKE_SOURCE_DIR}/include/cpp_core)
 
 project(
     cpp-core
-    VERSION ${PROJECT_VERSION}
+    VERSION "${GIT_VERSION_MAJOR}.${GIT_VERSION_MINOR}.${GIT_VERSION_PATCH}"
     DESCRIPTION "Cross-platform helper library shared by cpp-linux-bindings and cpp-windows-bindings"
     LANGUAGES CXX
-)
-
-configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/cpp_core/version.h.in
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/cpp_core/version.h
-    @ONLY
 )
 
 # Header-only library --------------------------------------------------------
@@ -40,8 +33,8 @@ add_library(cpp_core::cpp_core ALIAS cpp_core)
 target_include_directories(
     cpp_core
     INTERFACE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
 # Set C++ standard
@@ -74,9 +67,9 @@ include(CMakePackageConfigHelpers)
 
 write_basic_package_version_file(
     ${CMAKE_CURRENT_BINARY_DIR}/cpp_coreConfigVersion.cmake
-    VERSION ${PROJECT_VERSION}
+    VERSION "${GIT_VERSION_MAJOR}.${GIT_VERSION_MINOR}.${GIT_VERSION_PATCH}"
     COMPATIBILITY SameMajorVersion
- )
+)
 
 configure_package_config_file(
     ${CMAKE_CURRENT_LIST_DIR}/cmake/cpp_core_config.cmake.in
@@ -93,8 +86,8 @@ install(
 
 install(
     FILES
-        ${CMAKE_CURRENT_BINARY_DIR}/cpp_coreConfig.cmake
-        ${CMAKE_CURRENT_BINARY_DIR}/cpp_coreConfigVersion.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/cpp_coreConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/cpp_coreConfigVersion.cmake
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cpp_core
 )
 
@@ -102,9 +95,9 @@ if(CMAKE_EXPORT_COMPILE_COMMANDS AND EXISTS "${CMAKE_BINARY_DIR}/compile_command
     add_custom_target(
         copy-compile-commands
         ALL
-            ${CMAKE_COMMAND} -E copy_if_different
-            ${CMAKE_BINARY_DIR}/compile_commands.json
-            ${CMAKE_SOURCE_DIR}/compile_commands.json
+        ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_BINARY_DIR}/compile_commands.json
+        ${CMAKE_SOURCE_DIR}/compile_commands.json
         DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
         COMMENT "Copying compile_commands.json to project root"
     )
