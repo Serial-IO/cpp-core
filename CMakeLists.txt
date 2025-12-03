@@ -16,7 +16,7 @@ include(${cmake-git-versioning_SOURCE_DIR}/cmake/cmake-git-versioning.cmake)
 
 # Get git version info (sets CMake variables)
 get_git_version_info()
-generate_git_version(OUTPUT_DIR ${CMAKE_SOURCE_DIR}/include/cpp_core)
+generate_git_version(OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include/cpp_core)
 
 project(
     cpp-core
@@ -91,7 +91,7 @@ install(
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cpp_core
 )
 
-if(CMAKE_EXPORT_COMPILE_COMMANDS AND EXISTS "${CMAKE_BINARY_DIR}/compile_commands.json")
+if(PROJECT_IS_TOP_LEVEL AND CMAKE_EXPORT_COMPILE_COMMANDS AND EXISTS "${CMAKE_BINARY_DIR}/compile_commands.json")
     add_custom_target(
         copy-compile-commands
         ALL
