@@ -18,7 +18,7 @@ extern "C"
         const char *commit_hash_full  = version::GIT_COMMIT_HASH_FULL;
         const char *commit_date       = version::GIT_COMMIT_DATE;
         const char *branch            = version::GIT_BRANCH;
-        const char *version           = version::VERSION;
+        const char *version_string    = version::VERSION;
     };
     } // namespace cpp_core
 
