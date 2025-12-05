@@ -17,19 +17,11 @@ extern "C"
      * @param error_callback [optional] Callback to invoke on error. Defined in error_callback.h. Default is `nullptr`.
      * @return Number of ports found or a negative error code from ::cpp_core::StatusCodes on error.
      */
-    MODULE_API auto serialListPorts(
-        void (*callback_fn)(
-            const char *port,
-            const char *path,
-            const char *manufacturer,
-            const char *serial_number,
-            const char *pnp_id,
-            const char *location_id,
-            const char *product_id,
-            const char *vendor_id
-        ),
-        ErrorCallbackT error_callback = nullptr
-    ) -> int;
+    MODULE_API auto serialListPorts(void (*callback_fn)(const char *port, const char *path, const char *manufacturer,
+                                                        const char *serial_number, const char *pnp_id,
+                                                        const char *location_id, const char *product_id,
+                                                        const char *vendor_id),
+                                    ErrorCallbackT error_callback = nullptr) -> int;
 
 #ifdef __cplusplus
 }
