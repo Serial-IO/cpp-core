@@ -2,12 +2,10 @@
 Language:        Cpp
 # BasedOnStyle:  Microsoft
 AccessModifierOffset: -2
-AlignAfterOpenBracket: BlockIndent
+AlignAfterOpenBracket: Align
 AlignEscapedNewlines: Right
 AlignOperands:   Align
-AlignTrailingComments: false
-AlignConsecutiveAssignments: true
-AlignConsecutiveDeclarations: true
+AlignTrailingComments: true
 AllowAllArgumentsOnNextLine: true
 AllowAllConstructorInitializersOnNextLine: true
 AllowAllParametersOfDeclarationOnNextLine: true
@@ -24,8 +22,8 @@ AlwaysBreakBeforeMultilineStrings: false
 AlwaysBreakTemplateDeclarations: MultiLine
 AttributeMacros:
   - __capability
-BinPackArguments: false
-BinPackParameters: AlwaysOnePerLine
+BinPackArguments: true
+BinPackParameters: true
 BraceWrapping:
   AfterCaseLabel:  false
   AfterClass:      true
