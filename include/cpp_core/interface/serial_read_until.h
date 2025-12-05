@@ -26,15 +26,8 @@ extern "C"
      * @return Bytes read (including the terminator), 0 on timeout or a negative error code from ::cpp_core::StatusCodes
      * on error.
      */
-    MODULE_API auto serialReadUntil(
-        int64_t        handle,
-        void          *buffer,
-        int            buffer_size,
-        int            timeout_ms,
-        int            multiplier,
-        void          *until_char,
-        ErrorCallbackT error_callback = nullptr
-    ) -> int;
+    MODULE_API auto serialReadUntil(int64_t handle, void *buffer, int buffer_size, int timeout_ms, int multiplier,
+                                    void *until_char, ErrorCallbackT error_callback = nullptr) -> int;
 
 #ifdef __cplusplus
 }

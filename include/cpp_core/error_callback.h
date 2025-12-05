@@ -5,10 +5,7 @@ extern "C"
 {
 #endif
 
-    using ErrorCallbackT = void (*)(
-        int         error_code,
-        const char *message
-    );
+    using ErrorCallbackT = void (*)(int error_code, const char *message);
 
 #ifdef __cplusplus
 } // extern "C"
