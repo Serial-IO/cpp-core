@@ -25,14 +25,8 @@ extern "C"
      * @param error_callback [optional] Callback to invoke on error. Defined in error_callback.h. Default is `nullptr`.
      * @return A positive opaque handle on success or a negative value from ::cpp_core::StatusCodes on failure.
      */
-    MODULE_API auto serialOpen(
-        void          *port,
-        int            baudrate,
-        int            data_bits,
-        int            parity         = 0,
-        int            stop_bits      = 0,
-        ErrorCallbackT error_callback = nullptr
-    ) -> intptr_t;
+    MODULE_API auto serialOpen(void *port, int baudrate, int data_bits, int parity = 0, int stop_bits = 0,
+                               ErrorCallbackT error_callback = nullptr) -> intptr_t;
 
 #ifdef __cplusplus
 }

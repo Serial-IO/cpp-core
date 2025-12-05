@@ -11,14 +11,14 @@ extern "C"
     {
     struct Version
     {
-        int         major             = version::MAJOR;
-        int         minor             = version::MINOR;
-        int         patch             = version::PATCH;
+        int major = version::MAJOR;
+        int minor = version::MINOR;
+        int patch = version::PATCH;
         const char *commit_hash_short = version::GIT_COMMIT_HASH_SHORT;
-        const char *commit_hash_full  = version::GIT_COMMIT_HASH_FULL;
-        const char *commit_date       = version::GIT_COMMIT_DATE;
-        const char *branch            = version::GIT_BRANCH;
-        const char *version_string    = version::VERSION;
+        const char *commit_hash_full = version::GIT_COMMIT_HASH_FULL;
+        const char *commit_date = version::GIT_COMMIT_DATE;
+        const char *branch = version::GIT_BRANCH;
+        const char *version_string = version::VERSION;
     };
     } // namespace cpp_core
 
