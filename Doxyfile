@@ -4,42 +4,96 @@
 
 # Project related --------------------------------------------------------
 PROJECT_NAME           = "cpp-core"
-PROJECT_BRIEF          = "Header-only C++ helper library"
 PROJECT_NUMBER         = "1.0"
+PROJECT_BRIEF          = "Header-only API definitions for cross-platform serial communication"
 OUTPUT_DIRECTORY       = docs/html
 CREATE_SUBDIRS         = NO
+ALLOW_UNICODE_NAMES    = YES
+OPTIMIZE_OUTPUT_FOR_C  = NO
+OPTIMIZE_OUTPUT_JAVA   = NO
+OPTIMIZE_FOR_FORTRAN   = NO
+OPTIMIZE_OUTPUT_VHDL   = NO
+OPTIMIZE_OUTPUT_SLICE  = NO
+MARKDOWN_SUPPORT       = YES
+AUTOLINK_SUPPORT       = YES
+USE_MDFILE_AS_MAINPAGE = README.md
+
+FULL_PATH_NAMES        = NO
+STRIP_FROM_PATH        = include
+
+# Source files -----------------------------------------------------------
+INPUT                  = README.md include LICENSE
+FILE_PATTERNS          = *.h *.hpp *.md
+RECURSIVE              = YES
+EXCLUDE_PATTERNS       = */build/* */.git/* */install/*
 
 # Build options ----------------------------------------------------------
 EXTRACT_ALL            = YES
 EXTRACT_PRIVATE        = YES
 EXTRACT_STATIC         = YES
+EXTRACT_LOCAL_CLASSES  = YES
 EXTRACT_ANON_NSPACES   = YES
 
-# Source files -----------------------------------------------------------
-INPUT                  = include README.md LICENSE
-FILE_PATTERNS          = *.h *.hpp *.md
-RECURSIVE              = YES
+QUIET                  = YES
+WARN_IF_UNDOCUMENTED   = NO
+WARN_AS_ERROR          = NO
 
 # HTML output ------------------------------------------------------------
 GENERATE_HTML          = YES
 HTML_OUTPUT            = .
-HTML_COLORSTYLE_HUE    = 220
-HTML_COLORSTYLE_SAT    = 100
-HTML_COLORSTYLE_GAMMA  = 80
-
-# Disable unwanted output -----------------------------------------------
 GENERATE_LATEX         = NO
-GENERATE_MAN           = NO
-GENERATE_RTF           = NO
 GENERATE_XML           = NO
+
+# Doxygen Awesome theme integration
+HTML_HEADER            = docs/doxygen-theme/header.html
+HTML_EXTRA_STYLESHEET  = docs/doxygen-theme/doxygen-awesome.css
+HTML_EXTRA_FILES       = docs/doxygen-theme/doxygen-awesome-darkmode-toggle.js \
+                         docs/doxygen-theme/doxygen-awesome-fragment-copy-button.js \
+                         docs/doxygen-theme/doxygen-awesome-paragraph-link.js \
+                         docs/doxygen-theme/doxygen-awesome-interactive-toc.js \
+                         docs/doxygen-theme/doxygen-awesome-tabs.js
+
+HTML_COLORSTYLE        = LIGHT
+HTML_COPY_CLIPBOARD    = NO
+PAGE_OUTLINE_PANEL     = NO
+FULL_SIDEBAR           = NO
+GENERATE_TREEVIEW      = YES
+DISABLE_INDEX          = NO
+ALPHABETICAL_INDEX     = YES
+GENERATE_DEPRECATEDLIST = YES
+
+# Source browsing
+SOURCE_BROWSER         = YES
+INLINE_SOURCES         = NO
+STRIP_CODE_COMMENTS    = YES
+REFERENCED_BY_RELATION = YES
+REFERENCES_RELATION    = YES
+VERBATIM_HEADERS       = YES
+SHOW_INCLUDE_FILES     = YES
+SHOW_GROUPED_MEMB_INC  = NO
 
 # Diagrams --------------------------------------------------------------
 HAVE_DOT               = YES
-DOT_IMAGE_FORMAT       = svg
+DOT_NUM_THREADS        = 0
+CLASS_GRAPH            = YES
+COLLABORATION_GRAPH    = YES
+GROUP_GRAPHS           = YES
+UML_LOOK               = NO
+UML_LIMIT_NUM_FIELDS   = 10
+DOT_UML_DETAILS        = NO
+DOT_WRAP_THRESHOLD     = 17
+TEMPLATE_RELATIONS     = YES
+INCLUDE_GRAPH          = YES
+INCLUDED_BY_GRAPH      = YES
 CALL_GRAPH             = YES
 CALLER_GRAPH           = YES
-
-# Misc ------------------------------------------------------------------
-FULL_PATH_NAMES        = NO
-STRIP_FROM_PATH        = include
-GENERATE_TREEVIEW      = YES 
+GRAPHICAL_HIERARCHY    = YES
+DIRECTORY_GRAPH        = YES
+DIR_GRAPH_MAX_DEPTH    = 1
+DOT_IMAGE_FORMAT       = svg
+INTERACTIVE_SVG        = YES
+DOT_GRAPH_MAX_NODES    = 50
+MAX_DOT_GRAPH_DEPTH    = 0
+DOT_MULTI_TARGETS      = YES
+GENERATE_LEGEND        = YES
+DOT_CLEANUP            = YES
