@@ -8,7 +8,7 @@ include(cmake/CPM.cmake)
 CPMAddPackage(
     NAME cmake-git-versioning
     GITHUB_REPOSITORY Katze719/cmake-git-versioning
-    GIT_TAG v1.0.0
+    GIT_TAG v1.0.1
 )
 
 # Include the cmake-git-versioning module
