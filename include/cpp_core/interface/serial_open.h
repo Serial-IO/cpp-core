@@ -13,8 +13,7 @@ extern "C"
      *
      * The function attempts to open the device referenced by @p port and applies
      * the given line settings. The pointer is interpreted as
-     *   - `const char*` on POSIX and
-     *   - `const wchar_t*` on Windows.
+     * a UTF-8 encoded null-terminated string (`const char*`) on all platforms.
      *
      * @param port Null-terminated device identifier (e.g. "COM3", "/dev/ttyUSB0"). Passing `nullptr` results in
      * a failure.
