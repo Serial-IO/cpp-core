@@ -19,8 +19,7 @@ namespace cpp_core
 template <std::invocable Fn> class [[nodiscard]] ScopeGuard
 {
   public:
-    constexpr explicit ScopeGuard(Fn func) noexcept(std::is_nothrow_move_constructible_v<Fn>)
-        : fn_(std::move(func))
+    constexpr explicit ScopeGuard(Fn func) noexcept(std::is_nothrow_move_constructible_v<Fn>) : fn_(std::move(func))
     {
     }
 
