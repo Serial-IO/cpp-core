@@ -107,7 +107,7 @@ concept IsResult = requires {
     } while (false)
 // NOLINTEND(cppcoreguidelines-macro-usage)
 
-// Result → C return code bridge
+// Result -> C return code bridge
 // Converts a Result<int>/Status back into the C API convention (negative = error)
 // and optionally invokes the legacy ErrorCallbackT.
 

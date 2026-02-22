@@ -80,7 +80,7 @@ consteval auto validateDataBits(int bits) -> bool
 } // namespace detail
 
 /// Compile-time validated serial configuration.
-/// Invalid configs are rejected at compile time — no runtime overhead.
+/// Invalid configs are rejected at compile time - no runtime overhead.
 ///
 ///   constexpr auto kCfg = SerialConfig::make<9600, 8, Parity::kNone, StopBits::kOne>();
 struct SerialConfig

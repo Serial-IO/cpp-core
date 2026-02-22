@@ -1,7 +1,7 @@
 #pragma once
 
 /*
- * cpp_core.h — Umbrella header for the cpp_core library
+ * cpp_core.h - Umbrella header for the cpp_core library
  *
  * Include this single file to gain access to the complete public C/C++ API
  * of the cpp_core runtime.  Internally it forwards to the individual header
