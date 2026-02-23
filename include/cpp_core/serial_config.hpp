@@ -1,66 +1,12 @@
 #pragma once
 
-#include <compare>
+#include "strong_types.hpp"
+
 #include <concepts>
 #include <type_traits>
 
 namespace cpp_core
 {
-
-// Strong types for serial parameters
-
-/// Phantom-tagged strong type. Prevents mixing up baudrate, timeout, etc.
-template <typename Tag, std::integral Underlying = int> struct StrongInt
-{
-    using TagType = Tag;
-    using ValueType = Underlying;
-
-    Underlying value;
-
-    constexpr explicit StrongInt(Underlying val) noexcept : value(val)
-    {
-    }
-
-    [[nodiscard]] constexpr auto operator<=>(const StrongInt &) const noexcept = default;
-
-    [[nodiscard]] constexpr explicit operator Underlying() const noexcept
-    {
-        return value;
-    }
-};
-
-struct BaudrateTag
-{
-};
-struct DataBitsTag
-{
-};
-struct TimeoutMsTag
-{
-};
-struct MultiplierTag
-{
-};
-
-using Baudrate = StrongInt<BaudrateTag>;
-using DataBits = StrongInt<DataBitsTag>;
-using TimeoutMs = StrongInt<TimeoutMsTag>;
-using Multiplier = StrongInt<MultiplierTag>;
-
-// Parity & StopBits enums
-
-enum class Parity : int
-{
-    kNone = 0,
-    kEven = 1,
-    kOdd = 2,
-};
-
-enum class StopBits : int
-{
-    kOne = 0,
-    kTwo = 2,
-};
 
 // Compile-time validation
 
@@ -79,10 +25,10 @@ consteval auto validateDataBits(int bits) -> bool
 
 } // namespace detail
 
-/// Compile-time validated serial configuration.
-/// Invalid configs are rejected at compile time - no runtime overhead.
-///
-///   constexpr auto kCfg = SerialConfig::make<9600, 8, Parity::kNone, StopBits::kOne>();
+// Compile-time validated serial configuration.
+// Invalid configs are rejected at compile time - no runtime overhead.
+//
+//   constexpr auto kCfg = SerialConfig::make<9600, 8, Parity::kNone, StopBits::kOne>();
 struct SerialConfig
 {
     int baudrate;
@@ -137,19 +83,19 @@ struct SerialConfig
 
 // clang-format off
 
-/// A type that behaves like a native handle (int fd or HANDLE).
+// A type that behaves like a native handle (int fd or HANDLE).
 template <typename H>
 concept NativeHandle = (std::is_integral_v<H> || std::is_pointer_v<H>)
     && !std::is_same_v<H, bool>;
 
-/// A type that can serve as a mutable byte buffer for read operations.
+// A type that can serve as a mutable byte buffer for read operations.
 template <typename B>
 concept ByteBuffer = requires(B buf) {
     { buf.data() } -> std::convertible_to<void *>;
     { buf.size() } -> std::convertible_to<std::size_t>;
 };
 
-/// Read-only byte source for write operations.
+// Read-only byte source for write operations.
 template <typename B>
 concept ConstByteBuffer = requires(const B buf) {
     { buf.data() } -> std::convertible_to<const void *>;
@@ -157,23 +103,5 @@ concept ConstByteBuffer = requires(const B buf) {
 };
 
 // clang-format on
-
-// Common baud rate constants
-
-namespace baud
-{
-inline constexpr int k300 = 300;
-inline constexpr int k1200 = 1200;
-inline constexpr int k2400 = 2400;
-inline constexpr int k4800 = 4800;
-inline constexpr int k9600 = 9600;
-inline constexpr int k19200 = 19200;
-inline constexpr int k38400 = 38400;
-inline constexpr int k57600 = 57600;
-inline constexpr int k115200 = 115200;
-inline constexpr int k230400 = 230400;
-inline constexpr int k460800 = 460800;
-inline constexpr int k921600 = 921600;
-} // namespace baud
 
 } // namespace cpp_core

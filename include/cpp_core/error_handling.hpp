@@ -12,7 +12,7 @@ namespace cpp_core
 
 // Concepts
 
-/// Matches any callable that can receive (int, const char*).
+// Matches any callable that can receive (int, const char*).
 // clang-format off
 template <typename F>
 concept ErrorCallback = std::is_null_pointer_v<std::remove_cvref_t<F>>
@@ -22,17 +22,17 @@ concept ErrorCallback = std::is_null_pointer_v<std::remove_cvref_t<F>>
     };
 // clang-format on
 
-/// Matches anything implicitly convertible to a C-style function pointer (ErrorCallbackT).
+// Matches anything implicitly convertible to a C-style function pointer (ErrorCallbackT).
 template <typename F>
 concept LegacyErrorCallback = std::is_convertible_v<F, void (*)(int, const char *)>;
 
-/// Matches any type whose value can be returned as a status/result code.
+// Matches any type whose value can be returned as a status/result code.
 template <typename T>
 concept StatusConvertible = std::is_arithmetic_v<T> && requires(StatusCodes code) { static_cast<T>(code); };
 
 // Error invocation
 
-/// Safely invoke an error callback, does nothing if callback is nullptr.
+// Safely invoke an error callback, does nothing if callback is nullptr.
 template <ErrorCallback Callback>
 constexpr auto invokeError(Callback &&callback, StatusCodes code, std::string_view message) noexcept -> void
 {
@@ -55,7 +55,7 @@ constexpr auto invokeError(Callback &&callback, StatusCodes code, std::string_vi
 
 // Fail helpers (concept-constrained)
 
-/// Report failure through callback and return the status code cast to Ret.
+// Report failure through callback and return the status code cast to Ret.
 template <StatusConvertible Ret, ErrorCallback Callback>
 constexpr auto failMsg(Callback &&callback, StatusCodes code, std::string_view message) -> Ret
 {
@@ -63,7 +63,7 @@ constexpr auto failMsg(Callback &&callback, StatusCodes code, std::string_view m
     return static_cast<Ret>(code);
 }
 
-/// Overload that builds the message by concatenating a prefix and a detail string.
+// Overload that builds the message by concatenating a prefix and a detail string.
 template <StatusConvertible Ret, ErrorCallback Callback>
 auto failMsg(Callback &&callback, StatusCodes code, std::string_view prefix, std::string_view detail) -> Ret
 {
@@ -78,14 +78,14 @@ auto failMsg(Callback &&callback, StatusCodes code, std::string_view prefix, std
 
 // Pipe-style error chaining
 
-/// Chain operations that return a status-code integer.
-/// Stops at the first non-success result and returns it.
-///
-///   auto result = chainStatus(
-///       [&] { return configureBaudrate(h, 9600); },
-///       [&] { return configureParity(h, 0); },
-///       [&] { return configureStopBits(h, 1); }
-///   );
+// Chain operations that return a status-code integer.
+// Stops at the first non-success result and returns it.
+//
+//   auto result = chainStatus(
+//       [&] { return configureBaudrate(h, 9600); },
+//       [&] { return configureParity(h, 0); },
+//       [&] { return configureStopBits(h, 1); }
+//   );
 template <std::invocable... Fns>
 requires(std::is_convertible_v<std::invoke_result_t<Fns>, int> && ...)
 constexpr auto chainStatus(Fns &&...fns) -> int

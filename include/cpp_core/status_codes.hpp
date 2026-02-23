@@ -56,8 +56,8 @@ namespace cpp_core
     return code == StatusCodes::kSuccess;
 }
 
-/// Convert a raw int (as returned by C API functions) back to a StatusCodes.
-/// Returns kSuccess for any non-negative value.
+// Convert a raw int (as returned by C API functions) back to a StatusCodes.
+// Returns kSuccess for any non-negative value.
 [[nodiscard]] constexpr auto fromInt(int value) noexcept -> StatusCodes
 {
     if (value >= 0)

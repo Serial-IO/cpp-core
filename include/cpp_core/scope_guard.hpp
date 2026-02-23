@@ -10,12 +10,12 @@ namespace cpp_core
 
 // Core ScopeGuard
 
-/// RAII scope guard that invokes a callable on destruction.
-/// Supports dismiss() to cancel the action.
-///
-///   auto guard = ScopeGuard([&] { cleanup(); });
-///   // ... if everything succeeds ...
-///   guard.dismiss();
+// RAII scope guard that invokes a callable on destruction.
+// Supports dismiss() to cancel the action.
+//
+//   auto guard = ScopeGuard([&] { cleanup(); });
+//   // ... if everything succeeds ...
+//   guard.dismiss();
 template <std::invocable Fn> class [[nodiscard]] ScopeGuard
 {
   public:
@@ -66,7 +66,7 @@ template <std::invocable Fn> [[nodiscard]] constexpr auto onScopeExit(Fn &&func)
     return ScopeGuard<std::remove_cvref_t<Fn>>(std::forward<Fn>(func));
 }
 
-/// Runs only when the scope exits via an exception.
+// Runs only when the scope exits via an exception.
 template <std::invocable Fn> class [[nodiscard]] ScopeFail
 {
   public:
@@ -100,7 +100,7 @@ template <std::invocable Fn> [[nodiscard]] constexpr auto onScopeFail(Fn &&func)
     return ScopeFail<std::remove_cvref_t<Fn>>(std::forward<Fn>(func));
 }
 
-/// Runs only when the scope exits normally (no exception).
+// Runs only when the scope exits normally (no exception).
 template <std::invocable Fn> class [[nodiscard]] ScopeSuccess
 {
   public:

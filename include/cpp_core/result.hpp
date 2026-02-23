@@ -12,7 +12,7 @@
 namespace cpp_core
 {
 
-/// Enriched error type carrying a StatusCode and an optional message.
+// Enriched error type carrying a StatusCode and an optional message.
 struct Error
 {
     StatusCodes code;
@@ -42,15 +42,15 @@ struct Error
     }
 };
 
-/// Monadic result type: either a value T or a cpp_core::Error.
-/// Wraps std::expected with ergonomic helpers tuned for this library.
-///
-///   auto result = openPort()
-///       .transform([](auto h) { return h.fd(); })
-///       .or_else([](Error e) -> Result<int> { log(e); return std::unexpected(e); });
+// Monadic result type: either a value T or a cpp_core::Error.
+// Wraps std::expected with ergonomic helpers tuned for this library.
+//
+//   auto result = openPort()
+//       .transform([](auto h) { return h.fd(); })
+//       .or_else([](Error e) -> Result<int> { log(e); return std::unexpected(e); });
 template <typename T> using Result = std::expected<T, Error>;
 
-/// Convenience alias for void results (operations that only fail or succeed).
+// Convenience alias for void results (operations that only fail or succeed).
 using Status = Result<void>;
 
 // Factory helpers
