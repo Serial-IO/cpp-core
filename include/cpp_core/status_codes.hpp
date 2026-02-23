@@ -55,8 +55,10 @@ namespace cpp_core
     return code == StatusCodes::kSuccess;
 }
 
-// Convert a raw int (as returned by C API functions) back to a StatusCodes.
-// Returns kSuccess for any non-negative value.
+/**
+ * Convert a raw int (as returned by C API functions) back to a StatusCodes.
+ * Returns kSuccess for any non-negative value.
+ */
 [[nodiscard]] constexpr auto fromInt(int value) noexcept -> StatusCodes
 {
     if (value >= 0)
@@ -69,8 +71,10 @@ namespace cpp_core
 } // namespace cpp_core
 
 // std::format support
-// Enables: std::format("Port open failed: {}", StatusCodes::kNotFoundError)
-//      =>  "Port open failed: NotFoundError (-9)"
+/**
+ * Enables: std::format("Port open failed: {}", StatusCodes::kNotFoundError)
+ *      =>  "Port open failed: NotFoundError (-9)"
+ */
 template <> struct std::formatter<cpp_core::StatusCodes> : std::formatter<std::string_view>
 {
     auto format(cpp_core::StatusCodes code, auto &ctx) const

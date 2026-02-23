@@ -78,14 +78,15 @@ auto failMsg(Callback &&callback, StatusCodes code, std::string_view prefix, std
 
 // Pipe-style error chaining
 
-// Chain operations that return a status-code integer.
-// Stops at the first non-success result and returns it.
-//
-//   auto result = chainStatus(
-//       [&] { return configureBaudrate(h, 9600); },
-//       [&] { return configureParity(h, 0); },
-//       [&] { return configureStopBits(h, 1); }
-//   );
+/**
+ * Chain operations that return a status-code integer.
+ * Stops at the first non-success result and returns it.
+ *   auto result = chainStatus(
+ *       [&] { return configureBaudrate(h, 9600); },
+ *       [&] { return configureParity(h, 0); },
+ *       [&] { return configureStopBits(h, 1); }
+ *   );
+ */
 template <std::invocable... Fns>
 requires(std::is_convertible_v<std::invoke_result_t<Fns>, int> && ...)
 constexpr auto chainStatus(Fns &&...fns) -> int

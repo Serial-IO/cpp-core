@@ -42,12 +42,13 @@ struct Error
     }
 };
 
-// Monadic result type: either a value T or a cpp_core::Error.
-// Wraps std::expected with ergonomic helpers tuned for this library.
-//
-//   auto result = openPort()
-//       .transform([](auto h) { return h.fd(); })
-//       .or_else([](Error e) -> Result<int> { log(e); return std::unexpected(e); });
+/**
+ * Monadic result type: either a value T or a cpp_core::Error.
+ * Wraps std::expected with ergonomic helpers tuned for this library.
+ *   auto result = openPort()
+ *       .transform([](auto h) { return h.fd(); })
+ *       .or_else([](Error e) -> Result<int> { log(e); return std::unexpected(e); });
+ */
 template <typename T> using Result = std::expected<T, Error>;
 
 // Convenience alias for void results (operations that only fail or succeed).
@@ -85,9 +86,11 @@ concept IsResult = requires {
 } && std::same_as<typename R::error_type, Error>;
 // clang-format on
 
-// TRY macro
-// Usage:  auto value = CPP_CORE_TRY(someResultReturningCall());
-// Propagates the error automatically if the result holds an error.
+/**
+ * TRY macro
+ * Usage:  auto value = CPP_CORE_TRY(someResultReturningCall());
+ * Propagates the error automatically if the result holds an error.
+ */
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 #define CPP_CORE_TRY(expr)                                                                                             \
@@ -107,9 +110,11 @@ concept IsResult = requires {
     } while (false)
 // NOLINTEND(cppcoreguidelines-macro-usage)
 
-// Result -> C return code bridge
-// Converts a Result<int>/Status back into the C API convention (negative = error)
-// and optionally invokes the legacy ErrorCallbackT.
+/**
+ * Result -> C return code bridge
+ * Converts a Result<int>/Status back into the C API convention (negative = error)
+ * and optionally invokes the legacy ErrorCallbackT.
+ */
 template <typename T, typename Callback>
 requires std::is_arithmetic_v<T>
 constexpr auto toCResult(const Result<T> &result, Callback error_callback) -> T

@@ -10,12 +10,13 @@ namespace cpp_core
 
 // Core ScopeGuard
 
-// RAII scope guard that invokes a callable on destruction.
-// Supports dismiss() to cancel the action.
-//
-//   auto guard = ScopeGuard([&] { cleanup(); });
-//   // ... if everything succeeds ...
-//   guard.dismiss();
+/**
+ * RAII scope guard that invokes a callable on destruction.
+ * Supports dismiss() to cancel the action.
+ *   auto guard = ScopeGuard([&] { cleanup(); });
+ *   // ... if everything succeeds ...
+ *   guard.dismiss();
+ */
 template <std::invocable Fn> class [[nodiscard]] ScopeGuard
 {
   public:

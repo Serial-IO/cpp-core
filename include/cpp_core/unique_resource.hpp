@@ -7,19 +7,20 @@
 namespace cpp_core
 {
 
-// Trait contract for UniqueResource. Specialize this for your platform handle.
-//
-// Required members:
-//   using handle_type = ...;
-//   static constexpr handle_type invalid() noexcept;
-//   static void close(handle_type h) noexcept;
-//
-// Example (POSIX):
-//   template<> struct ResourceTraits<int> {
-//       using handle_type = int;
-//       static constexpr handle_type invalid() noexcept { return -1; }
-//       static void close(handle_type h) noexcept { ::close(h); }
-//   };
+/**
+ * Trait contract for UniqueResource. Specialize this for your platform handle.
+ * Required members:
+ *   using handle_type = ...;
+ *   static constexpr handle_type invalid() noexcept;
+ *   static void close(handle_type h) noexcept;
+ *
+ * Example (POSIX):
+ *   template<> struct ResourceTraits<int> {
+ *       using handle_type = int;
+ *       static constexpr handle_type invalid() noexcept { return -1; }
+ *       static void close(handle_type h) noexcept { ::close(h); }
+ *   };
+ */
 template <typename T> struct ResourceTraits;
 
 // clang-format off
@@ -33,11 +34,12 @@ concept ResourceTraitSpec = requires {
   && std::equality_comparable<typename T::handle_type>;
 // clang-format on
 
-// Generic RAII wrapper parameterized by a traits type.
-// Drop-in replacement for UniqueFd / UniqueHandle with zero overhead.
-//
-//   using UniqueFd     = UniqueResource<PosixFdTraits>;
-//   using UniqueHandle = UniqueResource<Win32HandleTraits>;
+/**
+ * Generic RAII wrapper parameterized by a traits type.
+ * Drop-in replacement for UniqueFd / UniqueHandle with zero overhead.
+ *   using UniqueFd     = UniqueResource<PosixFdTraits>;
+ *   using UniqueHandle = UniqueResource<Win32HandleTraits>;
+ */
 template <ResourceTraitSpec Traits> class UniqueResource
 {
   public:
