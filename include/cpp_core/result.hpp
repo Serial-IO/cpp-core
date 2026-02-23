@@ -110,7 +110,6 @@ concept IsResult = requires {
 // Result -> C return code bridge
 // Converts a Result<int>/Status back into the C API convention (negative = error)
 // and optionally invokes the legacy ErrorCallbackT.
-
 template <typename T, typename Callback>
 requires std::is_arithmetic_v<T>
 constexpr auto toCResult(const Result<T> &result, Callback error_callback) -> T

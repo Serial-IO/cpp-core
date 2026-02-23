@@ -9,7 +9,6 @@ namespace cpp_core
 {
 
 // constexpr toString
-
 [[nodiscard]] constexpr auto toString(StatusCodes code) noexcept -> std::string_view
 {
     switch (code)
@@ -72,7 +71,6 @@ namespace cpp_core
 // std::format support
 // Enables: std::format("Port open failed: {}", StatusCodes::kNotFoundError)
 //      =>  "Port open failed: NotFoundError (-9)"
-
 template <> struct std::formatter<cpp_core::StatusCodes> : std::formatter<std::string_view>
 {
     auto format(cpp_core::StatusCodes code, auto &ctx) const

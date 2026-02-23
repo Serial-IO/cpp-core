@@ -12,7 +12,6 @@ namespace cpp_core
 // Shared handle validation for both platforms.
 // The C API passes handles as int64_t; internally they must fit into int (Linux fd)
 // or intptr_t (Windows HANDLE). This helper checks the common constraints.
-
 template <StatusConvertible Ret, ErrorCallback Callback>
 constexpr auto validateHandle(int64_t handle, Callback &&error_callback) -> Ret
 {
@@ -25,7 +24,6 @@ constexpr auto validateHandle(int64_t handle, Callback &&error_callback) -> Ret
 
 // Shared parameter validation for serialOpen.
 // Returns kSuccess (0) if all params are valid, or the appropriate negative error code.
-
 template <StatusConvertible Ret, ErrorCallback Callback>
 constexpr auto validateOpenParams(void *port, int baudrate, int data_bits, Callback &&error_callback) -> Ret
 {
@@ -48,7 +46,6 @@ constexpr auto validateOpenParams(void *port, int baudrate, int data_bits, Callb
 }
 
 // Validate buffer + size for read/write calls.
-
 template <StatusConvertible Ret, ErrorCallback Callback>
 constexpr auto validateBuffer(const void *buffer, int buffer_size, Callback &&error_callback) -> Ret
 {
@@ -61,7 +58,6 @@ constexpr auto validateBuffer(const void *buffer, int buffer_size, Callback &&er
 }
 
 // Clamp timeout to non-negative.
-
 constexpr auto clampTimeout(int timeout_ms) -> int
 {
     return timeout_ms < 0 ? 0 : timeout_ms;
