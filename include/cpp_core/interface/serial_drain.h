@@ -12,7 +12,7 @@ extern "C"
      * @brief Wait until the operating-system driver has physically sent every queued byte.
      *
      * The function blocks the *calling thread* until the device driver reports
-     * that the transmit FIFO is **empty** – i.e. all bytes handed to previous
+     * that the transmit FIFO is **empty** - i.e. all bytes handed to previous
      * `serialWrite*` calls have been shifted out on the wire.  It does *not*
      * flush higher-level protocol buffers you may have implemented yourself.
      *

@@ -1,0 +1,11 @@
+# clangd configuration for cpp-core (C++23)
+# CMake generates compile_commands.json; the project copies it to the repo root
+# via the copy-compile-commands target. Run: cmake -B build && cmake --build build
+# clangd automatically uses compile_commands.json in the project root when present.
+
+CompileFlags:
+  Add:
+    - -std=c++23
+    - -Wno-c++98-compat-pedantic
+    - -Wno-pre-c++20-compat-pedantic
+    - -Wno-switch-default
