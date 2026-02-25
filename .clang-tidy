@@ -16,7 +16,9 @@ Checks:          '*,
                   -boost-use-ranges,
                   -google-objc-function-naming,
                   -google-objc-global-variable-declaration,
-                  -performance-enum-size'
+                  -performance-enum-size,
+                  -llvm-header-guard,
+                  -portability-avoid-pragma-once'
 WarningsAsErrors: ''
 HeaderFilterRegex: '^(?!magic_enum).*$'
 FormatStyle:     Microsoft

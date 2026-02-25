@@ -19,7 +19,7 @@ Header-only API definition library for cross-platform serial communication. Defi
 
 ## Requirements
 
-* CMake ≥ 3.30
+* CMake >= 3.30
 * A C++23 compatible compiler (GCC 13+, Clang 16+, MSVC 2022+)
 * Git (for automatic version detection)
 

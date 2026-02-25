@@ -12,7 +12,7 @@ extern "C"
      * @brief Close a previously opened serial port.
      *
      * The handle becomes invalid after the call. Passing an already invalid
-     * (≤ 0) handle is a no-op.
+     * (<= 0) handle is a no-op.
      *
      * @param handle Handle obtained from serialOpen().
      * @param error_callback [optional] Callback to invoke on error. Defined in error_callback.h. Default is `nullptr`.
