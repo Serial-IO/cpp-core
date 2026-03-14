@@ -25,3 +25,20 @@
 #include "interface/serial_set_read_callback.h"
 #include "interface/serial_set_write_callback.h"
 #include "interface/serial_write.h"
+
+// Modem line control
+#include "interface/serial_set_dtr.h"
+#include "interface/serial_set_rts.h"
+#include "interface/serial_get_cts.h"
+#include "interface/serial_get_dsr.h"
+#include "interface/serial_get_dcd.h"
+#include "interface/serial_get_ri.h"
+
+// Extended configuration
+#include "interface/serial_set_flow_control.h"
+#include "interface/serial_send_break.h"
+#include "interface/serial_update_baudrate.h"
+#include "interface/serial_get_config.h"
+
+// Port discovery
+#include "interface/serial_monitor_ports.h"
