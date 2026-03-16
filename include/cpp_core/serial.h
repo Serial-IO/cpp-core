@@ -34,11 +34,22 @@
 #include "interface/serial_get_dcd.h"
 #include "interface/serial_get_ri.h"
 
-// Extended configuration
+// Line-setting getters
+#include "interface/serial_get_baudrate.h"
+#include "interface/serial_get_data_bits.h"
+#include "interface/serial_get_parity.h"
+#include "interface/serial_get_stop_bits.h"
+#include "interface/serial_get_flow_control.h"
+
+// Line-setting setters
+#include "interface/serial_set_baudrate.h"
+#include "interface/serial_set_data_bits.h"
+#include "interface/serial_set_parity.h"
+#include "interface/serial_set_stop_bits.h"
 #include "interface/serial_set_flow_control.h"
+
+// Extended control
 #include "interface/serial_send_break.h"
-#include "interface/serial_update_baudrate.h"
-#include "interface/serial_get_config.h"
 
 // Port discovery
 #include "interface/serial_monitor_ports.h"

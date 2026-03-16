@@ -23,8 +23,10 @@ enum class StatusCodes
     kGetModemStatusError = -16,
     kSendBreakError = -17,
     kSetFlowControlError = -18,
-    kUpdateBaudrateError = -19,
-    kGetConfigError = -20,
+    kSetBaudrateError = -19,
+    kSetDataBitsError = -20,
+    kSetParityError = -22,
+    kSetStopBitsError = -23,
     kMonitorError = -21,
 };
 } // namespace cpp_core

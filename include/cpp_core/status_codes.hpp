@@ -51,10 +51,14 @@ namespace cpp_core
         return "SendBreakError";
     case StatusCodes::kSetFlowControlError:
         return "SetFlowControlError";
-    case StatusCodes::kUpdateBaudrateError:
-        return "UpdateBaudrateError";
-    case StatusCodes::kGetConfigError:
-        return "GetConfigError";
+    case StatusCodes::kSetBaudrateError:
+        return "SetBaudrateError";
+    case StatusCodes::kSetDataBitsError:
+        return "SetDataBitsError";
+    case StatusCodes::kSetParityError:
+        return "SetParityError";
+    case StatusCodes::kSetStopBitsError:
+        return "SetStopBitsError";
     case StatusCodes::kMonitorError:
         return "MonitorError";
     }
