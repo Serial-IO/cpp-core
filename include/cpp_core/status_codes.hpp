@@ -59,8 +59,6 @@ namespace cpp_core
         return "SetParityError";
     case StatusCodes::kSetStopBitsError:
         return "SetStopBitsError";
-    case StatusCodes::kMonitorError:
-        return "MonitorError";
     }
     return "Unknown";
 }

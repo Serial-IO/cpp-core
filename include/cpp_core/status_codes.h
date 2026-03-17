@@ -25,7 +25,6 @@ enum class StatusCodes
     kSetFlowControlError = -18,
     kSetBaudrateError = -19,
     kSetDataBitsError = -20,
-    kMonitorError = -21,
     kSetParityError = -22,
     kSetStopBitsError = -23,
 };

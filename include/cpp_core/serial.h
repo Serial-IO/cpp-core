@@ -50,6 +50,3 @@
 
 // Extended control
 #include "interface/serial_send_break.h"
-
-// Port discovery
-#include "interface/serial_monitor_ports.h"
