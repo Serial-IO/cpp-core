@@ -4,9 +4,11 @@
 #include <cstdint>
 #include <type_traits>
 
-namespace cpp_core
+namespace cpp_core::status_codes
 {
 
+namespace detail
+{
 using ValueType = std::int64_t;
 
 template <ValueType Category> struct CategoryBase
@@ -29,12 +31,13 @@ template <ValueType Category> struct CategoryBase
   public:
     static constexpr auto kCategoryCode = Category;
 };
+} // namespace detail
 
 struct StatusCode
 {
-    static constexpr ValueType kSuccess = 0;
+    static constexpr detail::ValueType kSuccess = 0;
 
-    struct Configuration : CategoryBase<1>
+    struct Configuration : detail::CategoryBase<1>
     {
         static constexpr GenCode<0> kSetBaudrateError;
         static constexpr GenCode<1> kSetDataBitsError;
@@ -44,14 +47,14 @@ struct StatusCode
         static constexpr GenCode<5> kSetTimeoutError;
     };
 
-    struct Connection : CategoryBase<2>
+    struct Connection : detail::CategoryBase<2>
     {
         static constexpr GenCode<0> kNotFoundError;
         static constexpr GenCode<1> kInvalidHandleError;
         static constexpr GenCode<2> kCloseHandleError;
     };
 
-    struct Io : CategoryBase<3>
+    struct Io : detail::CategoryBase<3>
     {
         static constexpr GenCode<0> kReadError;
         static constexpr GenCode<1> kWriteError;
@@ -62,7 +65,7 @@ struct StatusCode
         static constexpr GenCode<6> kClearBufferOutError;
     };
 
-    struct Control : CategoryBase<4>
+    struct Control : detail::CategoryBase<4>
     {
         static constexpr GenCode<0> kSetDtrError;
         static constexpr GenCode<1> kSetRtsError;
@@ -72,11 +75,16 @@ struct StatusCode
         static constexpr GenCode<5> kSetStateError;
     };
 
-    struct Monitor : CategoryBase<5>
+    struct Monitor : detail::CategoryBase<5>
     {
         static constexpr GenCode<0> kMonitorError;
     };
 };
 
-using StatusCodes = ValueType;
+} // namespace cpp_core::status_codes
+
+namespace cpp_core
+{
+using StatusCodes = ::cpp_core::status_codes::detail::ValueType;
+using StatusCode = ::cpp_core::status_codes::StatusCode;
 } // namespace cpp_core
