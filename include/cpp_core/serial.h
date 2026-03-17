@@ -25,3 +25,6 @@
 #include "interface/serial_set_read_callback.h"
 #include "interface/serial_set_write_callback.h"
 #include "interface/serial_write.h"
+
+// Port discovery
+#include "interface/serial_monitor_ports.h"

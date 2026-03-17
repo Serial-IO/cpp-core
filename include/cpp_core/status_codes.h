@@ -18,5 +18,6 @@ enum class StatusCodes
     kClearBufferOutError = -11,
     kAbortReadError = -12,
     kAbortWriteError = -13,
+    kMonitorError = -14,
 };
 } // namespace cpp_core
