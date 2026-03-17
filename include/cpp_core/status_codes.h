@@ -20,6 +20,10 @@ template <ValueType Category> struct CategoryBase
     template <ValueType Code> struct GenCode
     {
         static constexpr ValueType kValue = -((Category * kCategoryMultiplier) + Code);
+        constexpr explicit operator ValueType() const noexcept
+        {
+            return kValue;
+        }
     };
 
   public:
@@ -32,45 +36,45 @@ struct StatusCode
 
     struct Configuration : CategoryBase<1>
     {
-        static constexpr ValueType kSetBaudrateError = GenCode<0>::kValue;
-        static constexpr ValueType kSetDataBitsError = GenCode<1>::kValue;
-        static constexpr ValueType kSetParityError = GenCode<2>::kValue;
-        static constexpr ValueType kSetStopBitsError = GenCode<3>::kValue;
-        static constexpr ValueType kSetFlowControlError = GenCode<4>::kValue;
-        static constexpr ValueType kSetTimeoutError = GenCode<5>::kValue;
+        static constexpr GenCode<0> kSetBaudrateError;
+        static constexpr GenCode<1> kSetDataBitsError;
+        static constexpr GenCode<2> kSetParityError;
+        static constexpr GenCode<3> kSetStopBitsError;
+        static constexpr GenCode<4> kSetFlowControlError;
+        static constexpr GenCode<5> kSetTimeoutError;
     };
 
     struct Connection : CategoryBase<2>
     {
-        static constexpr ValueType kNotFoundError = GenCode<0>::kValue;
-        static constexpr ValueType kInvalidHandleError = GenCode<1>::kValue;
-        static constexpr ValueType kCloseHandleError = GenCode<2>::kValue;
+        static constexpr GenCode<0> kNotFoundError;
+        static constexpr GenCode<1> kInvalidHandleError;
+        static constexpr GenCode<2> kCloseHandleError;
     };
 
     struct Io : CategoryBase<3>
     {
-        static constexpr ValueType kReadError = GenCode<0>::kValue;
-        static constexpr ValueType kWriteError = GenCode<1>::kValue;
-        static constexpr ValueType kAbortReadError = GenCode<2>::kValue;
-        static constexpr ValueType kAbortWriteError = GenCode<3>::kValue;
-        static constexpr ValueType kBufferError = GenCode<4>::kValue;
-        static constexpr ValueType kClearBufferInError = GenCode<5>::kValue;
-        static constexpr ValueType kClearBufferOutError = GenCode<6>::kValue;
+        static constexpr GenCode<0> kReadError;
+        static constexpr GenCode<1> kWriteError;
+        static constexpr GenCode<2> kAbortReadError;
+        static constexpr GenCode<3> kAbortWriteError;
+        static constexpr GenCode<4> kBufferError;
+        static constexpr GenCode<5> kClearBufferInError;
+        static constexpr GenCode<6> kClearBufferOutError;
     };
 
     struct Control : CategoryBase<4>
     {
-        static constexpr ValueType kSetDtrError = GenCode<0>::kValue;
-        static constexpr ValueType kSetRtsError = GenCode<1>::kValue;
-        static constexpr ValueType kGetModemStatusError = GenCode<2>::kValue;
-        static constexpr ValueType kSendBreakError = GenCode<3>::kValue;
-        static constexpr ValueType kGetStateError = GenCode<4>::kValue;
-        static constexpr ValueType kSetStateError = GenCode<5>::kValue;
+        static constexpr GenCode<0> kSetDtrError;
+        static constexpr GenCode<1> kSetRtsError;
+        static constexpr GenCode<2> kGetModemStatusError;
+        static constexpr GenCode<3> kSendBreakError;
+        static constexpr GenCode<4> kGetStateError;
+        static constexpr GenCode<5> kSetStateError;
     };
 
     struct Monitor : CategoryBase<5>
     {
-        static constexpr ValueType kMonitorError = GenCode<0>::kValue;
+        static constexpr GenCode<0> kMonitorError;
     };
 };
 
