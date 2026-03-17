@@ -41,6 +41,8 @@ namespace cpp_core
         return "AbortReadError";
     case StatusCodes::kAbortWriteError:
         return "AbortWriteError";
+    case StatusCodes::kMonitorError:
+        return "MonitorError";
     }
     return "Unknown";
 }
