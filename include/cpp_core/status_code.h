@@ -48,20 +48,6 @@ template <typename Derived> struct CategoryBase
     friend Derived;
 };
 
-[[nodiscard]] constexpr auto isError(ValueType code) noexcept -> bool
-{
-    return code < 0;
-}
-[[nodiscard]] constexpr auto isSuccess(ValueType code) noexcept -> bool
-{
-    return code >= 0;
-}
-
-template <typename Category> [[nodiscard]] constexpr auto belongsTo(ValueType code) noexcept -> bool
-{
-    return code < 0 && (-code) / kCategoryMultiplier == Category::kCategoryCode;
-}
-
 } // namespace detail
 
 // Helper Macro
@@ -145,11 +131,24 @@ struct StatusCode
     CPP_CORE_CODE(kGetStateError);
     CPP_CORE_CODE(kSetStateError);
     CPP_CORE_STATUS_CATEGORY_END();
+
+    [[nodiscard]] static constexpr auto isError(detail::ValueType code) noexcept -> bool
+    {
+        return code < 0;
+    }
+    [[nodiscard]] static constexpr auto isSuccess(detail::ValueType code) noexcept -> bool
+    {
+        return code >= 0;
+    }
+    template <typename Category> [[nodiscard]] static constexpr auto belongsTo(detail::ValueType code) noexcept -> bool
+    {
+        return code < 0 && (-code) / detail::kCategoryMultiplier == Category::kCategoryCode;
+    }
 };
 
 } // namespace cpp_core::status_codes
 
 namespace cpp_core
 {
-using StatusCode = ::cpp_core::status_codes::StatusCode;
+using ::cpp_core::status_codes::StatusCode;
 } // namespace cpp_core
