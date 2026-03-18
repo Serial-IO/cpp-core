@@ -41,6 +41,24 @@ namespace cpp_core
         return "AbortReadError";
     case StatusCodes::kAbortWriteError:
         return "AbortWriteError";
+    case StatusCodes::kSetDtrError:
+        return "SetDtrError";
+    case StatusCodes::kSetRtsError:
+        return "SetRtsError";
+    case StatusCodes::kGetModemStatusError:
+        return "GetModemStatusError";
+    case StatusCodes::kSendBreakError:
+        return "SendBreakError";
+    case StatusCodes::kSetFlowControlError:
+        return "SetFlowControlError";
+    case StatusCodes::kSetBaudrateError:
+        return "SetBaudrateError";
+    case StatusCodes::kSetDataBitsError:
+        return "SetDataBitsError";
+    case StatusCodes::kSetParityError:
+        return "SetParityError";
+    case StatusCodes::kSetStopBitsError:
+        return "SetStopBitsError";
     }
     return "Unknown";
 }
