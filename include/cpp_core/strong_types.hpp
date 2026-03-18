@@ -59,4 +59,11 @@ enum class StopBits : int
     kTwo = 2,
 };
 
+enum class FlowControl : int
+{
+    kNone = 0,
+    kRtsCts = 1,
+    kXonXoff = 2,
+};
+
 } // namespace cpp_core
