@@ -74,11 +74,6 @@ struct StatusCode
         static constexpr GenCode<4> kGetStateError;
         static constexpr GenCode<5> kSetStateError;
     };
-
-    struct Monitor : detail::CategoryBase<5>
-    {
-        static constexpr GenCode<0> kMonitorError;
-    };
 };
 
 } // namespace cpp_core::status_codes
