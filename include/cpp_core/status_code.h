@@ -2,6 +2,7 @@
 
 #include <concepts>
 #include <cstdint>
+#include <string_view>
 #include <type_traits>
 
 namespace cpp_core::status_codes
@@ -9,82 +10,146 @@ namespace cpp_core::status_codes
 
 namespace detail
 {
+
 using ValueType = std::int64_t;
+
+inline constexpr ValueType kCategoryMultiplier{100};
+
+template <ValueType NumericValue> struct Code
+{
+    static constexpr ValueType kValue = NumericValue;
+
+    // NOLINTNEXTLINE(google-explicit-constructor, hicpp-explicit-conversions)
+    constexpr operator ValueType() const noexcept
+    {
+        return kValue;
+    }
+    [[nodiscard]] constexpr auto value() const noexcept -> ValueType
+    {
+        return kValue;
+    }
+};
 
 template <typename Derived> struct CategoryBase
 {
   private:
     constexpr CategoryBase() = default;
 
-    static constexpr ValueType kCategoryMultiplier{100};
-
-    template <ValueType Code> struct GenCode
+  protected:
+    template <ValueType LocalCode> static consteval auto computeValue() -> ValueType
     {
-        static constexpr ValueType kValue = -((Derived::kCategoryCode * kCategoryMultiplier) + Code);
-        constexpr explicit operator ValueType() const noexcept
-        {
-            return kValue;
-        }
-    };
+        static_assert(LocalCode >= 0, "Code index must not be negative");
+        static_assert(LocalCode < kCategoryMultiplier, "Category overflow (max 99 codes)");
+        return -((Derived::kCategoryCode * kCategoryMultiplier) + LocalCode);
+    }
+
+    template <ValueType LocalCode> using GenCode = Code<computeValue<LocalCode>()>;
+
     friend Derived;
 };
+
+[[nodiscard]] constexpr auto isError(ValueType code) noexcept -> bool
+{
+    return code < 0;
+}
+[[nodiscard]] constexpr auto isSuccess(ValueType code) noexcept -> bool
+{
+    return code >= 0;
+}
+
+template <typename Category> [[nodiscard]] constexpr auto belongsTo(ValueType code) noexcept -> bool
+{
+    return code < 0 && (-code) / kCategoryMultiplier == Category::kCategoryCode;
+}
+
 } // namespace detail
+
+// Helper Macro
+//
+//  CPP_CORE_STATUS_CATEGORY(Name, Id)   opens a category struct
+//  CPP_CORE_CODE(name)                  declares an auto-numbered code
+//  CPP_CORE_STATUS_CATEGORY_END()       closes the category
+//
+//  Each code carries:
+//    .value()     / compile-time numeric value
+//    .name()      / "kSomethingError"
+//    .category()  / "CategoryName"
+//  and converts implicitly to ValueType (no static_cast needed).
+
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+
+#define CPP_CORE_STATUS_CATEGORY(Name, CategoryId)                                                                     \
+    struct Name : ::cpp_core::status_codes::detail::CategoryBase<Name>                                                 \
+    {                                                                                                                  \
+        static constexpr ::cpp_core::status_codes::detail::ValueType kCategoryCode = CategoryId;                       \
+        static constexpr std::string_view kCategoryName{#Name};                                                        \
+                                                                                                                       \
+      private:                                                                                                         \
+        static constexpr int kCounterBase_ = __COUNTER__;                                                              \
+                                                                                                                       \
+      public:
+
+// NOLINTNEXTLINE(bugprone-macro-parentheses)
+#define CPP_CORE_CODE(code_name)                                                                                       \
+    static constexpr struct code_name##_t                                                                              \
+        : GenCode<__COUNTER__ - kCounterBase_ - 1>{[[nodiscard]] constexpr auto name() const noexcept                  \
+                                                   -> std::string_view{return #code_name;                              \
+    }                                                                                                                  \
+    [[nodiscard]] constexpr auto category() const noexcept -> std::string_view                                         \
+    {                                                                                                                  \
+        return kCategoryName;                                                                                          \
+    }                                                                                                                  \
+    }                                                                                                                  \
+    (code_name)                                                                                                        \
+    {                                                                                                                  \
+    }
+
+#define CPP_CORE_STATUS_CATEGORY_END() }
+
+// NOLINTEND(cppcoreguidelines-macro-usage)
 
 struct StatusCode
 {
     static constexpr detail::ValueType kSuccess = 0;
 
-    struct Configuration : detail::CategoryBase<Configuration>
-    {
-        static constexpr auto kCategoryCode{1};
+    CPP_CORE_STATUS_CATEGORY(Configuration, 1);
+    CPP_CORE_CODE(kSetBaudrateError);
+    CPP_CORE_CODE(kSetDataBitsError);
+    CPP_CORE_CODE(kSetParityError);
+    CPP_CORE_CODE(kSetStopBitsError);
+    CPP_CORE_CODE(kSetFlowControlError);
+    CPP_CORE_CODE(kSetTimeoutError);
+    CPP_CORE_STATUS_CATEGORY_END();
 
-        static constexpr GenCode<0> kSetBaudrateError;
-        static constexpr GenCode<1> kSetDataBitsError;
-        static constexpr GenCode<2> kSetParityError;
-        static constexpr GenCode<3> kSetStopBitsError;
-        static constexpr GenCode<4> kSetFlowControlError;
-        static constexpr GenCode<5> kSetTimeoutError;
-    };
+    CPP_CORE_STATUS_CATEGORY(Connection, 2);
+    CPP_CORE_CODE(kNotFoundError);
+    CPP_CORE_CODE(kInvalidHandleError);
+    CPP_CORE_CODE(kCloseHandleError);
+    CPP_CORE_STATUS_CATEGORY_END();
 
-    struct Connection : detail::CategoryBase<Connection>
-    {
-        static constexpr auto kCategoryCode{2};
+    CPP_CORE_STATUS_CATEGORY(Io, 3);
+    CPP_CORE_CODE(kReadError);
+    CPP_CORE_CODE(kWriteError);
+    CPP_CORE_CODE(kAbortReadError);
+    CPP_CORE_CODE(kAbortWriteError);
+    CPP_CORE_CODE(kBufferError);
+    CPP_CORE_CODE(kClearBufferInError);
+    CPP_CORE_CODE(kClearBufferOutError);
+    CPP_CORE_STATUS_CATEGORY_END();
 
-        static constexpr GenCode<0> kNotFoundError;
-        static constexpr GenCode<1> kInvalidHandleError;
-        static constexpr GenCode<2> kCloseHandleError;
-    };
-
-    struct Io : detail::CategoryBase<Io>
-    {
-        static constexpr auto kCategoryCode{3};
-
-        static constexpr GenCode<0> kReadError;
-        static constexpr GenCode<1> kWriteError;
-        static constexpr GenCode<2> kAbortReadError;
-        static constexpr GenCode<3> kAbortWriteError;
-        static constexpr GenCode<4> kBufferError;
-        static constexpr GenCode<5> kClearBufferInError;
-        static constexpr GenCode<6> kClearBufferOutError;
-    };
-
-    struct Control : detail::CategoryBase<Control>
-    {
-        static constexpr auto kCategoryCode{4};
-
-        static constexpr GenCode<0> kSetDtrError;
-        static constexpr GenCode<1> kSetRtsError;
-        static constexpr GenCode<2> kGetModemStatusError;
-        static constexpr GenCode<3> kSendBreakError;
-        static constexpr GenCode<4> kGetStateError;
-        static constexpr GenCode<5> kSetStateError;
-    };
+    CPP_CORE_STATUS_CATEGORY(Control, 4);
+    CPP_CORE_CODE(kSetDtrError);
+    CPP_CORE_CODE(kSetRtsError);
+    CPP_CORE_CODE(kGetModemStatusError);
+    CPP_CORE_CODE(kSendBreakError);
+    CPP_CORE_CODE(kGetStateError);
+    CPP_CORE_CODE(kSetStateError);
+    CPP_CORE_STATUS_CATEGORY_END();
 };
 
 } // namespace cpp_core::status_codes
 
 namespace cpp_core
 {
-using StatusCodes = ::cpp_core::status_codes::detail::ValueType;
 using StatusCode = ::cpp_core::status_codes::StatusCode;
 } // namespace cpp_core
