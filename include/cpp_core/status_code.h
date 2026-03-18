@@ -16,8 +16,7 @@ template <typename Derived> struct CategoryBase
   private:
     constexpr CategoryBase() = default;
 
-  protected:
-    static constexpr ValueType kCategoryMultiplier = 100;
+    static constexpr ValueType kCategoryMultiplier{100};
 
     template <ValueType Code> struct GenCode
     {
