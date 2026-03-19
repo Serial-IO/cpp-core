@@ -1,9 +1,7 @@
 #pragma once
 
-#include <concepts>
 #include <cstdint>
 #include <string_view>
-#include <type_traits>
 
 namespace cpp_core::status_codes
 {
@@ -15,9 +13,10 @@ using ValueType = std::int64_t;
 
 inline constexpr ValueType kCategoryMultiplier{100};
 
-template <ValueType NumericValue> struct Code
+template <typename Category, ValueType NumericValue> struct Code
 {
     static constexpr ValueType kValue = NumericValue;
+    std::string_view kName; // NOLINT(readability-identifier-naming)
 
     // NOLINTNEXTLINE(google-explicit-constructor, hicpp-explicit-conversions)
     constexpr operator ValueType() const noexcept
@@ -27,6 +26,14 @@ template <ValueType NumericValue> struct Code
     [[nodiscard]] constexpr auto value() const noexcept -> ValueType
     {
         return kValue;
+    }
+    [[nodiscard]] constexpr auto name() const noexcept -> std::string_view
+    {
+        return kName;
+    }
+    [[nodiscard]] constexpr auto category() const noexcept -> std::string_view
+    {
+        return Category::kCategoryName;
     }
 };
 
@@ -43,104 +50,77 @@ template <typename Derived> struct CategoryBase
         return -((Derived::kCategoryCode * kCategoryMultiplier) + LocalCode);
     }
 
-    template <ValueType LocalCode> using GenCode = Code<computeValue<LocalCode>()>;
+    template <ValueType LocalCode> using Code = detail::Code<Derived, computeValue<LocalCode>()>;
 
     friend Derived;
 };
 
 } // namespace detail
 
-// Helper Macro
-//
-//  CPP_CORE_STATUS_CATEGORY(Name, Id)   opens a category struct
-//  CPP_CORE_CODE(name)                  declares an auto-numbered code
-//  CPP_CORE_STATUS_CATEGORY_END()       closes the category
-//
-//  Each code carries:
-//    .value()     / compile-time numeric value
-//    .name()      / "kSomethingError"
-//    .category()  / "CategoryName"
-//  and converts implicitly to ValueType (no static_cast needed).
-
-// NOLINTBEGIN(cppcoreguidelines-macro-usage)
-
-#define CPP_CORE_STATUS_CATEGORY(Name, CategoryId)                                                                     \
-    struct Name : ::cpp_core::status_codes::detail::CategoryBase<Name>                                                 \
-    {                                                                                                                  \
-        static constexpr ::cpp_core::status_codes::detail::ValueType kCategoryCode = CategoryId;                       \
-        static constexpr std::string_view kCategoryName{#Name};                                                        \
-                                                                                                                       \
-      private:                                                                                                         \
-        static constexpr int kCounterBase_ = __COUNTER__;                                                              \
-                                                                                                                       \
-      public:
-
-// NOLINTNEXTLINE(bugprone-macro-parentheses)
-#define CPP_CORE_CODE(code_name)                                                                                       \
-    static constexpr struct code_name##_t                                                                              \
-        : GenCode<__COUNTER__ - kCounterBase_ - 1>{[[nodiscard]] constexpr auto name() const noexcept                  \
-                                                   -> std::string_view{return #code_name;                              \
-    }                                                                                                                  \
-    [[nodiscard]] constexpr auto category() const noexcept -> std::string_view                                         \
-    {                                                                                                                  \
-        return kCategoryName;                                                                                          \
-    }                                                                                                                  \
-    }                                                                                                                  \
-    (code_name)                                                                                                        \
-    {                                                                                                                  \
-    }
-
-#define CPP_CORE_STATUS_CATEGORY_END() }
-
-// NOLINTEND(cppcoreguidelines-macro-usage)
-
 struct StatusCode
 {
-    static constexpr detail::ValueType kSuccess = 0;
+    using ValueType = detail::ValueType;
+    static constexpr ValueType kSuccess = 0;
 
-    CPP_CORE_STATUS_CATEGORY(Configuration, 1);
-    CPP_CORE_CODE(kSetBaudrateError);
-    CPP_CORE_CODE(kSetDataBitsError);
-    CPP_CORE_CODE(kSetParityError);
-    CPP_CORE_CODE(kSetStopBitsError);
-    CPP_CORE_CODE(kSetFlowControlError);
-    CPP_CORE_CODE(kSetTimeoutError);
-    CPP_CORE_STATUS_CATEGORY_END();
+    struct Configuration : detail::CategoryBase<Configuration>
+    {
+        static constexpr ValueType kCategoryCode = 1;
+        static constexpr std::string_view kCategoryName{"Configuration"};
 
-    CPP_CORE_STATUS_CATEGORY(Connection, 2);
-    CPP_CORE_CODE(kNotFoundError);
-    CPP_CORE_CODE(kInvalidHandleError);
-    CPP_CORE_CODE(kCloseHandleError);
-    CPP_CORE_STATUS_CATEGORY_END();
+        static constexpr Code<0> kSetBaudrateError{"SetBaudrateError"};
+        static constexpr Code<1> kSetDataBitsError{"SetDataBitsError"};
+        static constexpr Code<2> kSetParityError{"SetParityError"};
+        static constexpr Code<3> kSetStopBitsError{"SetStopBitsError"};
+        static constexpr Code<4> kSetFlowControlError{"SetFlowControlError"};
+        static constexpr Code<5> kSetTimeoutError{"SetTimeoutError"};
+    };
 
-    CPP_CORE_STATUS_CATEGORY(Io, 3);
-    CPP_CORE_CODE(kReadError);
-    CPP_CORE_CODE(kWriteError);
-    CPP_CORE_CODE(kAbortReadError);
-    CPP_CORE_CODE(kAbortWriteError);
-    CPP_CORE_CODE(kBufferError);
-    CPP_CORE_CODE(kClearBufferInError);
-    CPP_CORE_CODE(kClearBufferOutError);
-    CPP_CORE_STATUS_CATEGORY_END();
+    struct Connection : detail::CategoryBase<Connection>
+    {
+        static constexpr ValueType kCategoryCode = 2;
+        static constexpr std::string_view kCategoryName{"Connection"};
 
-    CPP_CORE_STATUS_CATEGORY(Control, 4);
-    CPP_CORE_CODE(kSetDtrError);
-    CPP_CORE_CODE(kSetRtsError);
-    CPP_CORE_CODE(kGetModemStatusError);
-    CPP_CORE_CODE(kSendBreakError);
-    CPP_CORE_CODE(kGetStateError);
-    CPP_CORE_CODE(kSetStateError);
-    CPP_CORE_STATUS_CATEGORY_END();
+        static constexpr Code<0> kNotFoundError{"NotFoundError"};
+        static constexpr Code<1> kInvalidHandleError{"InvalidHandleError"};
+        static constexpr Code<2> kCloseHandleError{"CloseHandleError"};
+    };
 
-    [[nodiscard]] static constexpr auto isError(detail::ValueType code) noexcept -> bool
+    struct Io : detail::CategoryBase<Io>
+    {
+        static constexpr ValueType kCategoryCode = 3;
+        static constexpr std::string_view kCategoryName{"Io"};
+
+        static constexpr Code<0> kReadError{"ReadError"};
+        static constexpr Code<1> kWriteError{"WriteError"};
+        static constexpr Code<2> kAbortReadError{"AbortReadError"};
+        static constexpr Code<3> kAbortWriteError{"AbortWriteError"};
+        static constexpr Code<4> kBufferError{"BufferError"};
+        static constexpr Code<5> kClearBufferInError{"ClearBufferInError"};
+        static constexpr Code<6> kClearBufferOutError{"ClearBufferOutError"};
+    };
+
+    struct Control : detail::CategoryBase<Control>
+    {
+        static constexpr ValueType kCategoryCode = 4;
+        static constexpr std::string_view kCategoryName{"Control"};
+
+        static constexpr Code<0> kSetDtrError{"SetDtrError"};
+        static constexpr Code<1> kSetRtsError{"SetRtsError"};
+        static constexpr Code<2> kGetModemStatusError{"GetModemStatusError"};
+        static constexpr Code<3> kSendBreakError{"SendBreakError"};
+        static constexpr Code<4> kGetStateError{"GetStateError"};
+        static constexpr Code<5> kSetStateError{"SetStateError"};
+    };
+
+    [[nodiscard]] static constexpr auto isError(ValueType code) noexcept -> bool
     {
         return code < 0;
     }
-    [[nodiscard]] static constexpr auto isSuccess(detail::ValueType code) noexcept -> bool
+    [[nodiscard]] static constexpr auto isSuccess(ValueType code) noexcept -> bool
     {
         return code >= 0;
     }
-    template <typename Category> [[nodiscard]] static constexpr auto belongsTo(detail::ValueType code) noexcept -> bool
+    template <typename Category> [[nodiscard]] static constexpr auto belongsTo(ValueType code) noexcept -> bool
     {
         return code < 0 && (-code) / detail::kCategoryMultiplier == Category::kCategoryCode;
     }
@@ -152,3 +132,34 @@ namespace cpp_core
 {
 using ::cpp_core::status_codes::StatusCode;
 } // namespace cpp_core
+
+// Test cases
+static_assert(cpp_core::StatusCode::kSuccess == 0);
+static_assert(cpp_core::StatusCode::isSuccess(cpp_core::StatusCode::kSuccess));
+static_assert(!cpp_core::StatusCode::isError(cpp_core::StatusCode::kSuccess));
+
+static_assert(cpp_core::StatusCode::Configuration::kSetBaudrateError == -100);
+static_assert(cpp_core::StatusCode::Configuration::kSetDataBitsError == -101);
+static_assert(cpp_core::StatusCode::Configuration::kSetParityError == -102);
+static_assert(cpp_core::StatusCode::Configuration::kSetStopBitsError == -103);
+static_assert(cpp_core::StatusCode::Configuration::kSetFlowControlError == -104);
+static_assert(cpp_core::StatusCode::Configuration::kSetTimeoutError == -105);
+
+static_assert(cpp_core::StatusCode::Connection::kNotFoundError == -200);
+static_assert(cpp_core::StatusCode::Connection::kInvalidHandleError == -201);
+static_assert(cpp_core::StatusCode::Connection::kCloseHandleError == -202);
+
+static_assert(cpp_core::StatusCode::Io::kReadError == -300);
+static_assert(cpp_core::StatusCode::Io::kWriteError == -301);
+static_assert(cpp_core::StatusCode::Io::kAbortReadError == -302);
+static_assert(cpp_core::StatusCode::Io::kAbortWriteError == -303);
+static_assert(cpp_core::StatusCode::Io::kBufferError == -304);
+static_assert(cpp_core::StatusCode::Io::kClearBufferInError == -305);
+static_assert(cpp_core::StatusCode::Io::kClearBufferOutError == -306);
+
+static_assert(cpp_core::StatusCode::Control::kSetDtrError == -400);
+static_assert(cpp_core::StatusCode::Control::kSetRtsError == -401);
+static_assert(cpp_core::StatusCode::Control::kGetModemStatusError == -402);
+static_assert(cpp_core::StatusCode::Control::kSendBreakError == -403);
+static_assert(cpp_core::StatusCode::Control::kGetStateError == -404);
+static_assert(cpp_core::StatusCode::Control::kSetStateError == -405);
