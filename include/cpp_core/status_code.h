@@ -138,6 +138,8 @@ static_assert(cpp_core::StatusCode::kSuccess == 0);
 static_assert(cpp_core::StatusCode::isSuccess(cpp_core::StatusCode::kSuccess));
 static_assert(!cpp_core::StatusCode::isError(cpp_core::StatusCode::kSuccess));
 
+static_assert(cpp_core::StatusCode::isError(cpp_core::StatusCode::Configuration::kSetBaudrateError));
+
 static_assert(cpp_core::StatusCode::Configuration::kSetBaudrateError == -100);
 static_assert(cpp_core::StatusCode::Configuration::kSetDataBitsError == -101);
 static_assert(cpp_core::StatusCode::Configuration::kSetParityError == -102);
