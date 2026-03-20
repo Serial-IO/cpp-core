@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <limits>
 #include <string_view>
 
 namespace cpp_core::status_codes
@@ -45,8 +46,12 @@ template <typename Derived> struct CategoryBase
   protected:
     template <ValueType LocalCode> static consteval auto computeValue() -> ValueType
     {
+        static_assert(Derived::kCategoryCode >= 0, "Category code must not be negative");
         static_assert(LocalCode >= 0, "Code index must not be negative");
         static_assert(LocalCode < kCategoryMultiplier, "Category overflow (max 99 codes)");
+        static_assert(Derived::kCategoryCode <=
+                          (std::numeric_limits<ValueType>::max() - kCategoryMultiplier + 1) / kCategoryMultiplier,
+                      "Category code too large, multiplication would overflow");
         return -((Derived::kCategoryCode * kCategoryMultiplier) + LocalCode);
     }
 
@@ -133,35 +138,42 @@ namespace cpp_core
 using ::cpp_core::status_codes::StatusCode;
 } // namespace cpp_core
 
-// Test cases
-static_assert(cpp_core::StatusCode::kSuccess == 0);
-static_assert(cpp_core::StatusCode::isSuccess(cpp_core::StatusCode::kSuccess));
-static_assert(!cpp_core::StatusCode::isError(cpp_core::StatusCode::kSuccess));
+namespace cpp_core::status_codes::detail::tests
+{
 
-static_assert(cpp_core::StatusCode::isError(cpp_core::StatusCode::Configuration::kSetBaudrateError));
+template <int64_t CatCode> struct FakeCategory : CategoryBase<FakeCategory<CatCode>>
+{
+    static constexpr ValueType kCategoryCode = CatCode;
 
-static_assert(cpp_core::StatusCode::Configuration::kSetBaudrateError == -100);
-static_assert(cpp_core::StatusCode::Configuration::kSetDataBitsError == -101);
-static_assert(cpp_core::StatusCode::Configuration::kSetParityError == -102);
-static_assert(cpp_core::StatusCode::Configuration::kSetStopBitsError == -103);
-static_assert(cpp_core::StatusCode::Configuration::kSetFlowControlError == -104);
-static_assert(cpp_core::StatusCode::Configuration::kSetTimeoutError == -105);
+    template <ValueType Local> static consteval auto call() -> ValueType
+    {
+        return CategoryBase<FakeCategory>::template computeValue<Local>();
+    }
+};
 
-static_assert(cpp_core::StatusCode::Connection::kNotFoundError == -200);
-static_assert(cpp_core::StatusCode::Connection::kInvalidHandleError == -201);
-static_assert(cpp_core::StatusCode::Connection::kCloseHandleError == -202);
+// Formula: result == -(kCategoryCode * 100 + LocalCode)
+static_assert(FakeCategory<1>::call<0>() == -100);
+static_assert(FakeCategory<1>::call<42>() == -142);
+static_assert(FakeCategory<3>::call<7>() == -307);
 
-static_assert(cpp_core::StatusCode::Io::kReadError == -300);
-static_assert(cpp_core::StatusCode::Io::kWriteError == -301);
-static_assert(cpp_core::StatusCode::Io::kAbortReadError == -302);
-static_assert(cpp_core::StatusCode::Io::kAbortWriteError == -303);
-static_assert(cpp_core::StatusCode::Io::kBufferError == -304);
-static_assert(cpp_core::StatusCode::Io::kClearBufferInError == -305);
-static_assert(cpp_core::StatusCode::Io::kClearBufferOutError == -306);
+// Edge: kCategoryCode == 0 -> call<0>() produces 0 (not negative)
+static_assert(FakeCategory<0>::call<0>() == 0);
+static_assert(FakeCategory<0>::call<1>() == -1);
 
-static_assert(cpp_core::StatusCode::Control::kSetDtrError == -400);
-static_assert(cpp_core::StatusCode::Control::kSetRtsError == -401);
-static_assert(cpp_core::StatusCode::Control::kGetModemStatusError == -402);
-static_assert(cpp_core::StatusCode::Control::kSendBreakError == -403);
-static_assert(cpp_core::StatusCode::Control::kGetStateError == -404);
-static_assert(cpp_core::StatusCode::Control::kSetStateError == -405);
+// Edge: LocalCode == 99 (max before overflow guard)
+static_assert(FakeCategory<2>::call<99>() == -299);
+
+// Consecutive codes differ by exactly -1
+static_assert(FakeCategory<1>::call<1>() - FakeCategory<1>::call<0>() == -1);
+
+// Adjacent category ranges don't overlap (last of cat N > first of cat N+1)
+static_assert(FakeCategory<1>::call<99>() > FakeCategory<2>::call<0>());
+
+// Overflow: largest safe category still produces correct results
+inline constexpr ValueType kMaxSafeCat =
+    (std::numeric_limits<ValueType>::max() - kCategoryMultiplier + 1) / kCategoryMultiplier;
+static_assert(kMaxSafeCat > 1'000'000);
+static_assert(FakeCategory<kMaxSafeCat>::call<0>() == -(kMaxSafeCat * kCategoryMultiplier));
+static_assert(FakeCategory<kMaxSafeCat>::call<99>() > std::numeric_limits<ValueType>::min());
+
+} // namespace cpp_core::status_codes::detail::tests
