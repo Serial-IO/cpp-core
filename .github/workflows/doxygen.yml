@@ -6,43 +6,59 @@ on:
     paths:
       - 'include/**'
       - 'Doxyfile'
+      - 'docs/doxygen-theme/**'
       - '.github/workflows/doxygen.yml'
-  workflow_dispatch:
-
-# Required for GitHub Pages deployment
-permissions:
-  contents: write        
-  pages: write           
-  id-token: write        
+      - 'README.md'
 
 jobs:
-  build-docs:
+  # Build and deploy Doxygen to GitHub Pages
+  deploy-docs:
+    name: Build & Deploy Doxygen
     runs-on: ubuntu-latest
-    name: 'Build Doxygen HTML'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: "pages"
+      cancel-in-progress: false
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Install Doxygen + Graphviz
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y doxygen graphviz
+    - name: Install Doxygen 1.14.0
+      run: |
+        cd /tmp
+        wget -q https://github.com/doxygen/doxygen/releases/download/Release_1_14_0/doxygen-1.14.0.linux.bin.tar.gz
+        tar -xzf doxygen-1.14.0.linux.bin.tar.gz
+        sudo cp doxygen-1.14.0/bin/doxygen /usr/local/bin/
+        doxygen --version
+        sudo apt-get update
+        sudo apt-get install -y graphviz
 
-      - name: Generate documentation
-        run: |
-          doxygen -v
-          doxygen Doxyfile
+    - name: Download Doxygen Awesome theme
+      run: |
+        THEME_DIR=docs/doxygen-theme
+        DOXYGEN_AWESOME_URL=https://raw.githubusercontent.com/jothepro/doxygen-awesome-css/v2.4.1
+        wget -q -O $THEME_DIR/doxygen-awesome.css $DOXYGEN_AWESOME_URL/doxygen-awesome.css
+        wget -q -O $THEME_DIR/doxygen-awesome-darkmode-toggle.js $DOXYGEN_AWESOME_URL/doxygen-awesome-darkmode-toggle.js
+        wget -q -O $THEME_DIR/doxygen-awesome-fragment-copy-button.js $DOXYGEN_AWESOME_URL/doxygen-awesome-fragment-copy-button.js
+        wget -q -O $THEME_DIR/doxygen-awesome-paragraph-link.js $DOXYGEN_AWESOME_URL/doxygen-awesome-paragraph-link.js
+        wget -q -O $THEME_DIR/doxygen-awesome-interactive-toc.js $DOXYGEN_AWESOME_URL/doxygen-awesome-interactive-toc.js
+        wget -q -O $THEME_DIR/doxygen-awesome-tabs.js $DOXYGEN_AWESOME_URL/doxygen-awesome-tabs.js
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: docs/html
+    - name: Generate documentation
+      run: |
+        doxygen Doxyfile
 
-  deploy:
-    needs: build-docs
-    runs-on: ubuntu-latest
-    name: 'Deploy to GitHub Pages'
-    steps:
-      - name: Deploy
-        id: deployment
-        uses: actions/deploy-pages@v4 
+    - name: Setup Pages
+      uses: actions/configure-pages@v5
+
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: docs/html
+
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
