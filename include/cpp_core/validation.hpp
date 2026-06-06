@@ -1,7 +1,7 @@
 #pragma once
 
 #include "error_handling.hpp"
-#include "status_codes.h"
+#include "status_code.h"
 
 #include <cstdint>
 #include <limits>

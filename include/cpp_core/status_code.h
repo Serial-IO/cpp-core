@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <limits>
 #include <string_view>
 
 namespace cpp_core::status_codes
@@ -135,45 +134,6 @@ struct StatusCode
 
 namespace cpp_core
 {
+using StatusCodes = ::cpp_core::status_codes::detail::ValueType;
 using ::cpp_core::status_codes::StatusCode;
 } // namespace cpp_core
-
-namespace cpp_core::status_codes::detail::tests
-{
-
-template <int64_t CatCode> struct FakeCategory : CategoryBase<FakeCategory<CatCode>>
-{
-    static constexpr ValueType kCategoryCode = CatCode;
-
-    template <ValueType Local> static consteval auto call() -> ValueType
-    {
-        return CategoryBase<FakeCategory>::template computeValue<Local>();
-    }
-};
-
-// Formula: result == -(kCategoryCode * 100 + LocalCode)
-static_assert(FakeCategory<1>::call<0>() == -100);
-static_assert(FakeCategory<1>::call<42>() == -142);
-static_assert(FakeCategory<3>::call<7>() == -307);
-
-// Edge: kCategoryCode == 0 -> call<0>() produces 0 (not negative)
-static_assert(FakeCategory<0>::call<0>() == 0);
-static_assert(FakeCategory<0>::call<1>() == -1);
-
-// Edge: LocalCode == 99 (max before overflow guard)
-static_assert(FakeCategory<2>::call<99>() == -299);
-
-// Consecutive codes differ by exactly -1
-static_assert(FakeCategory<1>::call<1>() - FakeCategory<1>::call<0>() == -1);
-
-// Adjacent category ranges don't overlap (last of cat N > first of cat N+1)
-static_assert(FakeCategory<1>::call<99>() > FakeCategory<2>::call<0>());
-
-// Overflow: largest safe category still produces correct results
-inline constexpr ValueType kMaxSafeCat =
-    (std::numeric_limits<ValueType>::max() - kCategoryMultiplier + 1) / kCategoryMultiplier;
-static_assert(kMaxSafeCat > 1'000'000);
-static_assert(FakeCategory<kMaxSafeCat>::call<0>() == -(kMaxSafeCat * kCategoryMultiplier));
-static_assert(FakeCategory<kMaxSafeCat>::call<99>() > std::numeric_limits<ValueType>::min());
-
-} // namespace cpp_core::status_codes::detail::tests

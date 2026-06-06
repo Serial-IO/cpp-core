@@ -49,6 +49,13 @@ target_compile_features(cpp_core INTERFACE cxx_std_23)
 set(CMAKE_CXX_MODULE_STD 23)
 set(CMAKE_CXX_MODULE_EXTENSIONS OFF)
 
+include(CTest)
+
+if(BUILD_TESTING)
+    add_library(cpp_core_status_code_compile_test OBJECT tests/status_code_compile_test.cpp)
+    target_link_libraries(cpp_core_status_code_compile_test PRIVATE cpp_core::cpp_core)
+endif()
+
 # Install rules --------------------------------------------------------------
 include(GNUInstallDirs)
 
