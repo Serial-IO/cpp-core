@@ -6,14 +6,14 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 project(cpp-core LANGUAGES CXX)
 
 if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    message(FATAL_ERROR "This experimental branch requires GCC 16+ with -std=c++26 and -freflection.")
+    message(FATAL_ERROR "cpp-core requires GCC 16+ with -std=c++26 and -freflection.")
 endif()
 
 if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 16)
-    message(FATAL_ERROR "This experimental branch requires GCC 16 or newer.")
+    message(FATAL_ERROR "cpp-core requires GCC 16 or newer.")
 endif()
 
-# This branch intentionally targets a single experimental toolchain.
+# The project currently targets a single toolchain with C++26 reflection support.
 set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -63,7 +63,7 @@ get_git_version_info()
 generate_git_version(OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include/cpp_core)
 
 set(PROJECT_VERSION "${GIT_VERSION_MAJOR}.${GIT_VERSION_MINOR}.${GIT_VERSION_PATCH}")
-set(PROJECT_DESCRIPTION "Experimental GCC 16 / C++26 reflection branch for shared serial FFI metadata")
+set(PROJECT_DESCRIPTION "Shared serial API and FFI metadata for GCC 16 / C++26 reflection builds")
 
 # Header-only library --------------------------------------------------------
 add_library(cpp_core INTERFACE)

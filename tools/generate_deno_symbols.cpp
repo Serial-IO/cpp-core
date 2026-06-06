@@ -141,11 +141,11 @@ struct CliOptions
 [[nodiscard]] auto usesBufferMarshalling(const cpp_core::FunctionDescriptor &function) -> bool
 {
     return std::ranges::any_of(function.parameters, [](const auto &parameter) {
-        return parameter.abi_kind == cpp_core::AbiValueKind::kUtf8CString
-               || parameter.abi_kind == cpp_core::AbiValueKind::kConstBuffer
-               || parameter.abi_kind == cpp_core::AbiValueKind::kMutableBuffer
-               || parameter.abi_kind == cpp_core::AbiValueKind::kOpaquePointer
-               || parameter.abi_kind == cpp_core::AbiValueKind::kVersionStructPointer;
+        return parameter.abi_kind == cpp_core::AbiValueKind::kUtf8CString ||
+               parameter.abi_kind == cpp_core::AbiValueKind::kConstBuffer ||
+               parameter.abi_kind == cpp_core::AbiValueKind::kMutableBuffer ||
+               parameter.abi_kind == cpp_core::AbiValueKind::kOpaquePointer ||
+               parameter.abi_kind == cpp_core::AbiValueKind::kVersionStructPointer;
     });
 }
 
@@ -198,7 +198,7 @@ auto writeHeader(std::ostream &stream) -> void
     stream << "// Generated from cpp-core reflection metadata.\n";
     stream << "// Do not edit manually.\n";
     stream << "// Intended for use with Deno.dlopen.\n";
-    stream << "// ABI mode: legacy.\n\n";
+    stream << "// ABI mode: modern.\n\n";
 }
 
 auto writeSymbols(std::ostream &stream) -> void
@@ -298,7 +298,8 @@ auto writeHelpers(std::ostream &stream) -> void
     stream << "  }\n";
     stream << "  return pointer;\n";
     stream << "}\n\n";
-    stream << "function marshalCString(value: string | Deno.PointerValue, name: string, keepAlive: KeepAlive): Deno.PointerValue {\n";
+    stream << "function marshalCString(value: string | Deno.PointerValue, name: string, keepAlive: KeepAlive): "
+              "Deno.PointerValue {\n";
     stream << "  if (typeof value === \"string\") {\n";
     stream << "    const bytes = textEncoder.encode(`${value}\\0`);\n";
     stream << "    keepAlive.push(bytes);\n";
@@ -372,8 +373,8 @@ auto writeWrapperBody(std::ostream &stream, const cpp_core::FunctionDescriptor &
         {
             stream << " ?? 0";
         }
-        else if (parameter.abi_kind == cpp_core::AbiValueKind::kErrorCallback
-                 || parameter.abi_kind == cpp_core::AbiValueKind::kNotificationCallback)
+        else if (parameter.abi_kind == cpp_core::AbiValueKind::kErrorCallback ||
+                 parameter.abi_kind == cpp_core::AbiValueKind::kNotificationCallback)
         {
             stream << " ?? null";
         }
@@ -399,8 +400,8 @@ auto writeWrapperBody(std::ostream &stream, const cpp_core::FunctionDescriptor &
             break;
         case cpp_core::AbiValueKind::kOpaquePointer:
         case cpp_core::AbiValueKind::kVersionStructPointer:
-            stream << "      const " << parameter.name << "Pointer = requirePointer(" << source << ", \"" << parameter.name
-                   << "\", keepAlive);\n";
+            stream << "      const " << parameter.name << "Pointer = requirePointer(" << source << ", \""
+                   << parameter.name << "\", keepAlive);\n";
             break;
         case cpp_core::AbiValueKind::kInt64:
         case cpp_core::AbiValueKind::kOpaqueHandle:
@@ -471,8 +472,8 @@ auto writeWrapperFunctions(std::ostream &stream) -> void
 
     for (const auto &function : cpp_core::functionDescriptors())
     {
-        stream << "    " << function.name << "(args: " << toPascalCase(function.name) << "Params): "
-               << toWrapperReturnType(function) << " {\n";
+        stream << "    " << function.name << "(args: " << toPascalCase(function.name)
+               << "Params): " << toWrapperReturnType(function) << " {\n";
         writeWrapperBody(stream, function);
         stream << "    },\n";
     }

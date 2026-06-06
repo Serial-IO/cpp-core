@@ -4,7 +4,7 @@ Header-only API definition library for cross-platform serial communication. Defi
 
 > [!IMPORTANT]
 >
-> This branch is an **experimental GCC 16 / C++26 / reflection** branch.
+> This version of `cpp-core` requires **GCC 16**, **C++26**, and **reflection support**.
 >
 > **API definitions only** (headers). For implementations and ready-to-use shared libraries:
 > - [cpp-bindings-windows](https://github.com/Serial-IO/cpp-bindings-windows) - Windows (DLL)
@@ -26,20 +26,14 @@ Header-only API definition library for cross-platform serial communication. Defi
 * `-std=c++26` and `-freflection`
 * Git (for automatic version detection)
 
-Clang and MSVC are intentionally not supported on this branch.
+Clang and MSVC are not supported.
 
-## Experimental Direction
+## C Interface
 
-This branch keeps the **C ABI** as the external contract while moving internal metadata to a reflection-backed C++26 model.
+`cpp-core` defines a C-compatible interface for the platform-specific binding libraries and exposes reflection-backed
+metadata for that same interface.
 
-That split is intentional:
-
-* the **runtime ABI** stays easy to consume from Deno FFI and other foreign runtimes
-* the **C++ authoring model** gains a single metadata source for status codes, shared structs, and exported function signatures
-* bind generation for Deno bindings can read `cpp_core::kFunctionDescriptors`, `cpp_core::kOperationDescriptors`,
-  and the reflected struct field descriptors instead of re-parsing handwritten headers
-
-The new metadata entrypoint is:
+Metadata entrypoints:
 
 ```cpp
 #include <cpp_core/ffi_metadata.hpp>
@@ -50,32 +44,122 @@ constexpr auto statuses = cpp_core::statusCodeDescriptors();
 constexpr auto config_fields = cpp_core::serialConfigFieldDescriptors();
 ```
 
-More practical usage examples and the intended Deno/FFI workflow are documented in [docs/ffi-metadata.md](docs/ffi-metadata.md).
+More practical usage examples are documented in [docs/ffi-metadata.md](docs/ffi-metadata.md).
 
-There is also a bindgen target now:
+Bindgen target:
 
 ```sh
 cmake --build build/gcc --target cpp_core_bindgen
 ./build/gcc/cpp_core_bindgen --output deno_bindings.ts
 ```
 
-The generated module now contains:
+The generated module contains:
 
 * `symbols` for `Deno.dlopen`
 * `operations` metadata
 * `statusCodes` plus `StatusCodeError`
 * `createBindings(dylib)` which returns named TypeScript wrapper functions
 
-## Why This Helps Already
+Example:
 
-The new metadata layer is useful even before any full code generator exists:
+```ts
+import {
+  createBindings,
+  operations,
+  StatusCodeError,
+  statusCodeInfo,
+  statusCodes,
+  symbols,
+} from "./deno_bindings.ts";
+
+const dylib = Deno.dlopen("./libcpp_bindings_linux.so", symbols);
+const serial = createBindings(dylib);
+const decoder = new TextDecoder();
+
+let handle: bigint | undefined;
+
+function describeStatus(code: number) {
+  const info = statusCodeInfo[String(code) as keyof typeof statusCodeInfo];
+  return info ? `${info.category}::${info.name}` : `UnknownStatus (${code})`;
+}
+
+try {
+  console.log("opening via symbol", operations.serialOpen.symbol);
+
+  handle = serial.serialOpen({
+    port: "/dev/ttyUSB0",
+    baudrate: 115200,
+    data_bits: 8,
+    parity: 0,
+    stop_bits: 0,
+  });
+
+  const writeBuffer = new Uint8Array([0x41, 0x54, 0x49, 0x0d, 0x0a]);
+  const bytesWritten = serial.serialWrite({
+    handle,
+    buffer: writeBuffer,
+    buffer_size: writeBuffer.byteLength,
+    timeout_ms: 500,
+    multiplier: 0,
+  });
+
+  const queued = serial.serialInBytesWaiting({ handle });
+  const readBuffer = new Uint8Array(256);
+  const bytesRead = serial.serialRead({
+    handle,
+    buffer: readBuffer,
+    buffer_size: readBuffer.byteLength,
+    timeout_ms: 500,
+    multiplier: 0,
+  });
+
+  const payload = decoder.decode(readBuffer.subarray(0, bytesRead));
+
+  console.log({
+    handle,
+    bytesWritten,
+    queued,
+    bytesRead,
+    payload,
+  });
+} catch (error) {
+  if (error instanceof StatusCodeError) {
+    if (error.code === statusCodes.NotFoundError) {
+      console.error("port not found");
+    } else if (error.code === statusCodes.ReadError) {
+      console.error("read failed");
+    } else {
+      console.error(describeStatus(error.code));
+    }
+    throw error;
+  }
+  throw error;
+} finally {
+  if (handle !== undefined) {
+    try {
+      serial.serialClose({ handle });
+    } catch (error) {
+      if (error instanceof StatusCodeError) {
+        console.error("close failed:", describeStatus(error.code));
+      } else {
+        console.error("close failed:", error);
+      }
+    }
+  }
+  dylib.close();
+}
+```
+
+## Benefits
+
+The metadata layer provides:
 
 * **One source of truth** for exported function names, parameter names, return semantics, and status categories
 * **No manual re-parsing of headers** when you want to derive Deno FFI symbol definitions or internal binding manifests
 * **Generated wrapper functions** with named parameters, result decoding, and status-to-exception conversion
 * **Safer refactors** because compile-time metadata checks fail when the exposed signatures drift
 * **Shared understanding of the ABI** because buffers, callbacks, UTF-8 strings, opaque handles, and status-returning functions are classified centrally
-* **Less version drift in consumers** because the same `cpp-core` checkout now provides both the headers and the generator used by Linux/Windows builds
+* **Less version drift in consumers** because the same `cpp-core` checkout provides both the headers and the generator used by Linux/Windows builds
 
 ## Version Information
 
@@ -125,9 +209,9 @@ intptr_t serialOpen(
 }
 ```
 
-## Error Handling Today and Later
+## Error Handling
 
-The current ABI remains `status + out-params` or `value-or-negative-status`, because that maps cleanly to plain C and Deno FFI.
+The API uses `status + out-params` or `value-or-negative-status`, because that maps cleanly to plain C and Deno FFI.
 
 ```c
 intptr_t serialOpen(
@@ -140,9 +224,7 @@ intptr_t serialOpen(
 );
 ```
 
-Internally the implementation can still use `std::expected`-style flows and translate them at the ABI edge into the plain C model.
-
-The corresponding Deno FFI shape would stay straightforward:
+The corresponding Deno FFI shape is straightforward:
 
 ```ts
 const symbols = {

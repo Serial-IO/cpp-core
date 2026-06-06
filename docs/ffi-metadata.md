@@ -1,15 +1,15 @@
 # FFI Metadata Guide
 
-This branch adds a reflection-backed metadata layer in `cpp_core` for the public C ABI.
+`cpp_core` provides a reflection-backed metadata layer for the public C ABI.
 
 The important distinction is:
 
 * the exported runtime interface is still plain C ABI
-* the description of that interface is now available as typed compile-time metadata in C++
+* the description of that interface is available as typed compile-time metadata in C++
 
-That gives you a place to inspect the ABI, build tooling around it, and later generate bindings from it without maintaining a second hand-written schema.
+That gives you a place to inspect the ABI and build tooling around it without maintaining a second hand-written schema.
 
-## What Exists Today
+## Available Metadata
 
 Include:
 
@@ -28,7 +28,7 @@ Main entrypoints:
 * `cpp_core::findOperationDescriptor(name)`
 * `cpp_core::findStatusCodeDescriptor(code)`
 
-Generator tooling in this branch:
+Generator tooling:
 
 * `cpp_core_bindgen` generates a Deno-oriented TypeScript module from the same metadata used by the headers
 * the generated module includes `symbols`, metadata exports, `StatusCodeError`, and `createBindings(dylib)`
@@ -52,11 +52,11 @@ That caused three problems:
 
 * tools had to re-parse or duplicate knowledge about functions and parameters
 * buffer/callback/string/handle semantics were implicit and spread across comments
-* future Deno binding generation had no canonical machine-readable source inside `cpp-core`
+* Deno binding generation had no canonical machine-readable source inside `cpp-core`
 
 Now the ABI description is available in a typed form inside the library itself.
 
-## Practical Benefits Right Now
+## Benefits
 
 ### 1. You can inspect the exported ABI programmatically
 
@@ -113,7 +113,7 @@ The metadata layer makes that distinction explicit.
 
 Each function is classified with `FunctionResultModel`.
 
-Current models:
+Result models:
 
 * `kVoid`
 * `kStatusCode`
@@ -159,7 +159,7 @@ This is useful for:
 
 `SerialConfig` and `Version` expose field descriptors.
 
-That is the first step toward:
+This is useful for:
 
 * generated docs for shared data
 * generated FFI struct definitions and byte-layout helpers
@@ -197,9 +197,9 @@ Typical use case:
 
 ## Example: Derive Deno-Oriented Symbol Metadata
 
-This is not a full generator yet, but the metadata is now good enough to drive one.
+The metadata is sufficient to drive a generator directly.
 
-There is now a bindgen CLI tool for this in the repo:
+Bindgen CLI:
 
 ```sh
 cmake --build build/gcc --target cpp_core_bindgen
@@ -242,13 +242,13 @@ constexpr auto toDenoType(cpp_core::AbiValueKind kind) -> const char *
 }
 ```
 
-The current generator already emits an importable module and wraps the current legacy ABI:
+The generator emits an importable module and wraps the legacy ABI:
 
 ```ts
 // Generated from cpp-core reflection metadata.
 // Do not edit manually.
 // Intended for use with Deno.dlopen.
-// ABI mode: preferred.
+// ABI mode: legacy.
 
 export const symbols = {
   serialOpen: {
@@ -274,14 +274,14 @@ export function createBindings(dylib: Deno.DynamicLibrary<typeof symbols>) {
 }
 ```
 
-## What This Does Not Do Yet
+## Scope
 
-Current limitations:
+Limitations:
 
 * it does not encode every possible semantic rule for every parameter
 * it does not expose `std::expected` itself across the external ABI
 
-That is deliberate. The branch first makes the ABI description explicit and compile-checked.
+That is deliberate. The ABI description is explicit and compile-checked.
 
 ## Relation To `std::expected`
 
@@ -297,9 +297,9 @@ Instead, the model is:
 
 That gives you most of the practical benefits of structured error handling without making the FFI surface harder to consume.
 
-## Recommended Current Usage
+## Usage
 
-Today, the best use of the new layer is:
+The metadata layer is useful for:
 
 * inspect exported functions from tooling or tests
 * generate a Deno metadata module with `cpp_core_bindgen`
