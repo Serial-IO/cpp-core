@@ -15,14 +15,14 @@ namespace cpp_core
 // Enriched error type carrying a StatusCode and an optional message.
 struct Error
 {
-    StatusCodes code;
+    StatusCodeValue code;
     std::string message;
 
-    constexpr explicit Error(StatusCodes code_in) noexcept : code(code_in)
+    constexpr explicit Error(StatusCodeValue code_in) noexcept : code(code_in)
     {
     }
 
-    Error(StatusCodes code_in, std::string msg) : code(code_in), message(std::move(msg))
+    Error(StatusCodeValue code_in, std::string msg) : code(code_in), message(std::move(msg))
     {
     }
 
@@ -36,7 +36,7 @@ struct Error
         return code == other.code;
     }
 
-    [[nodiscard]] constexpr auto operator==(StatusCodes code_in) const noexcept -> bool
+    [[nodiscard]] constexpr auto operator==(StatusCodeValue code_in) const noexcept -> bool
     {
         return code == code_in;
     }
@@ -66,12 +66,12 @@ template <typename T> [[nodiscard]] constexpr auto ok(T &&value) -> Result<std::
     return {};
 }
 
-template <typename T = void> [[nodiscard]] constexpr auto fail(StatusCodes code) -> Result<T>
+template <typename T = void> [[nodiscard]] constexpr auto fail(StatusCodeValue code) -> Result<T>
 {
     return std::unexpected(Error{code});
 }
 
-template <typename T = void> [[nodiscard]] auto fail(StatusCodes code, std::string message) -> Result<T>
+template <typename T = void> [[nodiscard]] auto fail(StatusCodeValue code, std::string message) -> Result<T>
 {
     return std::unexpected(Error{code, std::move(message)});
 }

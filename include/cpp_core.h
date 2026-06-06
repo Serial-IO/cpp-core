@@ -13,6 +13,7 @@
  */
 
 #include "cpp_core/error_callback.h"
+#include "cpp_core/ffi_metadata.hpp"
 #include "cpp_core/serial.h"
 #include "cpp_core/status_code.h"
 #include "cpp_core/version.hpp"
