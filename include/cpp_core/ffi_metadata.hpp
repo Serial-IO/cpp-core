@@ -1,13 +1,16 @@
 #pragma once
 
+#include "abi_registry.hpp"
 #include "serial.h"
 #include "serial_config.hpp"
 #include "status_code.h"
+#include "status_code_registry.hpp"
 
 #include <array>
 #include <cstddef>
 #include <cstdint>
 #include <meta>
+#include <optional>
 #include <span>
 #include <string_view>
 #include <utility>
@@ -94,6 +97,22 @@ struct StructFieldDescriptor
 namespace detail
 {
 
+[[nodiscard]] consteval auto overrideParameterAbiValueKind(std::string_view function_name, std::string_view parameter_name,
+                                                           std::meta::info type_info) -> std::optional<AbiValueKind>
+{
+    if (!std::meta::is_pointer_type(type_info))
+    {
+        return std::nullopt;
+    }
+
+    if (function_name == "getVersion" && parameter_name == "out")
+    {
+        return AbiValueKind::kVersionStructPointer;
+    }
+
+    return std::nullopt;
+}
+
 [[nodiscard]] consteval auto isConstPointer(std::meta::info type_info) -> bool
 {
     if (!std::meta::is_pointer_type(type_info))
@@ -164,6 +183,28 @@ namespace detail
     return AbiValueKind::kOpaquePointer;
 }
 
+[[nodiscard]] consteval auto inferParameterAbiValueKind(std::string_view function_name, std::string_view parameter_name,
+                                                        std::meta::info type_info) -> AbiValueKind
+{
+    if (const auto override = overrideParameterAbiValueKind(function_name, parameter_name, type_info))
+    {
+        return *override;
+    }
+
+    return inferAbiValueKind(type_info, parameter_name);
+}
+
+[[nodiscard]] consteval auto overrideReturnAbiValueKind(std::string_view function_name)
+    -> std::optional<AbiValueKind>
+{
+    if (function_name == "serialOpen")
+    {
+        return AbiValueKind::kOpaqueHandle;
+    }
+
+    return std::nullopt;
+}
+
 [[nodiscard]] consteval auto inferReturnAbiValueKind(std::string_view function_name, std::meta::info return_type_info)
     -> AbiValueKind
 {
@@ -172,9 +213,9 @@ namespace detail
         return AbiValueKind::kVoid;
     }
 
-    if (function_name == "serialOpen")
+    if (const auto override = overrideReturnAbiValueKind(function_name))
     {
-        return AbiValueKind::kOpaqueHandle;
+        return *override;
     }
 
     if (std::meta::is_integral_type(return_type_info))
@@ -185,9 +226,25 @@ namespace detail
     return AbiValueKind::kOpaquePointer;
 }
 
+[[nodiscard]] consteval auto overrideParameterDirection(std::string_view function_name, std::string_view parameter_name)
+    -> std::optional<ParameterDirection>
+{
+    if (function_name == "getVersion" && parameter_name == "out")
+    {
+        return ParameterDirection::kOut;
+    }
+
+    return std::nullopt;
+}
+
 [[nodiscard]] consteval auto inferParameterDirection(std::string_view function_name, std::string_view parameter_name,
                                                      std::meta::info type_info) -> ParameterDirection
 {
+    if (const auto override = overrideParameterDirection(function_name, parameter_name))
+    {
+        return *override;
+    }
+
     if (parameter_name.ends_with("_callback") || parameter_name == "callback_fn" || parameter_name == "error_callback")
     {
         return ParameterDirection::kIn;
@@ -224,6 +281,17 @@ namespace detail
     return ParameterDirection::kIn;
 }
 
+[[nodiscard]] consteval auto overrideResultModel(std::string_view function_name)
+    -> std::optional<FunctionResultModel>
+{
+    if (function_name == "serialOpen")
+    {
+        return FunctionResultModel::kHandleOrStatus;
+    }
+
+    return std::nullopt;
+}
+
 [[nodiscard]] consteval auto inferResultModel(std::string_view function_name, std::meta::info return_type_info)
     -> FunctionResultModel
 {
@@ -232,9 +300,9 @@ namespace detail
         return FunctionResultModel::kVoid;
     }
 
-    if (function_name == "serialOpen")
+    if (const auto override = overrideResultModel(function_name))
     {
-        return FunctionResultModel::kHandleOrStatus;
+        return *override;
     }
 
     if (function_name.starts_with("serialRead") || function_name.starts_with("serialWrite")
@@ -256,7 +324,7 @@ namespace detail
     return ParameterDescriptor{
         .name = parameter_name,
         .cpp_type = std::meta::display_string_of(type_info),
-        .abi_kind = inferAbiValueKind(type_info, parameter_name),
+        .abi_kind = inferParameterAbiValueKind(function_name, parameter_name, type_info),
         .direction = inferParameterDirection(function_name, parameter_name, type_info),
         .optional = std::meta::has_default_argument(parameter_info),
     };
@@ -303,6 +371,15 @@ template <typename Struct, std::size_t... Index>
     };
 }
 
+[[nodiscard]] consteval auto makeOperationDescriptor(std::meta::info function_info) -> OperationDescriptor
+{
+    const auto function_name = std::meta::identifier_of(function_info);
+    return OperationDescriptor{
+        .name = function_name,
+        .function_name = function_name,
+    };
+}
+
 template <typename Code>
 [[nodiscard]] consteval auto makeStatusCodeDescriptor(const Code &code_value, std::string_view fallback_category = {})
     -> StatusCodeDescriptor
@@ -317,47 +394,6 @@ template <typename Code>
 
 } // namespace detail
 
-#define CPP_CORE_FFI_FUNCTION_LIST(X)                                                                                  \
-    X(getVersion)                                                                                                      \
-    X(serialAbortRead)                                                                                                 \
-    X(serialAbortWrite)                                                                                                \
-    X(serialClearBufferIn)                                                                                             \
-    X(serialClearBufferOut)                                                                                            \
-    X(serialClose)                                                                                                     \
-    X(serialDrain)                                                                                                     \
-    X(serialGetBaudrate)                                                                                               \
-    X(serialGetCts)                                                                                                    \
-    X(serialGetDataBits)                                                                                               \
-    X(serialGetDcd)                                                                                                    \
-    X(serialGetDsr)                                                                                                    \
-    X(serialGetFlowControl)                                                                                            \
-    X(serialGetParity)                                                                                                 \
-    X(serialGetRi)                                                                                                     \
-    X(serialGetStopBits)                                                                                               \
-    X(serialInBytesTotal)                                                                                              \
-    X(serialInBytesWaiting)                                                                                            \
-    X(serialListPorts)                                                                                                 \
-    X(serialMonitorPorts)                                                                                              \
-    X(serialOpen)                                                                                                      \
-    X(serialOutBytesTotal)                                                                                             \
-    X(serialOutBytesWaiting)                                                                                           \
-    X(serialRead)                                                                                                      \
-    X(serialReadLine)                                                                                                  \
-    X(serialReadUntil)                                                                                                 \
-    X(serialReadUntilSequence)                                                                                         \
-    X(serialSendBreak)                                                                                                 \
-    X(serialSetBaudrate)                                                                                               \
-    X(serialSetDataBits)                                                                                               \
-    X(serialSetDtr)                                                                                                    \
-    X(serialSetErrorCallback)                                                                                          \
-    X(serialSetFlowControl)                                                                                            \
-    X(serialSetParity)                                                                                                 \
-    X(serialSetReadCallback)                                                                                           \
-    X(serialSetRts)                                                                                                    \
-    X(serialSetStopBits)                                                                                               \
-    X(serialSetWriteCallback)                                                                                          \
-    X(serialWrite)
-
 #define CPP_CORE_DECLARE_FFI_METADATA(FunctionName)                                                                    \
     namespace detail                                                                                                   \
     {                                                                                                                  \
@@ -370,83 +406,31 @@ template <typename Code>
     inline constexpr auto kDescriptor_##FunctionName = makeFunctionDescriptor(^^FunctionName, kParameters_##FunctionName); \
     }
 
-CPP_CORE_FFI_FUNCTION_LIST(CPP_CORE_DECLARE_FFI_METADATA)
+CPP_CORE_ABI_FUNCTION_LIST(CPP_CORE_DECLARE_FFI_METADATA)
 
 #undef CPP_CORE_DECLARE_FFI_METADATA
 
 inline constexpr auto kFunctionDescriptors = std::array{
 #define CPP_CORE_FFI_DESCRIPTOR_ENTRY(FunctionName) detail::kDescriptor_##FunctionName,
-    CPP_CORE_FFI_FUNCTION_LIST(CPP_CORE_FFI_DESCRIPTOR_ENTRY)
+    CPP_CORE_ABI_FUNCTION_LIST(CPP_CORE_FFI_DESCRIPTOR_ENTRY)
 #undef CPP_CORE_FFI_DESCRIPTOR_ENTRY
 };
 
 inline constexpr auto kOperationDescriptors = std::array{
-    OperationDescriptor{"getVersion", "getVersion"},
-    OperationDescriptor{"serialAbortRead", "serialAbortRead"},
-    OperationDescriptor{"serialAbortWrite", "serialAbortWrite"},
-    OperationDescriptor{"serialClearBufferIn", "serialClearBufferIn"},
-    OperationDescriptor{"serialClearBufferOut", "serialClearBufferOut"},
-    OperationDescriptor{"serialClose", "serialClose"},
-    OperationDescriptor{"serialDrain", "serialDrain"},
-    OperationDescriptor{"serialGetBaudrate", "serialGetBaudrate"},
-    OperationDescriptor{"serialGetCts", "serialGetCts"},
-    OperationDescriptor{"serialGetDataBits", "serialGetDataBits"},
-    OperationDescriptor{"serialGetDcd", "serialGetDcd"},
-    OperationDescriptor{"serialGetDsr", "serialGetDsr"},
-    OperationDescriptor{"serialGetFlowControl", "serialGetFlowControl"},
-    OperationDescriptor{"serialGetParity", "serialGetParity"},
-    OperationDescriptor{"serialGetRi", "serialGetRi"},
-    OperationDescriptor{"serialGetStopBits", "serialGetStopBits"},
-    OperationDescriptor{"serialInBytesTotal", "serialInBytesTotal"},
-    OperationDescriptor{"serialInBytesWaiting", "serialInBytesWaiting"},
-    OperationDescriptor{"serialListPorts", "serialListPorts"},
-    OperationDescriptor{"serialMonitorPorts", "serialMonitorPorts"},
-    OperationDescriptor{"serialOpen", "serialOpen"},
-    OperationDescriptor{"serialOutBytesTotal", "serialOutBytesTotal"},
-    OperationDescriptor{"serialOutBytesWaiting", "serialOutBytesWaiting"},
-    OperationDescriptor{"serialRead", "serialRead"},
-    OperationDescriptor{"serialReadLine", "serialReadLine"},
-    OperationDescriptor{"serialReadUntil", "serialReadUntil"},
-    OperationDescriptor{"serialReadUntilSequence", "serialReadUntilSequence"},
-    OperationDescriptor{"serialSendBreak", "serialSendBreak"},
-    OperationDescriptor{"serialSetBaudrate", "serialSetBaudrate"},
-    OperationDescriptor{"serialSetDataBits", "serialSetDataBits"},
-    OperationDescriptor{"serialSetDtr", "serialSetDtr"},
-    OperationDescriptor{"serialSetErrorCallback", "serialSetErrorCallback"},
-    OperationDescriptor{"serialSetFlowControl", "serialSetFlowControl"},
-    OperationDescriptor{"serialSetParity", "serialSetParity"},
-    OperationDescriptor{"serialSetReadCallback", "serialSetReadCallback"},
-    OperationDescriptor{"serialSetRts", "serialSetRts"},
-    OperationDescriptor{"serialSetStopBits", "serialSetStopBits"},
-    OperationDescriptor{"serialSetWriteCallback", "serialSetWriteCallback"},
-    OperationDescriptor{"serialWrite", "serialWrite"},
+#define CPP_CORE_FFI_OPERATION_ENTRY(FunctionName) detail::makeOperationDescriptor(^^FunctionName),
+    CPP_CORE_ABI_FUNCTION_LIST(CPP_CORE_FFI_OPERATION_ENTRY)
+#undef CPP_CORE_FFI_OPERATION_ENTRY
 };
 
 inline constexpr auto kStatusCodeDescriptors = std::array{
     StatusCodeDescriptor{"General", "Success", StatusCode::kSuccess},
-    detail::makeStatusCodeDescriptor(StatusCode::Configuration::kSetBaudrateError),
-    detail::makeStatusCodeDescriptor(StatusCode::Configuration::kSetDataBitsError),
-    detail::makeStatusCodeDescriptor(StatusCode::Configuration::kSetParityError),
-    detail::makeStatusCodeDescriptor(StatusCode::Configuration::kSetStopBitsError),
-    detail::makeStatusCodeDescriptor(StatusCode::Configuration::kSetFlowControlError),
-    detail::makeStatusCodeDescriptor(StatusCode::Configuration::kSetTimeoutError),
-    detail::makeStatusCodeDescriptor(StatusCode::Connection::kNotFoundError),
-    detail::makeStatusCodeDescriptor(StatusCode::Connection::kInvalidHandleError),
-    detail::makeStatusCodeDescriptor(StatusCode::Connection::kCloseHandleError),
-    detail::makeStatusCodeDescriptor(StatusCode::Io::kReadError),
-    detail::makeStatusCodeDescriptor(StatusCode::Io::kWriteError),
-    detail::makeStatusCodeDescriptor(StatusCode::Io::kAbortReadError),
-    detail::makeStatusCodeDescriptor(StatusCode::Io::kAbortWriteError),
-    detail::makeStatusCodeDescriptor(StatusCode::Io::kBufferError),
-    detail::makeStatusCodeDescriptor(StatusCode::Io::kClearBufferInError),
-    detail::makeStatusCodeDescriptor(StatusCode::Io::kClearBufferOutError),
-    detail::makeStatusCodeDescriptor(StatusCode::Control::kSetDtrError),
-    detail::makeStatusCodeDescriptor(StatusCode::Control::kSetRtsError),
-    detail::makeStatusCodeDescriptor(StatusCode::Control::kGetModemStatusError),
-    detail::makeStatusCodeDescriptor(StatusCode::Control::kSendBreakError),
-    detail::makeStatusCodeDescriptor(StatusCode::Control::kGetStateError),
-    detail::makeStatusCodeDescriptor(StatusCode::Control::kSetStateError),
-    detail::makeStatusCodeDescriptor(StatusCode::Monitor::kMonitorError),
+#define CPP_CORE_STATUS_CODE_DESCRIPTOR_ENTRY(CategoryName, LocalCode, CodeName)                                      \
+    detail::makeStatusCodeDescriptor(StatusCode::CategoryName::k##CodeName),
+#define CPP_CORE_STATUS_CODE_DESCRIPTOR_CATEGORY(CategoryName, CategoryCode, CodeListMacro)                           \
+    CodeListMacro(CPP_CORE_STATUS_CODE_DESCRIPTOR_ENTRY, CategoryName)
+    CPP_CORE_STATUS_CODE_CATEGORY_LIST(CPP_CORE_STATUS_CODE_DESCRIPTOR_CATEGORY)
+#undef CPP_CORE_STATUS_CODE_DESCRIPTOR_CATEGORY
+#undef CPP_CORE_STATUS_CODE_DESCRIPTOR_ENTRY
 };
 
 inline constexpr auto kSerialConfigFieldDescriptors = []() consteval
@@ -531,6 +515,6 @@ inline constexpr auto kVersionFieldDescriptors = []() consteval
     return nullptr;
 }
 
-#undef CPP_CORE_FFI_FUNCTION_LIST
+#undef CPP_CORE_ABI_FUNCTION_LIST
 
 } // namespace cpp_core

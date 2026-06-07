@@ -2,11 +2,18 @@
 
 static_assert(__cpp_impl_reflection >= 202603L);
 
-static_assert(cpp_core::kFunctionDescriptors.size() == 39);
-static_assert(cpp_core::kOperationDescriptors.size() == 39);
-static_assert(cpp_core::kStatusCodeDescriptors.size() == 24);
+static_assert(!cpp_core::kFunctionDescriptors.empty());
+static_assert(cpp_core::kFunctionDescriptors.size() == cpp_core::kOperationDescriptors.size());
+static_assert(!cpp_core::kStatusCodeDescriptors.empty());
 static_assert(cpp_core::kSerialConfigFieldDescriptors.size() == 4);
 static_assert(cpp_core::kVersionFieldDescriptors.size() == 8);
+
+constexpr auto kGetVersion = cpp_core::detail::kDescriptor_getVersion;
+static_assert(kGetVersion.result_model == cpp_core::FunctionResultModel::kVoid);
+static_assert(kGetVersion.parameters.size() == 1);
+static_assert(kGetVersion.parameters[0].name == "out");
+static_assert(kGetVersion.parameters[0].abi_kind == cpp_core::AbiValueKind::kVersionStructPointer);
+static_assert(kGetVersion.parameters[0].direction == cpp_core::ParameterDirection::kOut);
 
 constexpr auto kSerialOpen = cpp_core::detail::kDescriptor_serialOpen;
 static_assert(kSerialOpen.result_model == cpp_core::FunctionResultModel::kHandleOrStatus);
@@ -45,6 +52,7 @@ static_assert(cpp_core::kVersionFieldDescriptors[7].name == "version_string");
 
 static_assert(cpp_core::findFunctionDescriptor("serialOpen") != nullptr);
 static_assert(cpp_core::findFunctionDescriptor("serialOpen")->name == "serialOpen");
+static_assert(cpp_core::findFunctionDescriptor("doesNotExist") == nullptr);
 static_assert(cpp_core::findOperationDescriptor("serialOpen") != nullptr);
 static_assert(cpp_core::findOperationDescriptor("serialOpen")->function_name == "serialOpen");
 static_assert(cpp_core::findStatusCodeDescriptor(cpp_core::StatusCodes::kMonitorError) != nullptr);

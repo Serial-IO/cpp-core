@@ -1,0 +1,42 @@
+#pragma once
+
+#define CPP_CORE_ABI_FUNCTION_LIST(X)                                                                                  \
+    X(getVersion)                                                                                                      \
+    X(serialAbortRead)                                                                                                 \
+    X(serialAbortWrite)                                                                                                \
+    X(serialClearBufferIn)                                                                                             \
+    X(serialClearBufferOut)                                                                                            \
+    X(serialClose)                                                                                                     \
+    X(serialDrain)                                                                                                     \
+    X(serialGetBaudrate)                                                                                               \
+    X(serialGetCts)                                                                                                    \
+    X(serialGetDataBits)                                                                                               \
+    X(serialGetDcd)                                                                                                    \
+    X(serialGetDsr)                                                                                                    \
+    X(serialGetFlowControl)                                                                                            \
+    X(serialGetParity)                                                                                                 \
+    X(serialGetRi)                                                                                                     \
+    X(serialGetStopBits)                                                                                               \
+    X(serialInBytesTotal)                                                                                              \
+    X(serialInBytesWaiting)                                                                                            \
+    X(serialListPorts)                                                                                                 \
+    X(serialMonitorPorts)                                                                                              \
+    X(serialOpen)                                                                                                      \
+    X(serialOutBytesTotal)                                                                                             \
+    X(serialOutBytesWaiting)                                                                                           \
+    X(serialRead)                                                                                                      \
+    X(serialReadLine)                                                                                                  \
+    X(serialReadUntil)                                                                                                 \
+    X(serialReadUntilSequence)                                                                                         \
+    X(serialSendBreak)                                                                                                 \
+    X(serialSetBaudrate)                                                                                               \
+    X(serialSetDataBits)                                                                                               \
+    X(serialSetDtr)                                                                                                    \
+    X(serialSetErrorCallback)                                                                                          \
+    X(serialSetFlowControl)                                                                                            \
+    X(serialSetParity)                                                                                                 \
+    X(serialSetReadCallback)                                                                                           \
+    X(serialSetRts)                                                                                                    \
+    X(serialSetStopBits)                                                                                               \
+    X(serialSetWriteCallback)                                                                                          \
+    X(serialWrite)
