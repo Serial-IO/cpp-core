@@ -2,6 +2,7 @@
 
 #include "strong_types.hpp"
 
+#include <cstddef>
 #include <concepts>
 #include <type_traits>
 

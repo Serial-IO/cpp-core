@@ -69,6 +69,23 @@ set(PROJECT_DESCRIPTION "Shared serial API and FFI metadata for GCC 16 / C++26 r
 add_library(cpp_core INTERFACE)
 add_library(cpp_core::cpp_core ALIAS cpp_core)
 
+add_library(cpp_core_strict_warnings INTERFACE)
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    target_compile_options(
+        cpp_core_strict_warnings
+        INTERFACE
+        -Wall
+        -Wextra
+        -Wpedantic
+        -Wconversion
+        -Wsign-conversion
+        -Wshadow
+        -Wundef
+        -Werror
+    )
+endif()
+
 # Public include directories
 target_include_directories(
     cpp_core
@@ -83,6 +100,7 @@ target_compile_options(cpp_core INTERFACE -freflection)
 
 add_executable(cpp_core_bindgen EXCLUDE_FROM_ALL tools/generate_deno_symbols.cpp)
 target_link_libraries(cpp_core_bindgen PRIVATE cpp_core::cpp_core)
+target_link_libraries(cpp_core_bindgen PRIVATE cpp_core_strict_warnings)
 
 include(CTest)
 
@@ -90,6 +108,7 @@ if(BUILD_TESTING)
     file(GLOB CPP_CORE_COMPILE_TEST_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/tests/*_compile_test.cpp")
     add_library(cpp_core_compile_tests OBJECT ${CPP_CORE_COMPILE_TEST_SOURCES})
     target_link_libraries(cpp_core_compile_tests PRIVATE cpp_core::cpp_core)
+    target_link_libraries(cpp_core_compile_tests PRIVATE cpp_core_strict_warnings)
 
     set(CPP_CORE_DENO_BINDGEN_SMOKE_EXE "${CMAKE_CURRENT_BINARY_DIR}/cpp_core_bindgen_smoke_bin")
     add_custom_target(

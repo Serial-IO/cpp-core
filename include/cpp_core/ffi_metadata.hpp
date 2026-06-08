@@ -1,6 +1,6 @@
 #pragma once
 
-#include "abi_registry.hpp"
+#include "ffi/abi_function_registry.hpp"
 #include "serial.h"
 #include "serial_config.hpp"
 #include "status_code.h"
@@ -329,14 +329,6 @@ namespace detail
     };
 }
 
-template <std::size_t... Index>
-[[nodiscard]] consteval auto makeParameterDescriptorsImpl(std::string_view function_name,
-                                                          const std::vector<std::meta::info> &params,
-                                                          std::index_sequence<Index...>)
-{
-    return std::array<ParameterDescriptor, sizeof...(Index)>{makeParameterDescriptor(function_name, params[Index])...};
-}
-
 template <std::meta::info FunctionInfo, std::size_t... Index>
 [[nodiscard]] consteval auto makeParameterDescriptorsForFunctionImpl(std::index_sequence<Index...>)
 {
@@ -456,7 +448,7 @@ inline constexpr auto kOperationDescriptors = []() consteval
                                      .size()>{});
 }();
 
-#include "status_code_descriptor_registry.hpp"
+#include "ffi/status_code_descriptors.hpp"
 
 inline constexpr auto kSerialConfigFieldDescriptors = []() consteval
 {

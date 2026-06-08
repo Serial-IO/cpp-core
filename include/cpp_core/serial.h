@@ -1,8 +1,5 @@
 #pragma once
 
-#include "module_api.h"
-#include "version.hpp"
-
 // Aggregated interface headers
 #include "interface/get_version.h"
 #include "interface/serial_abort_read.h"

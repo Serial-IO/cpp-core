@@ -4,7 +4,6 @@
 
 #include <concepts>
 #include <expected>
-#include <format>
 #include <string>
 #include <type_traits>
 #include <utility>
