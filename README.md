@@ -86,32 +86,14 @@ function describeStatus(code: number) {
 try {
   console.log("opening via symbol", operations.serialOpen.symbol);
 
-  handle = serial.serialOpen({
-    port: "/dev/ttyUSB0",
-    baudrate: 115200,
-    data_bits: 8,
-    parity: 0,
-    stop_bits: 0,
-  });
+  handle = serial.serialOpen("/dev/ttyUSB0", 115200, 8, 0, 0);
 
   const writeBuffer = new Uint8Array([0x41, 0x54, 0x49, 0x0d, 0x0a]);
-  const bytesWritten = serial.serialWrite({
-    handle,
-    buffer: writeBuffer,
-    buffer_size: writeBuffer.byteLength,
-    timeout_ms: 500,
-    multiplier: 0,
-  });
+  const bytesWritten = serial.serialWrite(handle, writeBuffer, writeBuffer.byteLength, 500, 0);
 
-  const queued = serial.serialInBytesWaiting({ handle });
+  const queued = serial.serialInBytesWaiting(handle);
   const readBuffer = new Uint8Array(256);
-  const bytesRead = serial.serialRead({
-    handle,
-    buffer: readBuffer,
-    buffer_size: readBuffer.byteLength,
-    timeout_ms: 500,
-    multiplier: 0,
-  });
+  const bytesRead = serial.serialRead(handle, readBuffer, readBuffer.byteLength, 500, 0);
 
   const payload = decoder.decode(readBuffer.subarray(0, bytesRead));
 
@@ -250,11 +232,7 @@ With the generated wrapper layer on top, the same call can be used more directly
 const dylib = Deno.dlopen(path, symbols);
 const serial = createBindings(dylib);
 
-const handle = serial.serialOpen({
-  port: "/dev/ttyUSB0",
-  baudrate: 115200,
-  data_bits: 8,
-});
+const handle = serial.serialOpen("/dev/ttyUSB0", 115200, 8);
 ```
 
 ## Using The Metadata

@@ -24,7 +24,7 @@ set(required_snippets
     "export const operations = {"
     "export class StatusCodeError extends Error"
     "export function createBindings(dylib: BindgenLibrary)"
-    "serialOpen(args: SerialOpenParams): bigint"
+    "serialOpen(port: string | Deno.PointerValue, baudrate: number, data_bits: number, parity: number = 0, stop_bits: number = 0, error_callback: Deno.PointerValue | null = null): bigint"
 )
 
 foreach(snippet IN LISTS required_snippets)

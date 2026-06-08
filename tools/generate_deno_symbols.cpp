@@ -1,7 +1,6 @@
 #include <cpp_core/ffi_metadata.hpp>
 
 #include <algorithm>
-#include <cctype>
 #include <fstream>
 #include <iostream>
 #include <optional>
@@ -66,33 +65,6 @@ struct CliOptions
     return "void";
 }
 
-[[nodiscard]] auto toPascalCase(std::string_view text) -> std::string
-{
-    std::string out;
-    out.reserve(text.size());
-
-    bool upper_next = true;
-    for (const char ch : text)
-    {
-        if (ch == '_' || ch == '-' || ch == ' ')
-        {
-            upper_next = true;
-            continue;
-        }
-
-        if (upper_next)
-        {
-            out.push_back(static_cast<char>(std::toupper(static_cast<unsigned char>(ch))));
-            upper_next = false;
-            continue;
-        }
-
-        out.push_back(ch);
-    }
-
-    return out;
-}
-
 [[nodiscard]] auto toTsParameterType(const cpp_core::ParameterDescriptor &parameter) -> std::string_view
 {
     switch (parameter.abi_kind)
@@ -148,14 +120,29 @@ struct CliOptions
     });
 }
 
-[[nodiscard]] auto sourceExpr(const cpp_core::ParameterDescriptor &parameter) -> std::string
+[[nodiscard]] auto optionalParameterDefault(const cpp_core::ParameterDescriptor &parameter)
+    -> std::optional<std::string_view>
 {
-    if (parameter.optional)
+    if (!parameter.optional)
     {
-        return std::string(parameter.name);
+        return std::nullopt;
     }
 
-    return "args." + std::string(parameter.name);
+    switch (parameter.abi_kind)
+    {
+    case cpp_core::AbiValueKind::kInt32:
+        return "0";
+    case cpp_core::AbiValueKind::kErrorCallback:
+    case cpp_core::AbiValueKind::kNotificationCallback:
+        return "null";
+    default:
+        return std::nullopt;
+    }
+}
+
+[[nodiscard]] auto sourceExpr(const cpp_core::ParameterDescriptor &parameter) -> std::string
+{
+    return std::string(parameter.name);
 }
 
 auto printUsage(std::ostream &stream) -> void
@@ -255,20 +242,6 @@ auto writeStatusCodes(std::ostream &stream) -> void
     stream << "} as const;\n\n";
 }
 
-auto writeParamInterfaces(std::ostream &stream) -> void
-{
-    for (const auto &function : cpp_core::functionDescriptors())
-    {
-        stream << "export interface " << toPascalCase(function.name) << "Params {\n";
-        for (const auto &parameter : function.parameters)
-        {
-            stream << "  " << parameter.name << (parameter.optional ? "?: " : ": ") << toTsParameterType(parameter)
-                   << ";\n";
-        }
-        stream << "}\n\n";
-    }
-}
-
 auto writeHelpers(std::ostream &stream) -> void
 {
     stream << "const textEncoder = new TextEncoder();\n\n";
@@ -362,26 +335,6 @@ auto writeWrapperBody(std::ostream &stream, const cpp_core::FunctionDescriptor &
 
     for (const auto &parameter : function.parameters)
     {
-        if (!parameter.optional)
-        {
-            continue;
-        }
-
-        stream << "      const " << parameter.name << " = args." << parameter.name;
-        if (parameter.abi_kind == cpp_core::AbiValueKind::kInt32)
-        {
-            stream << " ?? 0";
-        }
-        else if (parameter.abi_kind == cpp_core::AbiValueKind::kErrorCallback ||
-                 parameter.abi_kind == cpp_core::AbiValueKind::kNotificationCallback)
-        {
-            stream << " ?? null";
-        }
-        stream << ";\n";
-    }
-
-    for (const auto &parameter : function.parameters)
-    {
         const std::string source = sourceExpr(parameter);
         switch (parameter.abi_kind)
         {
@@ -462,6 +415,28 @@ auto writeWrapperBody(std::ostream &stream, const cpp_core::FunctionDescriptor &
     }
 }
 
+auto writeWrapperSignature(std::ostream &stream, const cpp_core::FunctionDescriptor &function) -> void
+{
+    stream << "    " << function.name << "(";
+
+    for (std::size_t index = 0; index < function.parameters.size(); ++index)
+    {
+        if (index != 0)
+        {
+            stream << ", ";
+        }
+
+        const auto &parameter = function.parameters[index];
+        stream << parameter.name << ": " << toTsParameterType(parameter);
+        if (const auto default_value = optionalParameterDefault(parameter))
+        {
+            stream << " = " << *default_value;
+        }
+    }
+
+    stream << "): " << toWrapperReturnType(function);
+}
+
 auto writeWrapperFunctions(std::ostream &stream) -> void
 {
     stream << "export type BindgenLibrary = Deno.DynamicLibrary<typeof symbols>;\n";
@@ -471,8 +446,8 @@ auto writeWrapperFunctions(std::ostream &stream) -> void
 
     for (const auto &function : cpp_core::functionDescriptors())
     {
-        stream << "    " << function.name << "(args: " << toPascalCase(function.name)
-               << "Params): " << toWrapperReturnType(function) << " {\n";
+        writeWrapperSignature(stream, function);
+        stream << " {\n";
         writeWrapperBody(stream, function);
         stream << "    },\n";
     }
@@ -488,7 +463,6 @@ auto writeModule(std::ostream &stream) -> void
     writeSymbols(stream);
     writeOperations(stream);
     writeStatusCodes(stream);
-    writeParamInterfaces(stream);
     writeHelpers(stream);
     writeWrapperFunctions(stream);
 }

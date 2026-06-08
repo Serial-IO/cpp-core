@@ -266,7 +266,14 @@ export const operations = {
 
 export function createBindings(dylib: Deno.DynamicLibrary<typeof symbols>) {
   return {
-    serialOpen(args: SerialOpenParams): bigint {
+    serialOpen(
+      port: string | Deno.PointerValue,
+      baudrate: number,
+      data_bits: number,
+      parity: number = 0,
+      stop_bits: number = 0,
+      error_callback: Deno.PointerValue | null = null,
+    ): bigint {
       // marshals strings
       // throws StatusCodeError on failure
     },
@@ -304,7 +311,7 @@ The metadata layer is useful for:
 * inspect exported functions from tooling or tests
 * generate a Deno metadata module with `cpp_core_bindgen`
 * generate or validate Deno FFI symbol tables
-* consume `createBindings(dylib)` as a higher-level TS wrapper layer with named params and automatic error conversion
+* consume `createBindings(dylib)` as a higher-level TS wrapper layer with positional arguments and automatic error conversion
 * generate status-code lookup tables
 * let Linux/Windows builds consume the same `cpp-core` revision for both headers and bindgen output
 * keep ABI comments and generated docs consistent with the actual declarations
