@@ -17,7 +17,7 @@ extern "C"
      *
      * @param handle Port handle obtained from serialOpen().
      * @param error_callback [optional] Callback to invoke on error. Defined in error_callback.h. Default is `nullptr`.
-     * @return 1 if asserted (HIGH), 0 if de-asserted (LOW), or a negative error code from ::cpp_core::StatusCodes.
+     * @return 1 if asserted (HIGH), 0 if de-asserted (LOW), or a negative error code from ::cpp_core::StatusCode.
      */
     MODULE_API auto serialGetDcd(int64_t handle, ErrorCallbackT error_callback = nullptr) -> int;
 

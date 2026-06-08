@@ -55,4 +55,4 @@ static_assert(cpp_core::findFunctionDescriptor("serialOpen")->name == "serialOpe
 static_assert(cpp_core::findFunctionDescriptor("doesNotExist") == nullptr);
 static_assert(cpp_core::findOperationDescriptor("serialOpen") != nullptr);
 static_assert(cpp_core::findOperationDescriptor("serialOpen")->function_name == "serialOpen");
-static_assert(cpp_core::findStatusCodeDescriptor(cpp_core::StatusCodes::kMonitorError) != nullptr);
+static_assert(cpp_core::findStatusCodeDescriptor(cpp_core::StatusCode::Monitor::kMonitorError) != nullptr);

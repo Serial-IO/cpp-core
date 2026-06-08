@@ -157,37 +157,4 @@ namespace cpp_core
 using StatusCodeValue = ::cpp_core::status_codes::detail::ValueType;
 using ::cpp_core::status_codes::StatusCode;
 
-struct StatusCodes
-{
-    static constexpr StatusCodeValue kSuccess = StatusCode::kSuccess;
-
-    static constexpr StatusCodeValue kSetBaudrateError = StatusCode::Configuration::kSetBaudrateError;
-    static constexpr StatusCodeValue kSetDataBitsError = StatusCode::Configuration::kSetDataBitsError;
-    static constexpr StatusCodeValue kSetParityError = StatusCode::Configuration::kSetParityError;
-    static constexpr StatusCodeValue kSetStopBitsError = StatusCode::Configuration::kSetStopBitsError;
-    static constexpr StatusCodeValue kSetFlowControlError = StatusCode::Configuration::kSetFlowControlError;
-    static constexpr StatusCodeValue kSetTimeoutError = StatusCode::Configuration::kSetTimeoutError;
-
-    static constexpr StatusCodeValue kNotFoundError = StatusCode::Connection::kNotFoundError;
-    static constexpr StatusCodeValue kInvalidHandleError = StatusCode::Connection::kInvalidHandleError;
-    static constexpr StatusCodeValue kCloseHandleError = StatusCode::Connection::kCloseHandleError;
-
-    static constexpr StatusCodeValue kReadError = StatusCode::Io::kReadError;
-    static constexpr StatusCodeValue kWriteError = StatusCode::Io::kWriteError;
-    static constexpr StatusCodeValue kAbortReadError = StatusCode::Io::kAbortReadError;
-    static constexpr StatusCodeValue kAbortWriteError = StatusCode::Io::kAbortWriteError;
-    static constexpr StatusCodeValue kBufferError = StatusCode::Io::kBufferError;
-    static constexpr StatusCodeValue kClearBufferInError = StatusCode::Io::kClearBufferInError;
-    static constexpr StatusCodeValue kClearBufferOutError = StatusCode::Io::kClearBufferOutError;
-
-    static constexpr StatusCodeValue kSetDtrError = StatusCode::Control::kSetDtrError;
-    static constexpr StatusCodeValue kSetRtsError = StatusCode::Control::kSetRtsError;
-    static constexpr StatusCodeValue kGetModemStatusError = StatusCode::Control::kGetModemStatusError;
-    static constexpr StatusCodeValue kSendBreakError = StatusCode::Control::kSendBreakError;
-    static constexpr StatusCodeValue kGetStateError = StatusCode::Control::kGetStateError;
-    static constexpr StatusCodeValue kSetStateError = StatusCode::Control::kSetStateError;
-
-    static constexpr StatusCodeValue kMonitorError = StatusCode::Monitor::kMonitorError;
-};
-
 } // namespace cpp_core

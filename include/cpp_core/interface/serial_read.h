@@ -23,7 +23,7 @@ extern "C"
      * @param multiplier Factor applied to @p timeout_ms for every byte after the first. 0 -> return immediately after
      * the first byte.
      * @param error_callback [optional] Callback to invoke on error. Defined in error_callback.h. Default is `nullptr`.
-     * @return Bytes read (0 on timeout) or a negative error code from ::cpp_core::StatusCodes on error.
+     * @return Bytes read (0 on timeout) or a negative error code from ::cpp_core::StatusCode on error.
      */
     MODULE_API auto serialRead(int64_t handle, void *buffer, int buffer_size, int timeout_ms, int multiplier,
                                ErrorCallbackT error_callback = nullptr) -> int;

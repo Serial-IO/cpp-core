@@ -13,7 +13,7 @@ extern "C"
      *
      * @param handle Port handle obtained from serialOpen().
      * @param error_callback [optional] Callback to invoke on error. Defined in error_callback.h. Default is `nullptr`.
-     * @return Current data bits (5-8) or a negative error code from ::cpp_core::StatusCodes.
+     * @return Current data bits (5-8) or a negative error code from ::cpp_core::StatusCode.
      */
     MODULE_API auto serialGetDataBits(int64_t handle, ErrorCallbackT error_callback = nullptr) -> int;
 

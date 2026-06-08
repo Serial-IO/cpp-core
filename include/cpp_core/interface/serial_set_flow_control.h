@@ -29,7 +29,7 @@ extern "C"
      * @param handle Port handle obtained from serialOpen().
      * @param mode Flow-control mode: 0 = none, 1 = RTS/CTS, 2 = XON/XOFF.
      * @param error_callback [optional] Callback to invoke on error. Defined in error_callback.h. Default is `nullptr`.
-     * @return 0 on success or a negative error code from ::cpp_core::StatusCodes on error.
+     * @return 0 on success or a negative error code from ::cpp_core::StatusCode on error.
      */
     MODULE_API auto serialSetFlowControl(int64_t handle, int mode, ErrorCallbackT error_callback = nullptr) -> int;
 

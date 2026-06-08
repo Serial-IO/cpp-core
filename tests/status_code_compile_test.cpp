@@ -54,13 +54,6 @@ static_assert(cpp_core::StatusCode::Control::kSetStateError == -405);
 static_assert(cpp_core::StatusCode::Monitor::kMonitorError.category() == "Monitor");
 static_assert(cpp_core::StatusCode::Monitor::kMonitorError == -500);
 
-static_assert(cpp_core::StatusCodes::kSuccess == cpp_core::StatusCode::kSuccess);
-static_assert(cpp_core::StatusCodes::kSetBaudrateError == cpp_core::StatusCode::Configuration::kSetBaudrateError);
-static_assert(cpp_core::StatusCodes::kInvalidHandleError == cpp_core::StatusCode::Connection::kInvalidHandleError);
-static_assert(cpp_core::StatusCodes::kAbortReadError == cpp_core::StatusCode::Io::kAbortReadError);
-static_assert(cpp_core::StatusCodes::kSetStateError == cpp_core::StatusCode::Control::kSetStateError);
-static_assert(cpp_core::StatusCodes::kMonitorError == cpp_core::StatusCode::Monitor::kMonitorError);
-
 static_assert(cpp_core::StatusCode::belongsTo<cpp_core::StatusCode::Configuration>(
     cpp_core::StatusCode::Configuration::kSetBaudrateError));
 static_assert(!cpp_core::StatusCode::belongsTo<cpp_core::StatusCode::Io>(
