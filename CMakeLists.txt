@@ -13,7 +13,6 @@ if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 16)
     message(FATAL_ERROR "cpp-core requires GCC 16 or newer.")
 endif()
 
-# The project currently targets a single toolchain with C++26 reflection support.
 set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -63,7 +62,7 @@ get_git_version_info()
 generate_git_version(OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include/cpp_core)
 
 set(PROJECT_VERSION "${GIT_VERSION_MAJOR}.${GIT_VERSION_MINOR}.${GIT_VERSION_PATCH}")
-set(PROJECT_DESCRIPTION "Shared serial API and FFI metadata for GCC 16 / C++26 reflection builds")
+set(PROJECT_DESCRIPTION "Cross-platform helper library shared by cpp-linux-bindings and cpp-windows-bindings")
 
 # Header-only library --------------------------------------------------------
 add_library(cpp_core INTERFACE)

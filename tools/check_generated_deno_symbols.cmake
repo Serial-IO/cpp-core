@@ -23,6 +23,9 @@ set(required_snippets
     "result: \"i64\""
     "export const operations = {"
     "export class StatusCodeError extends Error"
+    "export const errorCallbackDefinition = {"
+    "export type ErrorCallback = (error_code: number, message: string | null) => void;"
+    "export function createErrorCallback(callback: ErrorCallback): Deno.UnsafeCallback<typeof errorCallbackDefinition>"
     "export function createBindings(dylib: BindgenLibrary)"
     "serialOpen(port: string | Deno.PointerValue, baudrate: number, data_bits: number, parity: number = 0, stop_bits: number = 0, error_callback: Deno.PointerValue | null = null): bigint"
 )

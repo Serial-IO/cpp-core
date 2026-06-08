@@ -44,8 +44,6 @@ constexpr auto statuses = cpp_core::statusCodeDescriptors();
 constexpr auto config_fields = cpp_core::serialConfigFieldDescriptors();
 ```
 
-More practical usage examples are documented in [docs/ffi-metadata.md](docs/ffi-metadata.md).
-
 Bindgen target:
 
 ```sh
@@ -58,7 +56,7 @@ The generated module contains:
 * `symbols` for `Deno.dlopen`
 * `operations` metadata
 * `statusCodes` plus `StatusCodeError`
-* `createBindings(dylib)` which returns named TypeScript wrapper functions
+* `createBindings(dylib)` which returns positional TypeScript wrapper functions
 
 Example:
 
@@ -119,7 +117,7 @@ try {
 } finally {
   if (handle !== undefined) {
     try {
-      serial.serialClose({ handle });
+      serial.serialClose(handle);
     } catch (error) {
       if (error instanceof StatusCodeError) {
         console.error("close failed:", describeStatus(error.code));
@@ -138,7 +136,7 @@ The metadata layer provides:
 
 * **One source of truth** for exported function names, parameter names, return semantics, and status categories
 * **No manual re-parsing of headers** when you want to derive Deno FFI symbol definitions or internal binding manifests
-* **Generated wrapper functions** with named parameters, result decoding, and status-to-exception conversion
+* **Generated wrapper functions** with positional parameters, result decoding, and status-to-exception conversion
 * **Safer refactors** because compile-time metadata checks fail when the exposed signatures drift
 * **Shared understanding of the ABI** because buffers, callbacks, UTF-8 strings, opaque handles, and status-returning functions are classified centrally
 * **Less version drift in consumers** because the same `cpp-core` checkout provides both the headers and the generator used by Linux/Windows builds
@@ -235,9 +233,86 @@ const serial = createBindings(dylib);
 const handle = serial.serialOpen("/dev/ttyUSB0", 115200, 8);
 ```
 
+## TypeScript Wrapper Examples
+
+The generated wrapper layer is intended to feel like ordinary TypeScript, not a metadata-driven object API.
+
+Simple open / write / close flow:
+
+```ts
+import { createBindings, symbols } from "./deno_bindings.ts";
+
+const dylib = Deno.dlopen("./libcpp_bindings_linux.so", symbols);
+const serial = createBindings(dylib);
+
+const handle = serial.serialOpen("/dev/ttyUSB0", 115200, 8);
+serial.serialWrite(handle, new Uint8Array([0x41, 0x54, 0x0d]), 3, 500, 0);
+serial.serialClose(handle);
+
+dylib.close();
+```
+
+Using optional ABI parameters through normal TypeScript defaults:
+
+```ts
+const handle = serial.serialOpen("/dev/ttyUSB0", 115200, 8);
+const available = serial.serialInBytesWaiting(handle);
+const line = new Uint8Array(256);
+const bytesRead = serial.serialReadLine(handle, line, line.byteLength, 250, 2);
+```
+
+Handling wrapper-thrown `StatusCodeError`:
+
+```ts
+import {
+  createBindings,
+  StatusCodeError,
+  statusCodes,
+  symbols,
+} from "./deno_bindings.ts";
+
+const dylib = Deno.dlopen("./libcpp_bindings_linux.so", symbols);
+const serial = createBindings(dylib);
+
+try {
+  serial.serialOpen("/dev/does-not-exist", 115200, 8);
+} catch (error) {
+  if (error instanceof StatusCodeError) {
+    if (error.code === statusCodes.NotFoundError) {
+      console.error("port not found");
+    }
+    console.error(error.category, error.statusName, error.code);
+  }
+}
+```
+
+Passing an explicit error callback pointer to the generated wrapper:
+
+```ts
+import {
+  createBindings,
+  createErrorCallback,
+  symbols,
+} from "./deno_bindings.ts";
+
+const dylib = Deno.dlopen("./libcpp_bindings_linux.so", symbols);
+const serial = createBindings(dylib);
+
+const errorCallback = createErrorCallback((error_code, message) => {
+  console.error("ffi error callback:", error_code, message ?? "<no message>");
+});
+
+try {
+  serial.serialOpen("/dev/does-not-exist", 115200, 8, 0, 0, errorCallback.pointer);
+} finally {
+  errorCallback.close();
+  dylib.close();
+}
+```
+
 ## Using The Metadata
 
-For concrete usage examples, see [docs/ffi-metadata.md](docs/ffi-metadata.md). The short version is:
+The short version is:
 
 * use `cpp_core::functionDescriptors()` when you want to inspect the exported C ABI
 * use `cpp_core::operationDescriptors()` when you want a stable per-operation view next to the raw function list

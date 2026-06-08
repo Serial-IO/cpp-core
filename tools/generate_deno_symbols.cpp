@@ -6,9 +6,29 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <tuple>
+#include <type_traits>
 
 namespace
 {
+
+template <typename> struct FunctionPointerTraits;
+
+template <typename Return, typename... Args> struct FunctionPointerTraits<Return (*)(Args...)>
+{
+    using ReturnType = Return;
+    using ArgumentTypes = std::tuple<Args...>;
+    static constexpr std::size_t kArity = sizeof...(Args);
+
+    template <std::size_t Index> using Argument = std::tuple_element_t<Index, ArgumentTypes>;
+};
+
+using ErrorCallbackTraits = FunctionPointerTraits<ErrorCallbackT>;
+
+static_assert(ErrorCallbackTraits::kArity == 2);
+static_assert(std::is_same_v<ErrorCallbackTraits::ReturnType, void>);
+static_assert(std::is_same_v<ErrorCallbackTraits::Argument<0>, int>);
+static_assert(std::is_same_v<ErrorCallbackTraits::Argument<1>, const char *>);
 
 struct CliOptions
 {
@@ -40,9 +60,9 @@ struct CliOptions
     return "pointer";
 }
 
-[[nodiscard]] constexpr auto toDenoResultType(const cpp_core::FunctionDescriptor &function) -> std::string_view
+[[nodiscard]] constexpr auto toDenoResultType(cpp_core::AbiValueKind kind) -> std::string_view
 {
-    switch (function.return_abi_kind)
+    switch (kind)
     {
     case cpp_core::AbiValueKind::kVoid:
         return "void";
@@ -63,6 +83,11 @@ struct CliOptions
     }
 
     return "void";
+}
+
+[[nodiscard]] constexpr auto toDenoResultType(const cpp_core::FunctionDescriptor &function) -> std::string_view
+{
+    return toDenoResultType(function.return_abi_kind);
 }
 
 [[nodiscard]] auto toTsParameterType(const cpp_core::ParameterDescriptor &parameter) -> std::string_view
@@ -270,6 +295,12 @@ auto writeHelpers(std::ostream &stream) -> void
     stream << "  }\n";
     stream << "  return pointer;\n";
     stream << "}\n\n";
+    stream << "function decodeCStringPointer(value: Deno.PointerValue): string | null {\n";
+    stream << "  if (value === null) {\n";
+    stream << "    return null;\n";
+    stream << "  }\n";
+    stream << "  return new Deno.UnsafePointerView(value).getCString();\n";
+    stream << "}\n\n";
     stream << "function marshalCString(value: string | Deno.PointerValue, name: string, keepAlive: KeepAlive): "
               "Deno.PointerValue {\n";
     stream << "  if (typeof value === \"string\") {\n";
@@ -322,6 +353,29 @@ auto writeHelpers(std::ostream &stream) -> void
     stream << "  if (normalized < 0) {\n";
     stream << "    throw new StatusCodeError(normalized);\n";
     stream << "  }\n";
+    stream << "}\n\n";
+}
+
+auto writeErrorCallbackSupport(std::ostream &stream) -> void
+{
+    stream << "export const errorCallbackDefinition = {\n";
+    stream << "  parameters: [\"i32\", \"pointer\"],\n";
+    stream << "  result: \"void\",\n";
+    stream << "} as const;\n\n";
+
+    stream << "export type RawErrorCallback = (error_code: number, message: Deno.PointerValue) => void;\n";
+    stream << "export type ErrorCallback = (error_code: number, message: string | null) => void;\n\n";
+
+    stream << "export function createRawErrorCallback(callback: RawErrorCallback): Deno.UnsafeCallback<typeof "
+              "errorCallbackDefinition> {\n";
+    stream << "  return new Deno.UnsafeCallback(errorCallbackDefinition, callback);\n";
+    stream << "}\n\n";
+
+    stream << "export function createErrorCallback(callback: ErrorCallback): Deno.UnsafeCallback<typeof "
+              "errorCallbackDefinition> {\n";
+    stream << "  return new Deno.UnsafeCallback(errorCallbackDefinition, (error_code, message) => {\n";
+    stream << "    callback(error_code, decodeCStringPointer(message));\n";
+    stream << "  });\n";
     stream << "}\n\n";
 }
 
@@ -464,6 +518,7 @@ auto writeModule(std::ostream &stream) -> void
     writeOperations(stream);
     writeStatusCodes(stream);
     writeHelpers(stream);
+    writeErrorCallbackSupport(stream);
     writeWrapperFunctions(stream);
 }
 
