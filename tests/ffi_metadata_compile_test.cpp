@@ -8,14 +8,14 @@ static_assert(!cpp_core::kStatusCodeDescriptors.empty());
 static_assert(cpp_core::kSerialConfigFieldDescriptors.size() == 4);
 static_assert(cpp_core::kVersionFieldDescriptors.size() == 8);
 
-constexpr auto kGetVersion = cpp_core::detail::kDescriptor_getVersion;
+constexpr auto &kGetVersion = *cpp_core::findFunctionDescriptor("getVersion");
 static_assert(kGetVersion.result_model == cpp_core::FunctionResultModel::kVoid);
 static_assert(kGetVersion.parameters.size() == 1);
 static_assert(kGetVersion.parameters[0].name == "out");
 static_assert(kGetVersion.parameters[0].abi_kind == cpp_core::AbiValueKind::kVersionStructPointer);
 static_assert(kGetVersion.parameters[0].direction == cpp_core::ParameterDirection::kOut);
 
-constexpr auto kSerialOpen = cpp_core::detail::kDescriptor_serialOpen;
+constexpr auto &kSerialOpen = *cpp_core::findFunctionDescriptor("serialOpen");
 static_assert(kSerialOpen.result_model == cpp_core::FunctionResultModel::kHandleOrStatus);
 static_assert(kSerialOpen.return_abi_kind == cpp_core::AbiValueKind::kOpaqueHandle);
 static_assert(kSerialOpen.parameters.size() == 6);
@@ -25,13 +25,13 @@ static_assert(kSerialOpen.parameters[4].optional);
 static_assert(kSerialOpen.parameters[5].name == "error_callback");
 static_assert(kSerialOpen.parameters[5].abi_kind == cpp_core::AbiValueKind::kErrorCallback);
 
-constexpr auto kSerialRead = cpp_core::detail::kDescriptor_serialRead;
+constexpr auto &kSerialRead = *cpp_core::findFunctionDescriptor("serialRead");
 static_assert(kSerialRead.result_model == cpp_core::FunctionResultModel::kValueOrStatus);
 static_assert(kSerialRead.parameters[1].name == "buffer");
 static_assert(kSerialRead.parameters[1].abi_kind == cpp_core::AbiValueKind::kMutableBuffer);
 static_assert(kSerialRead.parameters[1].direction == cpp_core::ParameterDirection::kOut);
 
-constexpr auto kSetErrorCallback = cpp_core::detail::kDescriptor_serialSetErrorCallback;
+constexpr auto &kSetErrorCallback = *cpp_core::findFunctionDescriptor("serialSetErrorCallback");
 static_assert(kSetErrorCallback.result_model == cpp_core::FunctionResultModel::kVoid);
 static_assert(kSetErrorCallback.parameters.size() == 1);
 static_assert(kSetErrorCallback.parameters[0].abi_kind == cpp_core::AbiValueKind::kErrorCallback);

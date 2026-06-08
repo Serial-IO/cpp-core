@@ -21,6 +21,7 @@ static_assert(cpp_core::StatusCode::isSuccess(cpp_core::StatusCode::kSuccess));
 static_assert(!cpp_core::StatusCode::isError(cpp_core::StatusCode::kSuccess));
 static_assert(cpp_core::StatusCode::isError(cpp_core::StatusCode::Configuration::kSetBaudrateError));
 
+static_assert(cpp_core::StatusCode::Configuration::kSetBaudrateError.category() == "Configuration");
 static_assert(cpp_core::StatusCode::Configuration::kSetBaudrateError == -100);
 static_assert(cpp_core::StatusCode::Configuration::kSetDataBitsError == -101);
 static_assert(cpp_core::StatusCode::Configuration::kSetParityError == -102);
@@ -28,10 +29,12 @@ static_assert(cpp_core::StatusCode::Configuration::kSetStopBitsError == -103);
 static_assert(cpp_core::StatusCode::Configuration::kSetFlowControlError == -104);
 static_assert(cpp_core::StatusCode::Configuration::kSetTimeoutError == -105);
 
+static_assert(cpp_core::StatusCode::Connection::kNotFoundError.category() == "Connection");
 static_assert(cpp_core::StatusCode::Connection::kNotFoundError == -200);
 static_assert(cpp_core::StatusCode::Connection::kInvalidHandleError == -201);
 static_assert(cpp_core::StatusCode::Connection::kCloseHandleError == -202);
 
+static_assert(cpp_core::StatusCode::Io::kReadError.category() == "Io");
 static_assert(cpp_core::StatusCode::Io::kReadError == -300);
 static_assert(cpp_core::StatusCode::Io::kWriteError == -301);
 static_assert(cpp_core::StatusCode::Io::kAbortReadError == -302);
@@ -40,12 +43,28 @@ static_assert(cpp_core::StatusCode::Io::kBufferError == -304);
 static_assert(cpp_core::StatusCode::Io::kClearBufferInError == -305);
 static_assert(cpp_core::StatusCode::Io::kClearBufferOutError == -306);
 
+static_assert(cpp_core::StatusCode::Control::kSetDtrError.category() == "Control");
 static_assert(cpp_core::StatusCode::Control::kSetDtrError == -400);
 static_assert(cpp_core::StatusCode::Control::kSetRtsError == -401);
 static_assert(cpp_core::StatusCode::Control::kGetModemStatusError == -402);
 static_assert(cpp_core::StatusCode::Control::kSendBreakError == -403);
 static_assert(cpp_core::StatusCode::Control::kGetStateError == -404);
 static_assert(cpp_core::StatusCode::Control::kSetStateError == -405);
+
+static_assert(cpp_core::StatusCode::Monitor::kMonitorError.category() == "Monitor");
+static_assert(cpp_core::StatusCode::Monitor::kMonitorError == -500);
+
+static_assert(cpp_core::StatusCodes::kSuccess == cpp_core::StatusCode::kSuccess);
+static_assert(cpp_core::StatusCodes::kSetBaudrateError == cpp_core::StatusCode::Configuration::kSetBaudrateError);
+static_assert(cpp_core::StatusCodes::kInvalidHandleError == cpp_core::StatusCode::Connection::kInvalidHandleError);
+static_assert(cpp_core::StatusCodes::kAbortReadError == cpp_core::StatusCode::Io::kAbortReadError);
+static_assert(cpp_core::StatusCodes::kSetStateError == cpp_core::StatusCode::Control::kSetStateError);
+static_assert(cpp_core::StatusCodes::kMonitorError == cpp_core::StatusCode::Monitor::kMonitorError);
+
+static_assert(cpp_core::StatusCode::belongsTo<cpp_core::StatusCode::Configuration>(
+    cpp_core::StatusCode::Configuration::kSetBaudrateError));
+static_assert(!cpp_core::StatusCode::belongsTo<cpp_core::StatusCode::Io>(
+    cpp_core::StatusCode::Configuration::kSetBaudrateError));
 
 // Formula: result == -(kCategoryCode * 100 + LocalCode)
 static_assert(FakeCategory<1>::call<0>() == -100);

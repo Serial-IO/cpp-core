@@ -4,7 +4,6 @@
 #include "serial.h"
 #include "serial_config.hpp"
 #include "status_code.h"
-#include "status_code_registry.hpp"
 
 #include <array>
 #include <cstddef>
@@ -338,6 +337,20 @@ template <std::size_t... Index>
     return std::array<ParameterDescriptor, sizeof...(Index)>{makeParameterDescriptor(function_name, params[Index])...};
 }
 
+template <std::meta::info FunctionInfo, std::size_t... Index>
+[[nodiscard]] consteval auto makeParameterDescriptorsForFunctionImpl(std::index_sequence<Index...>)
+{
+    constexpr auto params = std::define_static_array(std::meta::parameters_of(FunctionInfo));
+    return std::array<ParameterDescriptor, sizeof...(Index)>{
+        makeParameterDescriptor(std::meta::identifier_of(FunctionInfo), *(params.data() + Index))...,
+    };
+}
+
+template <std::meta::info FunctionInfo>
+inline constexpr auto kParameterDescriptorsForFunction =
+    makeParameterDescriptorsForFunctionImpl<FunctionInfo>(
+        std::make_index_sequence<std::meta::parameters_of(FunctionInfo).size()>{});
+
 template <std::size_t ParamCount>
 [[nodiscard]] consteval auto makeFunctionDescriptor(std::meta::info function_info,
                                                     const std::array<ParameterDescriptor, ParamCount> &params)
@@ -354,6 +367,11 @@ template <std::size_t ParamCount>
         .result_model = inferResultModel(function_name, return_type),
         .parameters = std::span<const ParameterDescriptor>(params),
     };
+}
+
+template <std::meta::info FunctionInfo> [[nodiscard]] consteval auto makeFunctionDescriptorFromInfo() -> FunctionDescriptor
+{
+    return makeFunctionDescriptor(FunctionInfo, kParameterDescriptorsForFunction<FunctionInfo>);
 }
 
 template <typename Struct, std::size_t... Index>
@@ -380,58 +398,65 @@ template <typename Struct, std::size_t... Index>
     };
 }
 
-template <typename Code>
-[[nodiscard]] consteval auto makeStatusCodeDescriptor(const Code &code_value, std::string_view fallback_category = {})
-    -> StatusCodeDescriptor
+template <std::meta::info FunctionInfo> [[nodiscard]] consteval auto makeOperationDescriptorFromInfo() -> OperationDescriptor
 {
-    const auto category = fallback_category.empty() ? code_value.category() : fallback_category;
+    return makeOperationDescriptor(FunctionInfo);
+}
+
+template <typename Code> [[nodiscard]] consteval auto makeStatusCodeDescriptor(const Code &code_value) -> StatusCodeDescriptor
+{
     return StatusCodeDescriptor{
-        .category = category,
+        .category = code_value.category(),
         .name = code_value.name(),
         .value = static_cast<StatusCodeValue>(code_value),
     };
 }
 
+template <std::size_t... Index>
+[[nodiscard]] consteval auto makeAbiFunctionDescriptorsImpl(std::index_sequence<Index...>)
+    -> std::array<FunctionDescriptor, sizeof...(Index)>
+{
+    constexpr AbiFunctionRegistry registry{};
+    constexpr auto fields = std::define_static_array(
+        std::meta::nonstatic_data_members_of(^^AbiFunctionRegistry, std::meta::access_context::unchecked()));
+
+    return std::array<FunctionDescriptor, sizeof...(Index)>{
+        makeFunctionDescriptorFromInfo<registry.[:*(fields.data() + Index):]>()...,
+    };
+}
+
+template <std::size_t... Index>
+[[nodiscard]] consteval auto makeAbiOperationDescriptorsImpl(std::index_sequence<Index...>)
+    -> std::array<OperationDescriptor, sizeof...(Index)>
+{
+    constexpr AbiFunctionRegistry registry{};
+    constexpr auto fields = std::define_static_array(
+        std::meta::nonstatic_data_members_of(^^AbiFunctionRegistry, std::meta::access_context::unchecked()));
+
+    return std::array<OperationDescriptor, sizeof...(Index)>{
+        makeOperationDescriptorFromInfo<registry.[:*(fields.data() + Index):]>()...,
+    };
+}
+
 } // namespace detail
 
-#define CPP_CORE_DECLARE_FFI_METADATA(FunctionName)                                                                    \
-    namespace detail                                                                                                   \
-    {                                                                                                                  \
-    inline constexpr auto kParameters_##FunctionName = []() consteval                                                  \
-    {                                                                                                                  \
-        auto params = std::meta::parameters_of(^^FunctionName);                                                        \
-        return makeParameterDescriptorsImpl(std::meta::identifier_of(^^FunctionName), params,                          \
-                                            std::make_index_sequence<std::meta::parameters_of(^^FunctionName).size()>{}); \
-    }();                                                                                                               \
-    inline constexpr auto kDescriptor_##FunctionName = makeFunctionDescriptor(^^FunctionName, kParameters_##FunctionName); \
-    }
+inline constexpr auto kFunctionDescriptors = []() consteval
+{
+    return detail::makeAbiFunctionDescriptorsImpl(
+        std::make_index_sequence<std::meta::nonstatic_data_members_of(^^detail::AbiFunctionRegistry,
+                                                                       std::meta::access_context::unchecked())
+                                     .size()>{});
+}();
 
-CPP_CORE_ABI_FUNCTION_LIST(CPP_CORE_DECLARE_FFI_METADATA)
+inline constexpr auto kOperationDescriptors = []() consteval
+{
+    return detail::makeAbiOperationDescriptorsImpl(
+        std::make_index_sequence<std::meta::nonstatic_data_members_of(^^detail::AbiFunctionRegistry,
+                                                                       std::meta::access_context::unchecked())
+                                     .size()>{});
+}();
 
-#undef CPP_CORE_DECLARE_FFI_METADATA
-
-inline constexpr auto kFunctionDescriptors = std::array{
-#define CPP_CORE_FFI_DESCRIPTOR_ENTRY(FunctionName) detail::kDescriptor_##FunctionName,
-    CPP_CORE_ABI_FUNCTION_LIST(CPP_CORE_FFI_DESCRIPTOR_ENTRY)
-#undef CPP_CORE_FFI_DESCRIPTOR_ENTRY
-};
-
-inline constexpr auto kOperationDescriptors = std::array{
-#define CPP_CORE_FFI_OPERATION_ENTRY(FunctionName) detail::makeOperationDescriptor(^^FunctionName),
-    CPP_CORE_ABI_FUNCTION_LIST(CPP_CORE_FFI_OPERATION_ENTRY)
-#undef CPP_CORE_FFI_OPERATION_ENTRY
-};
-
-inline constexpr auto kStatusCodeDescriptors = std::array{
-    StatusCodeDescriptor{"General", "Success", StatusCode::kSuccess},
-#define CPP_CORE_STATUS_CODE_DESCRIPTOR_ENTRY(CategoryName, LocalCode, CodeName)                                      \
-    detail::makeStatusCodeDescriptor(StatusCode::CategoryName::k##CodeName),
-#define CPP_CORE_STATUS_CODE_DESCRIPTOR_CATEGORY(CategoryName, CategoryCode, CodeListMacro)                           \
-    CodeListMacro(CPP_CORE_STATUS_CODE_DESCRIPTOR_ENTRY, CategoryName)
-    CPP_CORE_STATUS_CODE_CATEGORY_LIST(CPP_CORE_STATUS_CODE_DESCRIPTOR_CATEGORY)
-#undef CPP_CORE_STATUS_CODE_DESCRIPTOR_CATEGORY
-#undef CPP_CORE_STATUS_CODE_DESCRIPTOR_ENTRY
-};
+#include "status_code_descriptor_registry.hpp"
 
 inline constexpr auto kSerialConfigFieldDescriptors = []() consteval
 {
@@ -514,7 +539,5 @@ inline constexpr auto kVersionFieldDescriptors = []() consteval
 
     return nullptr;
 }
-
-#undef CPP_CORE_ABI_FUNCTION_LIST
 
 } // namespace cpp_core

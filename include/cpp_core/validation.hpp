@@ -20,7 +20,7 @@ constexpr auto validateHandle(int64_t handle, Callback &&error_callback) -> Ret
     if (handle <= 0 || handle > std::numeric_limits<int>::max())
     {
         return failMsg<Ret>(std::forward<Callback>(error_callback),
-                            static_cast<StatusCodeValue>(StatusCode::Connection::kInvalidHandleError),
+                            static_cast<StatusCodeValue>(StatusCodes::kInvalidHandleError),
                             "Invalid handle");
     }
     return static_cast<Ret>(StatusCode::kSuccess);
@@ -36,19 +36,19 @@ constexpr auto validateOpenParams(void *port, int baudrate, int data_bits, Callb
     if (port == nullptr)
     {
         return failMsg<Ret>(std::forward<Callback>(error_callback),
-                            static_cast<StatusCodeValue>(StatusCode::Connection::kNotFoundError),
+                            static_cast<StatusCodeValue>(StatusCodes::kNotFoundError),
                             "Port parameter is nullptr");
     }
     if (baudrate < 300)
     {
         return failMsg<Ret>(std::forward<Callback>(error_callback),
-                            static_cast<StatusCodeValue>(StatusCode::Control::kSetStateError),
+                            static_cast<StatusCodeValue>(StatusCodes::kSetStateError),
                             "Invalid baudrate: must be >= 300");
     }
     if (data_bits < 5 || data_bits > 8)
     {
         return failMsg<Ret>(std::forward<Callback>(error_callback),
-                            static_cast<StatusCodeValue>(StatusCode::Control::kSetStateError),
+                            static_cast<StatusCodeValue>(StatusCodes::kSetStateError),
                             "Invalid data bits: must be 5-8");
     }
     return static_cast<Ret>(StatusCode::kSuccess);
@@ -61,7 +61,7 @@ constexpr auto validateBuffer(const void *buffer, int buffer_size, Callback &&er
     if (buffer == nullptr || buffer_size <= 0)
     {
         return failMsg<Ret>(std::forward<Callback>(error_callback),
-                            static_cast<StatusCodeValue>(StatusCode::Io::kBufferError),
+                            static_cast<StatusCodeValue>(StatusCodes::kBufferError),
                             "Invalid buffer or buffer_size");
     }
     return static_cast<Ret>(StatusCode::kSuccess);
