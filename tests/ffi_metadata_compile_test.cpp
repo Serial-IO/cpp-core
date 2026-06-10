@@ -1,6 +1,6 @@
 #include "cpp_core/ffi_metadata.hpp"
 
-static_assert(__cpp_impl_reflection >= 202603L);
+static_assert(__cpp_impl_reflection >= 202506L);
 
 static_assert(!cpp_core::kFunctionDescriptors.empty());
 static_assert(cpp_core::kFunctionDescriptors.size() == cpp_core::kOperationDescriptors.size());
