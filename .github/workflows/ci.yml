@@ -1,0 +1,48 @@
+name: 'CI'
+
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    name: 'Build compile tests and bindgen smoke'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install GCC 16 + Ninja
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y gcc-16 g++-16 ninja-build
+
+      - name: Show tool versions
+        run: |
+          cmake --version
+          ninja --version
+          gcc-16 --version
+          g++-16 --version
+
+      - name: Configure
+        run: |
+          cmake -S . -B build/ci -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_C_COMPILER=gcc-16 \
+            -DCMAKE_CXX_COMPILER=g++-16
+
+      - name: Build compile tests
+        run: |
+          cmake --build build/ci --target cpp_core_compile_tests
+
+      - name: Run bindgen smoke test
+        run: |
+          cmake --build build/ci --target cpp_core_bindgen_smoke
+
+      - name: Run CTest if registered tests exist
+        run: |
+          ctest --test-dir build/ci --output-on-failure --no-tests=ignore

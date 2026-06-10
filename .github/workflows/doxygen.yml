@@ -6,14 +6,16 @@ on:
     paths:
       - 'include/**'
       - 'Doxyfile'
+      - 'README.md'
+      - 'LICENSE'
       - '.github/workflows/doxygen.yml'
   workflow_dispatch:
 
 # Required for GitHub Pages deployment
 permissions:
-  contents: write        
-  pages: write           
-  id-token: write        
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   build-docs:
@@ -21,7 +23,7 @@ jobs:
     name: 'Build Doxygen HTML'
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install Doxygen + Graphviz
         run: |
@@ -42,7 +44,10 @@ jobs:
     needs: build-docs
     runs-on: ubuntu-latest
     name: 'Deploy to GitHub Pages'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Deploy
         id: deployment
-        uses: actions/deploy-pages@v4 
+        uses: actions/deploy-pages@v4
