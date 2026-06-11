@@ -104,7 +104,7 @@ target_link_libraries(cpp_core_bindgen PRIVATE cpp_core_strict_warnings)
 include(CTest)
 
 if(BUILD_TESTING)
-    file(GLOB CPP_CORE_COMPILE_TEST_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/tests/*_compile_test.cpp")
+    file(GLOB CPP_CORE_COMPILE_TEST_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/tests/*.test.cpp")
     add_library(cpp_core_compile_tests OBJECT ${CPP_CORE_COMPILE_TEST_SOURCES})
     target_link_libraries(cpp_core_compile_tests PRIVATE cpp_core::cpp_core)
     target_link_libraries(cpp_core_compile_tests PRIVATE cpp_core_strict_warnings)

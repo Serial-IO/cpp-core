@@ -1,4 +1,4 @@
-name: 'CI'
+name: 'Build Compile Tests And Bindgen Smoke'
 
 on:
   push:
