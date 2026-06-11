@@ -97,7 +97,7 @@ target_include_directories(
 target_compile_features(cpp_core INTERFACE cxx_std_26)
 target_compile_options(cpp_core INTERFACE -freflection)
 
-add_executable(cpp_core_bindgen EXCLUDE_FROM_ALL tools/generate_deno_symbols.cpp)
+add_executable(cpp_core_bindgen EXCLUDE_FROM_ALL tools/generate_typescript_bindings.cpp)
 target_link_libraries(cpp_core_bindgen PRIVATE cpp_core::cpp_core)
 target_link_libraries(cpp_core_bindgen PRIVATE cpp_core_strict_warnings)
 
@@ -109,7 +109,7 @@ if(BUILD_TESTING)
     target_link_libraries(cpp_core_compile_tests PRIVATE cpp_core::cpp_core)
     target_link_libraries(cpp_core_compile_tests PRIVATE cpp_core_strict_warnings)
 
-    set(CPP_CORE_DENO_BINDGEN_SMOKE_EXE "${CMAKE_CURRENT_BINARY_DIR}/cpp_core_bindgen_smoke_bin")
+    set(CPP_CORE_TYPESCRIPT_BINDGEN_SMOKE_EXE "${CMAKE_CURRENT_BINARY_DIR}/cpp_core_bindgen_smoke_bin")
     add_custom_target(
         cpp_core_bindgen_smoke
         COMMAND
@@ -117,14 +117,14 @@ if(BUILD_TESTING)
         -E
         copy
         $<TARGET_FILE:cpp_core_bindgen>
-        ${CPP_CORE_DENO_BINDGEN_SMOKE_EXE}
+        ${CPP_CORE_TYPESCRIPT_BINDGEN_SMOKE_EXE}
         COMMAND
         ${CMAKE_COMMAND}
-        -DGENERATOR=${CPP_CORE_DENO_BINDGEN_SMOKE_EXE}
+        -DGENERATOR=${CPP_CORE_TYPESCRIPT_BINDGEN_SMOKE_EXE}
         -P
-        ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_generated_deno_symbols.cmake
+        ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_generated_typescript_bindings.cmake
         DEPENDS cpp_core_bindgen
-        COMMENT "Running smoke check for generated Deno bindgen output"
+        COMMENT "Running smoke check for generated TypeScript bindgen output"
         VERBATIM
     )
 endif()

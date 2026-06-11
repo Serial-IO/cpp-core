@@ -32,7 +32,7 @@ set(CMAKE_C_FLAGS_DEBUG_INIT "-g -O0")
 set(CMAKE_CXX_FLAGS_RELEASE_INIT "-O3 -DNDEBUG")
 set(CMAKE_C_FLAGS_RELEASE_INIT "-O3 -DNDEBUG")
 
-# Recommended for Deno-loaded DLLs:
+# Recommended for FFI-loaded DLLs:
 # statically link MinGW runtime parts, but keep Windows system DLLs dynamic.
 set(CMAKE_SHARED_LINKER_FLAGS_INIT "-static-libgcc -static-libstdc++")
 set(CMAKE_EXE_LINKER_FLAGS_INIT "-static-libgcc -static-libstdc++")
