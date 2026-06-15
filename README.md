@@ -1,6 +1,6 @@
 # C++ Core
 
-`cpp-core` is the header-only **API and ABI contract** shared by the Serial-IO platform bindings. It defines the exported serial interface, the status-code model, build-time version information, and the reflection-backed metadata used by bindgen tooling.
+`cpp-core` is the header-only **API and ABI contract** shared by the Serial-IO platform bindings. It defines the exported serial interface, the status-code model, and build-time version information consumed by the platform implementations.
 
 This repository does not provide a ready-to-load shared library by itself. It provides the contract consumed by the platform implementations:
 
@@ -9,33 +9,25 @@ This repository does not provide a ready-to-load shared library by itself. It pr
 
 ## Status
 
-`cpp-core` is the canonical definition of the current reflection-based API line.
+`cpp-core` is the canonical definition of the current API line.
 
-- Supported compiler family: GNU C++
-- Supported Linux toolchain: GCC 16+
-- Supported Windows toolchain: MinGW-w64 GCC 16+
+- Supported Linux toolchain: modern C++26-capable toolchain
+- Supported Windows toolchain: modern C++26-capable toolchain
 - macOS support: not ready yet
-- Required language mode: C++26 with `-freflection`
+- Required language mode: C++26
 - Required build system: CMake 3.30+
-
-Clang and MSVC are not supported at this time.
 
 ## What It Provides
 
 - Header-only C-compatible serial API definitions under `include/cpp_core`
-- Reflection-backed ABI metadata for functions, operations, status codes, and shared structs
 - A generated version surface used consistently across all platform bindings
-- A `cpp_core_bindgen` executable that emits TypeScript FFI metadata and wrappers
 - An installable CMake package target: `cpp_core::cpp_core`
 
 ## Repository Layout
 
 - `include/cpp_core/serial.h`: aggregated C ABI for serial operations
-- `include/cpp_core/ffi_metadata.hpp`: compile-time metadata over the exported ABI
+- `include/cpp_core/status_code.h`: shared status-code model
 - `include/cpp_core/interface/get_version.h`: version struct and `getVersion`
-- `tools/generate_typescript_bindings.cpp`: bindgen entrypoint for TypeScript symbols and wrappers
-
-`cpp-core` hard-requires the GNU compiler family with working C++26 reflection support. During configure, CMake rejects unsupported compilers and rejects GNU builds where `-freflection` is unavailable or incomplete.
 
 ## Quick Start
 
@@ -78,27 +70,18 @@ getVersion(&version);
 
 ## Building This Repository
 
-Native GCC build:
+Native build:
 
 ```sh
-cmake -S . -B build/gcc -G Ninja -DCMAKE_CXX_COMPILER=g++-16
-cmake --build build/gcc
-ctest --test-dir build/gcc
-```
-
-MinGW-w64 GCC build:
-
-```sh
-cmake -S . -B build/mingw -G Ninja -DCMAKE_TOOLCHAIN_FILE=cmake/mingw-toolchain.cmake
-cmake --build build/mingw
+cmake -S . -B build -G Ninja
+cmake --build build
+ctest --test-dir build
 ```
 
 The CMake project exports the package target and also builds these relevant targets:
 
 - `cpp_core::cpp_core`: header-only interface target
-- `cpp_core_bindgen`: TypeScript symbol and wrapper generator
 - `cpp_core_compile_tests`: compile-time validation target when testing is enabled
-- `cpp_core_bindgen_smoke`: generated-output smoke check when testing is enabled
 
 ## ABI Surface
 
@@ -125,109 +108,6 @@ MODULE_API auto serialOpen(
 
 This model keeps the ABI easy to consume from TypeScript hosts, Rust, Python, or other FFI hosts without requiring C++ runtime coupling.
 
-## Reflection Metadata
-
-`cpp-core` exposes compile-time metadata for the ABI and the shared structs:
-
-```cpp
-#include <cpp_core/ffi_metadata.hpp>
-
-constexpr auto functions = cpp_core::functionDescriptors();
-constexpr auto operations = cpp_core::operationDescriptors();
-constexpr auto statuses = cpp_core::statusCodeDescriptors();
-constexpr auto serial_config_fields = cpp_core::serialConfigFieldDescriptors();
-constexpr auto version_fields = cpp_core::versionFieldDescriptors();
-```
-
-Targeted lookup helpers are also available:
-
-```cpp
-constexpr auto *open_fn = cpp_core::findFunctionDescriptor("serialOpen");
-constexpr auto *open_op = cpp_core::findOperationDescriptor("serialOpen");
-constexpr auto *read_error =
-    cpp_core::findStatusCodeDescriptor(cpp_core::StatusCode::Io::kReadError);
-```
-
-The metadata is the source of truth for:
-
-- exported function names
-- parameter names and optionality
-- ABI kind classification for strings, buffers, handles, and callbacks
-- result model classification
-- shared struct field layout metadata
-
-## TypeScript Bindgen
-
-Build and run the bindgen tool:
-
-```sh
-cmake --build build/gcc --target cpp_core_bindgen
-./build/gcc/cpp_core_bindgen --output cpp_core_bindings.ts
-```
-
-Optional runtime profile:
-
-```sh
-./build/gcc/cpp_core_bindgen --runtime deno --output cpp_core_bindings.ts
-./build/gcc/cpp_core_bindgen --runtime bun --output cpp_core_bindings.ts
-```
-
-The generated module includes:
-
-- `symbols` ABI metadata
-- `operations` metadata
-- `statusCodes` and status lookup data
-- `StatusCodeError`
-- `createBindings(host, dylib)` wrappers
-- custom runtime adapter helpers for Node or other hosts
-- optional built-in runtime helpers when `--runtime deno` or `--runtime bun` is used
-- callback helpers such as `createErrorCallback(...)`
-
-Default generic usage:
-
-```ts
-import {
-  createBindings,
-  createHostFromRuntimeAdapter,
-  loadLibraryFromRuntimeAdapter,
-  symbols,
-  type BindgenRuntimeAdapter,
-} from "./cpp_core_bindings.ts";
-
-declare const adapter: BindgenRuntimeAdapter;
-
-const host = createHostFromRuntimeAdapter(adapter);
-const dylib = loadLibraryFromRuntimeAdapter(adapter, "./libcpp_bindings_linux.so", symbols);
-const serial = createBindings(host, dylib);
-```
-
-Deno-specific usage with `--runtime deno`:
-
-```ts
-import {
-  createBindings,
-  createErrorCallback,
-  createDenoHost,
-  loadDenoLibrary,
-  symbols,
-} from "./cpp_core_bindings.ts";
-
-const host = createDenoHost();
-const dylib = loadDenoLibrary("./libcpp_bindings_linux.so", symbols);
-const serial = createBindings(host, dylib);
-const errorCallback = createErrorCallback(host, (errorCode, message) => {
-  console.error(errorCode, message);
-});
-
-const handle = serial.serialOpen("/dev/ttyUSB0", 115200, 8);
-serial.serialWrite(handle, new Uint8Array([0x41, 0x54, 0x0d]), 3, 500, 0);
-serial.serialClose(handle);
-errorCallback.close();
-dylib.close();
-```
-
-Without `--runtime`, the output stays generic. If you target Node.js or another host, use the generated custom-adapter helpers and implement the runtime bridge yourself.
-
 ## Versioning
 
 Version information is generated from Git during CMake configure and written into `include/cpp_core/version.hpp`.
@@ -251,7 +131,7 @@ The version data is exposed through:
 - `cpp-bindings-windows` provides the Windows DLL implementation
 - macOS bindings are not part of the supported line yet
 
-Keeping the contract, metadata, and version surface here avoids ABI drift between platforms and keeps generated binding layers aligned with the actual exported API.
+Keeping the contract and version surface here avoids ABI drift between platforms and keeps the shared API aligned with the actual exported implementation.
 
 ## License
 
