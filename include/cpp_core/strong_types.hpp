@@ -2,6 +2,7 @@
 
 #include <compare>
 #include <concepts>
+#include <utility>
 
 namespace cpp_core
 {
@@ -12,10 +13,41 @@ template <typename Tag, std::integral Underlying = int> struct StrongInt
     using TagType = Tag;
     using ValueType = Underlying;
 
-    Underlying value;
+    Underlying value{};
+
+    constexpr StrongInt() noexcept = default;
 
     constexpr explicit StrongInt(Underlying val) noexcept : value(val)
     {
+    }
+
+    [[nodiscard]] constexpr auto get() const noexcept -> Underlying
+    {
+        return value;
+    }
+
+    constexpr auto operator+=(StrongInt other) noexcept -> StrongInt &
+    {
+        value += other.value;
+        return *this;
+    }
+
+    constexpr auto operator-=(StrongInt other) noexcept -> StrongInt &
+    {
+        value -= other.value;
+        return *this;
+    }
+
+    [[nodiscard]] friend constexpr auto operator+(StrongInt lhs, StrongInt rhs) noexcept -> StrongInt
+    {
+        lhs += rhs;
+        return lhs;
+    }
+
+    [[nodiscard]] friend constexpr auto operator-(StrongInt lhs, StrongInt rhs) noexcept -> StrongInt
+    {
+        lhs -= rhs;
+        return lhs;
     }
 
     [[nodiscard]] constexpr auto operator<=>(const StrongInt &) const noexcept = default;
@@ -65,5 +97,12 @@ enum class FlowControl : int
     kRtsCts = 1,
     kXonXoff = 2,
 };
+
+template <typename Enum>
+requires std::is_enum_v<Enum>
+[[nodiscard]] constexpr auto toInt(Enum value) noexcept -> int
+{
+    return std::to_underlying(value);
+}
 
 } // namespace cpp_core

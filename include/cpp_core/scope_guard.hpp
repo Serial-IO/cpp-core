@@ -135,24 +135,9 @@ template <std::invocable Fn> [[nodiscard]] constexpr auto onScopeSuccess(Fn &&fu
     return ScopeSuccess<std::remove_cvref_t<Fn>>(std::forward<Fn>(func));
 }
 
-// DEFER macro (Go-style)
-// Usage:  DEFER { cleanup(); };
-
-// NOLINTBEGIN(cppcoreguidelines-macro-usage)
-namespace detail
+template <std::invocable Fn> [[nodiscard]] constexpr auto defer(Fn &&func)
 {
-struct DeferHelper
-{
-    template <std::invocable Fn> constexpr auto operator<<(Fn &&func) const
-    {
-        return ScopeGuard<std::remove_cvref_t<Fn>>(std::forward<Fn>(func));
-    }
-};
-} // namespace detail
-
-#define CPP_CORE_DEFER_CONCAT_(a, b) a##b
-#define CPP_CORE_DEFER_CONCAT(a, b) CPP_CORE_DEFER_CONCAT_(a, b)
-#define DEFER auto CPP_CORE_DEFER_CONCAT(_cpp_core_defer_, __COUNTER__) = ::cpp_core::detail::DeferHelper{} << [&]()
-// NOLINTEND(cppcoreguidelines-macro-usage)
+    return onScopeExit(std::forward<Fn>(func));
+}
 
 } // namespace cpp_core

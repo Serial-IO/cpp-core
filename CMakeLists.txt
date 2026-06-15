@@ -11,6 +11,14 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_MODULE_STD 26)
 set(CMAKE_CXX_MODULE_EXTENSIONS OFF)
 
+if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    message(FATAL_ERROR "cpp-core currently requires GCC 16.1+ with the GCC std::meta reflection implementation.")
+endif()
+
+if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 16.1)
+    message(FATAL_ERROR "cpp-core currently requires GCC 16.1+.")
+endif()
+
 include(cmake/CPM.cmake)
 
 CPMAddPackage(
@@ -35,20 +43,18 @@ add_library(cpp_core::cpp_core ALIAS cpp_core)
 
 add_library(cpp_core_strict_warnings INTERFACE)
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    target_compile_options(
-        cpp_core_strict_warnings
-        INTERFACE
-        -Wall
-        -Wextra
-        -Wpedantic
-        -Wconversion
-        -Wsign-conversion
-        -Wshadow
-        -Wundef
-        -Werror
-    )
-endif()
+target_compile_options(
+    cpp_core_strict_warnings
+    INTERFACE
+    -Wall
+    -Wextra
+    -Wpedantic
+    -Wconversion
+    -Wsign-conversion
+    -Wshadow
+    -Wundef
+    -Werror
+)
 
 # Public include directories
 target_include_directories(
@@ -57,6 +63,8 @@ target_include_directories(
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
+
+target_compile_options(cpp_core INTERFACE -freflection)
 
 target_compile_features(cpp_core INTERFACE cxx_std_26)
 

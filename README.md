@@ -11,8 +11,10 @@ This repository does not provide a ready-to-load shared library by itself. It pr
 
 `cpp-core` is the canonical definition of the current API line.
 
-- Supported Linux toolchain: modern C++26-capable toolchain
-- Supported Windows toolchain: modern C++26-capable toolchain
+- Current baseline compiler: GCC 16.1+
+- Reflection model: GCC `std::meta` with `-freflection`
+- Supported Linux toolchain: GCC 16.1+ in C++26 mode
+- Supported Windows toolchain: MinGW 16.1+ in C++26 mode
 - macOS support: not ready yet
 - Required language mode: C++26
 - Required build system: CMake 3.30+
@@ -20,6 +22,7 @@ This repository does not provide a ready-to-load shared library by itself. It pr
 ## What It Provides
 
 - Header-only C-compatible serial API definitions under `include/cpp_core`
+- Modern C++26 helper surface for `std::expected`-based error propagation, strong typed config values, and compile-time reflection helpers
 - A generated version surface used consistently across all platform bindings
 - An installable CMake package target: `cpp_core::cpp_core`
 
@@ -107,6 +110,14 @@ MODULE_API auto serialOpen(
 ```
 
 This model keeps the ABI easy to consume from TypeScript hosts, Rust, Python, or other FFI hosts without requiring C++ runtime coupling.
+
+For C++ callers, the helper surface includes:
+
+- `include/cpp_core/result.hpp`: `Result<T>`, `Status`, `forwardUnexpected(...)`, plus the native `std::expected` monadic operations
+- `include/cpp_core/scope_guard.hpp`: `onScopeExit(...)`, `onScopeFail(...)`, `onScopeSuccess(...)`, `defer(...)`
+- `include/cpp_core/strong_types.hpp`: arithmetic-preserving strong integral wrappers and enum conversion helpers
+- `include/cpp_core/serial_config.hpp`: typed config construction with `Result<SerialConfig>` validation helpers
+- `include/cpp_core/reflection.hpp`: GCC 16 / C++26 reflection helpers such as enum/member counts and names, plus public field counts and names
 
 ## Versioning
 

@@ -1,9 +1,11 @@
 #pragma once
 
+#include "result.hpp"
 #include "strong_types.hpp"
 
 #include <cstddef>
 #include <concepts>
+#include <utility>
 #include <type_traits>
 
 namespace cpp_core
@@ -14,14 +16,24 @@ namespace cpp_core
 namespace detail
 {
 
-consteval auto validateBaudrate(int baud) -> bool
+constexpr auto validateBaudrate(int baud) -> bool
 {
     return baud >= 300;
 }
 
-consteval auto validateDataBits(int bits) -> bool
+constexpr auto validateDataBits(int bits) -> bool
 {
     return bits >= 5 && bits <= 8;
+}
+
+constexpr auto validateParity(Parity parity) -> bool
+{
+    return parity == Parity::kNone || parity == Parity::kEven || parity == Parity::kOdd;
+}
+
+constexpr auto validateStopBits(StopBits stop_bits) -> bool
+{
+    return stop_bits == StopBits::kOne || stop_bits == StopBits::kTwo;
 }
 
 } // namespace detail
@@ -52,30 +64,73 @@ struct SerialConfig
         };
     }
 
-    [[nodiscard]] static constexpr auto tryMake(int baud, int data_bits_val, Parity parity = Parity::kNone,
-                                                StopBits stop_bits = StopBits::kOne) -> SerialConfig
+    [[nodiscard]] static constexpr auto tryMake(Baudrate baud, DataBits data_bits, Parity parity = Parity::kNone,
+                                                StopBits stop_bits = StopBits::kOne) -> Result<SerialConfig>
     {
-        return SerialConfig{
+        return tryMake(baud.get(), data_bits.get(), parity, stop_bits);
+    }
+
+    [[nodiscard]] static constexpr auto tryMake(int baud, int data_bits_val, Parity parity = Parity::kNone,
+                                                StopBits stop_bits = StopBits::kOne) -> Result<SerialConfig>
+    {
+        if (!detail::validateBaudrate(baud))
+        {
+            return fail<SerialConfig>(StatusCode::Configuration::kSetBaudrateError);
+        }
+        if (!detail::validateDataBits(data_bits_val))
+        {
+            return fail<SerialConfig>(StatusCode::Configuration::kSetDataBitsError);
+        }
+        if (!detail::validateParity(parity))
+        {
+            return fail<SerialConfig>(StatusCode::Configuration::kSetParityError);
+        }
+        if (!detail::validateStopBits(stop_bits))
+        {
+            return fail<SerialConfig>(StatusCode::Configuration::kSetStopBitsError);
+        }
+        return ok(SerialConfig{
             .baudrate = baud,
             .data_bits = data_bits_val,
             .parity = parity,
             .stop_bits = stop_bits,
-        };
+        });
     }
 
     [[nodiscard]] constexpr auto isValid() const noexcept -> bool
     {
-        return baudrate >= 300 && data_bits >= 5 && data_bits <= 8;
+        return detail::validateBaudrate(baudrate) && detail::validateDataBits(data_bits)
+            && detail::validateParity(parity) && detail::validateStopBits(stop_bits);
+    }
+
+    [[nodiscard]] constexpr auto baudrateValue() const noexcept -> Baudrate
+    {
+        return Baudrate{baudrate};
+    }
+
+    [[nodiscard]] constexpr auto dataBitsValue() const noexcept -> DataBits
+    {
+        return DataBits{data_bits};
     }
 
     [[nodiscard]] constexpr auto parityInt() const noexcept -> int
     {
-        return static_cast<int>(parity);
+        return toInt(parity);
     }
 
     [[nodiscard]] constexpr auto stopBitsInt() const noexcept -> int
     {
-        return static_cast<int>(stop_bits);
+        return toInt(stop_bits);
+    }
+
+    [[nodiscard]] constexpr auto withBaudrate(Baudrate baud) const -> Result<SerialConfig>
+    {
+        return tryMake(baud, dataBitsValue(), parity, stop_bits);
+    }
+
+    [[nodiscard]] constexpr auto withDataBits(DataBits bits) const -> Result<SerialConfig>
+    {
+        return tryMake(baudrateValue(), bits, parity, stop_bits);
     }
 
     [[nodiscard]] constexpr auto operator<=>(const SerialConfig &) const noexcept = default;

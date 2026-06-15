@@ -3,6 +3,7 @@
 #include "cpp_core/error_callback.h"
 #include "cpp_core/error_handling.hpp"
 #include "cpp_core/result.hpp"
+#include "cpp_core/reflection.hpp"
 #include "cpp_core/scope_guard.hpp"
 #include "cpp_core/serial.h"
 #include "cpp_core/serial_config.hpp"
