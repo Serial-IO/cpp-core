@@ -24,6 +24,12 @@ set(
     CACHE FILEPATH
     "Path to the clang++ executable used for AST JSON export"
 )
+set(
+    CPP_CORE_AST_SLIM_JSON_OUTPUT
+    "${CMAKE_BINARY_DIR}/ast/cpp_core_ffi_api.json"
+    CACHE FILEPATH
+    "Output path for the reduced FFI API JSON metadata"
+)
 
 if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     message(FATAL_ERROR "cpp-core currently requires GCC 16.1+ with the GCC std::meta reflection implementation.")
@@ -92,6 +98,8 @@ if(BUILD_TESTING)
 endif()
 
 if(CPP_CORE_ENABLE_AST_EXPORT)
+    find_package(Python3 COMPONENTS Interpreter REQUIRED)
+
     file(
         GLOB _cpp_core_ast_interface_headers
         CONFIGURE_DEPENDS
@@ -123,6 +131,7 @@ if(CPP_CORE_ENABLE_AST_EXPORT)
 
     set(_cpp_core_ast_wrapper "${CMAKE_CURRENT_BINARY_DIR}/ast/cpp_core_ffi_ast.cpp")
     get_filename_component(_cpp_core_ast_json_dir "${CPP_CORE_AST_JSON_OUTPUT}" DIRECTORY)
+    get_filename_component(_cpp_core_ast_slim_json_dir "${CPP_CORE_AST_SLIM_JSON_OUTPUT}" DIRECTORY)
 
     file(
         GENERATE
@@ -146,7 +155,25 @@ if(CPP_CORE_ENABLE_AST_EXPORT)
         VERBATIM
     )
 
-    add_custom_target(cpp_core_ast_json DEPENDS "${CPP_CORE_AST_JSON_OUTPUT}")
+    add_custom_command(
+        OUTPUT "${CPP_CORE_AST_SLIM_JSON_OUTPUT}"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${_cpp_core_ast_slim_json_dir}"
+        COMMAND
+            "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tools/clang_ast_to_ffi_json.py"
+            --input "${CPP_CORE_AST_JSON_OUTPUT}"
+            --output "${CPP_CORE_AST_SLIM_JSON_OUTPUT}"
+            --source-root "${CMAKE_CURRENT_SOURCE_DIR}"
+            --public-header "cpp_core/serial.h"
+        DEPENDS
+            "${CPP_CORE_AST_JSON_OUTPUT}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tools/clang_ast_to_ffi_json.py"
+        COMMENT "Reducing clang AST JSON to compact FFI API metadata"
+        VERBATIM
+    )
+
+    add_custom_target(cpp_core_ast_full_json DEPENDS "${CPP_CORE_AST_JSON_OUTPUT}")
+    add_custom_target(cpp_core_ast_json DEPENDS "${CPP_CORE_AST_SLIM_JSON_OUTPUT}")
 endif()
 
 # Install rules --------------------------------------------------------------
@@ -161,6 +188,14 @@ install(
     DIRECTORY include/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
+
+if(CPP_CORE_ENABLE_AST_EXPORT)
+    install(
+        FILES "${CPP_CORE_AST_SLIM_JSON_OUTPUT}"
+        DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/cpp_core
+        OPTIONAL
+    )
+endif()
 
 # CMake package configuration ------------------------------------------------
 include(CMakePackageConfigHelpers)

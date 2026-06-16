@@ -94,8 +94,11 @@ cmake --build build --target cpp_core_ast_json
 ```
 
 - The project still configures with GCC; the AST export itself invokes `clang++` separately
+- `cpp_core_ast_full_json` builds only the raw clang AST dump
 - Requires `clang++` on `PATH` or `-DCPP_CORE_AST_CLANGXX=/path/to/clang++`
+- Requires a Python 3 interpreter for the slim metadata reduction step
 - Writes the combined FFI header AST JSON to `build/ast/cpp_core_ffi_ast.json`
+- Writes compact, ship-friendly FFI metadata to `build/ast/cpp_core_ffi_api.json`
 - Exports the `#include <cpp_core/serial.h>` surface intended for downstream FFI adapter generation
 
 ## ABI Surface
