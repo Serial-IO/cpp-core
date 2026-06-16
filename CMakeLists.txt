@@ -31,14 +31,6 @@ set(
     "Output path for the reduced FFI API JSON metadata"
 )
 
-if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    message(FATAL_ERROR "cpp-core currently requires GCC 16.1+ with the GCC std::meta reflection implementation.")
-endif()
-
-if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 16.1)
-    message(FATAL_ERROR "cpp-core currently requires GCC 16.1+.")
-endif()
-
 include(cmake/CPM.cmake)
 
 CPMAddPackage(
