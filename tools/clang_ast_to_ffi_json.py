@@ -142,7 +142,7 @@ def parse_function_pointer(type_name: str) -> dict[str, Any] | None:
     params_text = match.group("params").strip()
     params = [] if not params_text or params_text == "void" else split_top_level(params_text)
     return {
-        "return_type": match.group("return_type").strip(),
+        "returnType": match.group("return_type").strip(),
         "parameters": params,
     }
 
@@ -273,9 +273,6 @@ def build_parameter(node: dict[str, Any], doc_params: dict[str, Any]) -> dict[st
     default_value = extract_default_expr(default_expr)
     if default_value is not None:
         parameter["default"] = default_value
-        parameter["optional"] = True
-    else:
-        parameter["optional"] = False
 
     callback = parse_function_pointer(callback_source_type)
     if callback:
@@ -288,7 +285,7 @@ def build_parameter(node: dict[str, Any], doc_params: dict[str, Any]) -> dict[st
     return parameter
 
 
-def build_function(node: dict[str, Any], source_root: Path, public_header: str) -> dict[str, Any]:
+def build_function(node: dict[str, Any], source_root: Path) -> dict[str, Any]:
     type_name = node.get("type", {}).get("qualType", "")
     doc = extract_comment(node)
     doc_params = doc.pop("params", {})
@@ -296,9 +293,8 @@ def build_function(node: dict[str, Any], source_root: Path, public_header: str) 
     function: dict[str, Any] = {
         "name": node["name"],
         "symbol": node.get("mangledName", node["name"]),
-        "public_header": public_header,
-        "declared_in": normalize_header_path(declaration_file(node), source_root),
-        "return_type": extract_return_type(type_name),
+        "declaredIn": normalize_header_path(declaration_file(node), source_root),
+        "returnType": extract_return_type(type_name),
         "parameters": [
             build_parameter(child, doc_params)
             for child in node.get("inner", [])
@@ -324,7 +320,7 @@ def main() -> int:
         ast = json.load(input_file)
 
     functions = [
-        build_function(node, source_root, args.public_header)
+        build_function(node, source_root)
         for node in walk(ast)
         if is_exported_function(node, source_root)
     ]
@@ -332,8 +328,8 @@ def main() -> int:
 
     metadata = {
         "schema": "cpp_core_ffi_api",
-        "schema_version": 1,
-        "public_header": args.public_header,
+        "schemaVersion": 1,
+        "publicHeader": args.public_header,
         "functions": functions,
     }
 
