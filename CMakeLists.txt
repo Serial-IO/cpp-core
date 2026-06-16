@@ -11,6 +11,20 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_MODULE_STD 26)
 set(CMAKE_CXX_MODULE_EXTENSIONS OFF)
 
+option(CPP_CORE_ENABLE_AST_EXPORT "Enable clang-based JSON AST export for the FFI headers" ON)
+set(
+    CPP_CORE_AST_JSON_OUTPUT
+    "${CMAKE_BINARY_DIR}/ast/cpp_core_ffi_ast.json"
+    CACHE FILEPATH
+    "Output path for the generated FFI AST JSON file"
+)
+set(
+    CPP_CORE_AST_CLANGXX
+    ""
+    CACHE FILEPATH
+    "Path to the clang++ executable used for AST JSON export"
+)
+
 if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     message(FATAL_ERROR "cpp-core currently requires GCC 16.1+ with the GCC std::meta reflection implementation.")
 endif()
@@ -75,6 +89,64 @@ if(BUILD_TESTING)
     add_library(cpp_core_compile_tests OBJECT ${CPP_CORE_COMPILE_TEST_SOURCES})
     target_link_libraries(cpp_core_compile_tests PRIVATE cpp_core::cpp_core)
     target_link_libraries(cpp_core_compile_tests PRIVATE cpp_core_strict_warnings)
+endif()
+
+if(CPP_CORE_ENABLE_AST_EXPORT)
+    file(
+        GLOB _cpp_core_ast_interface_headers
+        CONFIGURE_DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/include/cpp_core/interface/*.h"
+    )
+
+    set(
+        _cpp_core_ast_headers
+        "${CMAKE_CURRENT_SOURCE_DIR}/include/cpp_core/serial.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/include/cpp_core/error_callback.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/include/cpp_core/module_api.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/include/cpp_core/version.hpp"
+        ${_cpp_core_ast_interface_headers}
+    )
+
+    if(CPP_CORE_AST_CLANGXX)
+        set(_cpp_core_ast_clangxx "${CPP_CORE_AST_CLANGXX}")
+    else()
+        find_program(_cpp_core_ast_clangxx NAMES clang++)
+    endif()
+
+    if(NOT _cpp_core_ast_clangxx)
+        message(
+            FATAL_ERROR
+            "CPP_CORE_ENABLE_AST_EXPORT=ON requires clang++. "
+            "Install clang++ or set CPP_CORE_AST_CLANGXX to an explicit path."
+        )
+    endif()
+
+    set(_cpp_core_ast_wrapper "${CMAKE_CURRENT_BINARY_DIR}/ast/cpp_core_ffi_ast.cpp")
+    get_filename_component(_cpp_core_ast_json_dir "${CPP_CORE_AST_JSON_OUTPUT}" DIRECTORY)
+
+    file(
+        GENERATE
+        OUTPUT "${_cpp_core_ast_wrapper}"
+        CONTENT "#include <cpp_core/serial.h>\n"
+    )
+
+    add_custom_command(
+        OUTPUT "${CPP_CORE_AST_JSON_OUTPUT}"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${_cpp_core_ast_json_dir}"
+        COMMAND
+            ${CMAKE_COMMAND}
+            -DCPP_CORE_AST_CLANGXX=${_cpp_core_ast_clangxx}
+            -DCPP_CORE_AST_INCLUDE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/include
+            -DCPP_CORE_AST_OUTPUT=${CPP_CORE_AST_JSON_OUTPUT}
+            -DCPP_CORE_AST_SOURCE=${_cpp_core_ast_wrapper}
+            -DCPP_CORE_AST_STANDARD=${CMAKE_CXX_STANDARD}
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/export_ast_json.cmake
+        DEPENDS "${_cpp_core_ast_wrapper}" ${_cpp_core_ast_headers}
+        COMMENT "Exporting FFI header AST JSON with clang++"
+        VERBATIM
+    )
+
+    add_custom_target(cpp_core_ast_json DEPENDS "${CPP_CORE_AST_JSON_OUTPUT}")
 endif()
 
 # Install rules --------------------------------------------------------------

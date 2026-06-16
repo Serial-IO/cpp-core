@@ -86,6 +86,18 @@ The CMake project exports the package target and also builds these relevant targ
 - `cpp_core::cpp_core`: header-only interface target
 - `cpp_core_compile_tests`: compile-time validation target when testing is enabled
 
+Optional FFI AST export:
+
+```sh
+cmake -S . -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE=cmake/gcc-toolchain.cmake -DCPP_CORE_ENABLE_AST_EXPORT=ON
+cmake --build build --target cpp_core_ast_json
+```
+
+- The project still configures with GCC; the AST export itself invokes `clang++` separately
+- Requires `clang++` on `PATH` or `-DCPP_CORE_AST_CLANGXX=/path/to/clang++`
+- Writes the combined FFI header AST JSON to `build/ast/cpp_core_ffi_ast.json`
+- Exports the `#include <cpp_core/serial.h>` surface intended for downstream FFI adapter generation
+
 ## ABI Surface
 
 The main aggregated interface lives in:
