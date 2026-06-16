@@ -94,6 +94,7 @@ cmake --build build --target cpp_core_ast_json
 ```
 
 - The project still configures with GCC; the AST export itself invokes `clang++` separately
+- The current FFI generation workflow is validated with `clang++ 22.1.4` (`Fedora 22.1.4-1.fc44`)
 - `cpp_core_ast_full_json` builds only the raw clang AST dump
 - Requires `clang++` on `PATH` or `-DCPP_CORE_AST_CLANGXX=/path/to/clang++`
 - Requires a Python 3 interpreter for the slim metadata reduction step
