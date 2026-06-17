@@ -135,14 +135,14 @@ def split_top_level(text: str) -> list[str]:
 
 
 def parse_function_pointer(type_name: str) -> dict[str, Any] | None:
-    match = re.match(r"^(?P<return_type>.+?)\s*\(\*\)\((?P<params>.*)\)$", type_name)
-    if not match:
+    signature_match = re.match(r"^(?P<return_type>.+?)\s*\(\*\)\((?P<params>.*)\)$", type_name)
+    if not signature_match:
         return None
 
-    params_text = match.group("params").strip()
+    params_text = signature_match.group("params").strip()
     params = [] if not params_text or params_text == "void" else split_top_level(params_text)
     return {
-        "returnType": match.group("return_type").strip(),
+        "returnType": signature_match.group("return_type").strip(),
         "parameters": params,
     }
 

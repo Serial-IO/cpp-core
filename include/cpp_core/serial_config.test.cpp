@@ -1,16 +1,8 @@
 #include "cpp_core/reflection.hpp"
 #include "cpp_core/serial_config.hpp"
-#include "cpp_core/strong_types.hpp"
 
-namespace cpp_core::tests::helper_types
+namespace cpp_core::tests::serial_config
 {
-
-static_assert(Baudrate{}.get() == 0);
-static_assert((Baudrate{9'600} + Baudrate{115'200}).get() == 124'800);
-static_assert((DataBits{8} - DataBits{3}).get() == 5);
-static_assert(toInt(Parity::kOdd) == 2);
-static_assert(toInt(StopBits::kTwo) == 2);
-static_assert(toInt(FlowControl::kXonXoff) == 2);
 
 constexpr auto kCompileTimeConfig = SerialConfig::make<115'200, 8, Parity::kEven, StopBits::kTwo>();
 static_assert(kCompileTimeConfig.isValid());
@@ -50,4 +42,4 @@ static_assert(kRetunedConfig->baudrateValue() == Baudrate{230'400});
 static_assert(cpp_core::reflection::publicFieldName<SerialConfig, 0>() == "baudrate");
 static_assert(cpp_core::reflection::publicFieldName<SerialConfig, 1>() == "data_bits");
 
-} // namespace cpp_core::tests::helper_types
+} // namespace cpp_core::tests::serial_config

@@ -30,24 +30,24 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y doxygen graphviz
 
-      - name: Generate documentation
+      - name: 'Generate documentation'
         run: |
           doxygen -v
           doxygen Doxyfile
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: 'Upload Pages artifact'
+        uses: actions/upload-pages-artifact@v5
         with:
           path: docs/html
 
   deploy:
     needs: build-docs
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: 'Deploy to GitHub Pages'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Deploy
+      - name: 'Deploy'
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

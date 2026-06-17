@@ -40,7 +40,7 @@ Consume `cpp-core` as a CMake dependency from another project:
 CPMAddPackage(
   NAME cpp_core
   GITHUB_REPOSITORY Serial-IO/cpp-core
-  GIT_TAG v1.1.0
+  GIT_TAG vX.Y.Z
 )
 
 target_link_libraries(my_binding PRIVATE cpp_core::cpp_core)
@@ -90,12 +90,12 @@ Optional FFI AST export:
 
 ```sh
 cmake -S . -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE=cmake/gcc-toolchain.cmake -DCPP_CORE_ENABLE_AST_EXPORT=ON
-cmake --build build --target cpp_core_ast_json
+cmake --build build --target cpp_core_ast_slim_json
 ```
 
 - The project still configures with GCC; the AST export itself invokes `clang++` separately
 - The current FFI generation workflow is validated with `clang++ 22.1.4` (`Fedora 22.1.4-1.fc44`)
-- `cpp_core_ast_full_json` builds only the raw clang AST dump
+- `cpp_core_ast_raw_json` builds only the raw clang AST dump
 - Requires `clang++` on `PATH` or `-DCPP_CORE_AST_CLANGXX=/path/to/clang++`
 - Requires a Python 3 interpreter for the slim metadata reduction step
 - Writes the combined FFI header AST JSON to `build/ast/cpp_core_ffi_ast.json`

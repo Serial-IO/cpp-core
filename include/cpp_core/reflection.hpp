@@ -10,6 +10,7 @@
 namespace cpp_core::reflection
 {
 
+// Small std::meta helpers for downstream bindings and compile-time validation.
 template <typename T>
 concept ReflectableRecord = std::is_class_v<T> || std::is_union_v<T>;
 

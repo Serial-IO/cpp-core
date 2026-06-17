@@ -83,7 +83,11 @@ target_compile_features(cpp_core INTERFACE cxx_std_26)
 include(CTest)
 
 if(BUILD_TESTING)
-    file(GLOB CPP_CORE_COMPILE_TEST_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/tests/*.test.cpp")
+    file(
+        GLOB_RECURSE CPP_CORE_COMPILE_TEST_SOURCES
+        CONFIGURE_DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/include/*.test.cpp"
+    )
     add_library(cpp_core_compile_tests OBJECT ${CPP_CORE_COMPILE_TEST_SOURCES})
     target_link_libraries(cpp_core_compile_tests PRIVATE cpp_core::cpp_core)
     target_link_libraries(cpp_core_compile_tests PRIVATE cpp_core_strict_warnings)
@@ -164,8 +168,8 @@ if(CPP_CORE_ENABLE_AST_EXPORT)
         VERBATIM
     )
 
-    add_custom_target(cpp_core_ast_full_json DEPENDS "${CPP_CORE_AST_JSON_OUTPUT}")
-    add_custom_target(cpp_core_ast_json DEPENDS "${CPP_CORE_AST_SLIM_JSON_OUTPUT}")
+    add_custom_target(cpp_core_ast_raw_json DEPENDS "${CPP_CORE_AST_JSON_OUTPUT}")
+    add_custom_target(cpp_core_ast_slim_json DEPENDS "${CPP_CORE_AST_SLIM_JSON_OUTPUT}")
 endif()
 
 # Install rules --------------------------------------------------------------
