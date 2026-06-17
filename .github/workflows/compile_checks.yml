@@ -13,10 +13,10 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-      - name: Checkout
+      - name: 'Checkout repository'
         uses: actions/checkout@v6
 
-      - name: Install GCC 16.1 toolchain
+      - name: 'Install GCC 16.1 toolchain'
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y software-properties-common
@@ -24,24 +24,24 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y gcc-16 g++-16 ninja-build cmake
 
-      - name: Show toolchain versions
+      - name: 'Show toolchain versions'
         run: |
           cmake --version
           ninja --version
           gcc-16 --version
           g++-16 --version
 
-      - name: Configure
+      - name: 'Configure CMAKE'
         run: |
           cmake -S . -B build/ci -G Ninja \
             -DCMAKE_BUILD_TYPE=Debug \
             -DCMAKE_C_COMPILER=gcc-16 \
             -DCMAKE_CXX_COMPILER=g++-16
 
-      - name: Build compile checks
+      - name: 'Build compile checks'
         run: |
           cmake --build build/ci --target cpp_core_compile_tests
 
-      - name: Run CTest if registered tests exist
+      - name: 'Run CTest if registered tests exist'
         run: |
           ctest --test-dir build/ci --output-on-failure --no-tests=ignore
