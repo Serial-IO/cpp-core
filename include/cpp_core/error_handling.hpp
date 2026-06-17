@@ -6,6 +6,7 @@
 #include <string>
 #include <string_view>
 #include <type_traits>
+#include <utility>
 
 namespace cpp_core
 {
@@ -28,13 +29,13 @@ concept LegacyErrorCallback = std::is_convertible_v<F, void (*)(int, const char 
 
 // Matches any type whose value can be returned as a status/result code.
 template <typename T>
-concept StatusConvertible = std::is_arithmetic_v<T> && requires(StatusCodes code) { static_cast<T>(code); };
+concept StatusConvertible = std::is_arithmetic_v<T> && requires(StatusCodeValue code) { static_cast<T>(code); };
 
 // Error invocation
 
 // Safely invoke an error callback, does nothing if callback is nullptr.
 template <ErrorCallback Callback>
-constexpr auto invokeError(Callback &&callback, StatusCodes code, std::string_view message) noexcept -> void
+constexpr auto invokeError(Callback &&callback, StatusCodeValue code, std::string_view message) noexcept -> void
 {
     if constexpr (std::is_null_pointer_v<std::remove_cvref_t<Callback>>)
     {
@@ -57,7 +58,7 @@ constexpr auto invokeError(Callback &&callback, StatusCodes code, std::string_vi
 
 // Report failure through callback and return the status code cast to Ret.
 template <StatusConvertible Ret, ErrorCallback Callback>
-constexpr auto failMsg(Callback &&callback, StatusCodes code, std::string_view message) -> Ret
+constexpr auto failMsg(Callback &&callback, StatusCodeValue code, std::string_view message) -> Ret
 {
     invokeError(std::forward<Callback>(callback), code, message);
     return static_cast<Ret>(code);
@@ -65,7 +66,7 @@ constexpr auto failMsg(Callback &&callback, StatusCodes code, std::string_view m
 
 // Overload that builds the message by concatenating a prefix and a detail string.
 template <StatusConvertible Ret, ErrorCallback Callback>
-auto failMsg(Callback &&callback, StatusCodes code, std::string_view prefix, std::string_view detail) -> Ret
+auto failMsg(Callback &&callback, StatusCodeValue code, std::string_view prefix, std::string_view detail) -> Ret
 {
     std::string full;
     full.reserve(prefix.size() + 2 + detail.size());

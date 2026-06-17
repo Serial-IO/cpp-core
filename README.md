@@ -1,76 +1,165 @@
 # C++ Core
 
-Header-only API definition library for cross-platform serial communication. Defines the **API contract** and **version information** shared by all platform-specific binding implementations.
+`cpp-core` is the header-only **API and ABI contract** shared by the Serial-IO platform bindings. It defines the exported serial interface, the status-code model, and build-time version information consumed by the platform implementations.
 
-> [!IMPORTANT]
->
-> **API definitions only** (headers). For implementations and ready-to-use shared libraries:
-> - [cpp-bindings-windows](https://github.com/Serial-IO/cpp-bindings-windows) - Windows (DLL)
-> - [cpp-bindings-linux](https://github.com/Serial-IO/cpp-bindings-linux) - Linux (SO)
-> - [cpp-bindings-macos](https://github.com/Serial-IO/cpp-bindings-macos) - macOS (dylib)
+This repository does not provide a ready-to-load shared library by itself. It provides the contract consumed by the platform implementations:
 
-## Features
+- [cpp-bindings-linux](https://github.com/Serial-IO/cpp-bindings-linux)
+- [cpp-bindings-windows](https://github.com/Serial-IO/cpp-bindings-windows)
 
-* **C++23** header-only API definitions
-* **Cross-platform serial I/O API** (POSIX/Windows compatible)
-* **Centralized version information** from Git tags (`cpp_core::kVersion`)
-* **Status codes** enum for error handling
-* **C-compatible API** for FFI bindings (Rust, Python, Deno, etc.)
+## Status
 
-## Requirements
+`cpp-core` is the canonical definition of the current API line.
 
-* CMake >= 3.30
-* A C++23 compatible compiler (GCC 13+, Clang 16+, MSVC 2022+)
-* Git (for automatic version detection)
+- Current baseline compiler: GCC 16.1+
+- Reflection model: GCC `std::meta` with `-freflection`
+- Supported Linux toolchain: GCC 16.1+ in C++26 mode
+- Supported Windows toolchain: MinGW 16.1+ in C++26 mode
+- macOS support: not ready yet
+- Required language mode: C++26
+- Required build system: CMake 3.30+
 
-## Version Information
+## What It Provides
 
-The version is **automatically extracted from Git tags** during CMake configuration and cannot be overridden:
+- Header-only C-compatible serial API definitions under `include/cpp_core`
+- Modern C++26 helper surface for `std::expected`-based error propagation, strong typed config values, and compile-time reflection helpers
+- A generated version surface used consistently across all platform bindings
+- An installable CMake package target: `cpp_core::cpp_core`
 
-* **With Git tag** (e.g., `v1.2.3`): Version is `1.2.3` (or `1.2.3-dirty` if working tree has uncommitted changes)
-* **Without Git tag**: Version is `0.0.0` (or `0.0.0-dirty` if working tree has uncommitted changes)
+## Repository Layout
 
-All binding repositories that include this repository will use the same version information, ensuring consistency across platforms.
+- `include/cpp_core/serial.h`: aggregated C ABI for serial operations
+- `include/cpp_core/status_code.h`: shared status-code model
+- `include/cpp_core/interface/get_version.h`: version struct and `getVersion`
 
-```cpp
-#include <cpp_core/version.h>
+## Quick Start
 
-constexpr auto v = cpp_core::kVersion;  // v.major, v.minor, v.patch
-```
-
-## Usage in Binding Repositories
-
-Binding repositories typically include this repository as a dependency:
+Consume `cpp-core` as a CMake dependency from another project:
 
 ```cmake
 CPMAddPackage(
   NAME cpp_core
   GITHUB_REPOSITORY Serial-IO/cpp-core
-  GIT_TAG v1.2.3  # Version tag determines the API version
+  GIT_TAG vX.Y.Z
 )
 
-target_link_libraries(my_binding_library PRIVATE cpp_core::cpp_core)
+target_link_libraries(my_binding PRIVATE cpp_core::cpp_core)
 ```
 
-The binding implementation then uses the API definitions:
+Use the exported headers in your implementation:
 
 ```cpp
 #include <cpp_core/serial.h>
-#include <cpp_core/version.h>
+#include <cpp_core/interface/get_version.h>
 
-// Implement platform-specific functions matching the API
-intptr_t serialOpen(
+auto serialOpen(
     void *port,
     int baudrate,
     int data_bits,
     int parity,
     int stop_bits,
     ErrorCallbackT error_callback
-) {
-    // Platform-specific implementation (Windows/Linux/macOS)
-}
+) -> intptr_t;
 ```
+
+Read the version data baked into the checkout:
+
+```cpp
+#include <cpp_core/interface/get_version.h>
+
+cpp_core::Version version{};
+getVersion(&version);
+```
+
+## Building This Repository
+
+Native build:
+
+```sh
+cmake -S . -B build -G Ninja
+cmake --build build
+ctest --test-dir build
+```
+
+The CMake project exports the package target and also builds these relevant targets:
+
+- `cpp_core::cpp_core`: header-only interface target
+- `cpp_core_compile_tests`: compile-time validation target when testing is enabled
+
+Optional FFI AST export:
+
+```sh
+cmake -S . -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE=cmake/gcc-toolchain.cmake -DCPP_CORE_ENABLE_AST_EXPORT=ON
+cmake --build build --target cpp_core_ast_slim_json
+```
+
+- The project still configures with GCC; the AST export itself invokes `clang++` separately
+- The current FFI generation workflow is validated with `clang++ 22.1.4` (`Fedora 22.1.4-1.fc44`)
+- `cpp_core_ast_raw_json` builds only the raw clang AST dump
+- Requires `clang++` on `PATH` or `-DCPP_CORE_AST_CLANGXX=/path/to/clang++`
+- Requires a Python 3 interpreter for the slim metadata reduction step
+- Writes the combined FFI header AST JSON to `build/ast/cpp_core_ffi_ast.json`
+- Writes compact, ship-friendly FFI metadata to `build/ast/cpp_core_ffi_api.json`
+- Exports the `#include <cpp_core/serial.h>` surface intended for downstream FFI adapter generation
+
+## ABI Surface
+
+The main aggregated interface lives in:
+
+```cpp
+#include <cpp_core/serial.h>
+```
+
+The ABI is intentionally plain-C friendly: functions either return a status code, return a value-or-negative-status, or return an opaque handle-or-negative-status.
+
+Example:
+
+```cpp
+MODULE_API auto serialOpen(
+    void *port,
+    int baudrate,
+    int data_bits,
+    int parity = 0,
+    int stop_bits = 0,
+    ErrorCallbackT error_callback = nullptr
+) -> intptr_t;
+```
+
+This model keeps the ABI easy to consume from TypeScript hosts, Rust, Python, or other FFI hosts without requiring C++ runtime coupling.
+
+For C++ callers, the helper surface includes:
+
+- `include/cpp_core/result.hpp`: `Result<T>`, `Status`, `forwardUnexpected(...)`, plus the native `std::expected` monadic operations
+- `include/cpp_core/scope_guard.hpp`: `onScopeExit(...)`, `onScopeFail(...)`, `onScopeSuccess(...)`, `defer(...)`
+- `include/cpp_core/strong_types.hpp`: arithmetic-preserving strong integral wrappers and enum conversion helpers
+- `include/cpp_core/serial_config.hpp`: typed config construction with `Result<SerialConfig>` validation helpers
+- `include/cpp_core/reflection.hpp`: GCC 16 / C++26 reflection helpers such as enum/member counts and names, plus public field counts and names
+
+## Versioning
+
+Version information is generated from Git during CMake configure and written into `include/cpp_core/version.hpp`.
+
+- Tagged checkout: uses the tag as the base version
+- Additional commits after a tag: appends the commit distance and short hash
+- Dirty working tree: appends `-dirty`
+- No usable tag: falls back to `0.0.0`
+
+The version data is exposed through:
+
+- the `version` namespace in `include/cpp_core/version.hpp`
+- the `cpp_core::Version` struct
+- the `getVersion(cpp_core::Version *out)` ABI function
+
+## Relationship to Platform Repositories
+
+`cpp-core` defines the contract. The platform repositories implement it.
+
+- `cpp-bindings-linux` provides the Linux shared library implementation
+- `cpp-bindings-windows` provides the Windows DLL implementation
+- macOS bindings are not part of the supported line yet
+
+Keeping the contract and version surface here avoids ABI drift between platforms and keeps the shared API aligned with the actual exported implementation.
 
 ## License
 
-`Apache-2.0` - Check [LICENSE](LICENSE) for more details.
+Licensed under `Apache-2.0`. See [LICENSE](LICENSE).

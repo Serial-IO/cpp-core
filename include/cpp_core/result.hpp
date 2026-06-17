@@ -4,7 +4,6 @@
 
 #include <concepts>
 #include <expected>
-#include <format>
 #include <string>
 #include <type_traits>
 #include <utility>
@@ -15,14 +14,14 @@ namespace cpp_core
 // Enriched error type carrying a StatusCode and an optional message.
 struct Error
 {
-    StatusCodes code;
+    StatusCodeValue code;
     std::string message;
 
-    constexpr explicit Error(StatusCodes code_in) noexcept : code(code_in)
+    constexpr explicit Error(StatusCodeValue code_in) noexcept : code(code_in)
     {
     }
 
-    Error(StatusCodes code_in, std::string msg) : code(code_in), message(std::move(msg))
+    constexpr Error(StatusCodeValue code_in, std::string msg) : code(code_in), message(std::move(msg))
     {
     }
 
@@ -36,7 +35,7 @@ struct Error
         return code == other.code;
     }
 
-    [[nodiscard]] constexpr auto operator==(StatusCodes code_in) const noexcept -> bool
+    [[nodiscard]] constexpr auto operator==(StatusCodeValue code_in) const noexcept -> bool
     {
         return code == code_in;
     }
@@ -66,12 +65,12 @@ template <typename T> [[nodiscard]] constexpr auto ok(T &&value) -> Result<std::
     return {};
 }
 
-template <typename T = void> [[nodiscard]] constexpr auto fail(StatusCodes code) -> Result<T>
+template <typename T = void> [[nodiscard]] constexpr auto fail(StatusCodeValue code) -> Result<T>
 {
     return std::unexpected(Error{code});
 }
 
-template <typename T = void> [[nodiscard]] auto fail(StatusCodes code, std::string message) -> Result<T>
+template <typename T = void> [[nodiscard]] constexpr auto fail(StatusCodeValue code, std::string message) -> Result<T>
 {
     return std::unexpected(Error{code, std::move(message)});
 }
@@ -86,29 +85,32 @@ concept IsResult = requires {
 } && std::same_as<typename R::error_type, Error>;
 // clang-format on
 
+namespace detail
+{
+
+template <IsResult R> [[nodiscard]] constexpr auto propagateUnexpected(R &&result) -> std::unexpected<Error>
+{
+    return std::unexpected(std::forward<R>(result).error());
+}
+
+} // namespace detail
+
 /**
- * TRY macro
- * Usage:  auto value = CPP_CORE_TRY(someResultReturningCall());
- * Propagates the error automatically if the result holds an error.
+ * Convert a failed Result/Status into the matching std::unexpected payload for
+ * an immediate `return`.
+ *
+ * Usage:
+ *   auto opened = openPort();
+ *   if (!opened)
+ *   {
+ *       return forwardUnexpected(std::move(opened));
+ *   }
+ *   auto handle = std::move(opened).value();
  */
-
-// NOLINTBEGIN(cppcoreguidelines-macro-usage)
-#define CPP_CORE_TRY(expr)                                                                                             \
-    ({                                                                                                                 \
-        auto _cpp_core_result_ = (expr);                                                                               \
-        if (!_cpp_core_result_.has_value())                                                                            \
-            return std::unexpected(std::move(_cpp_core_result_).error());                                              \
-        std::move(_cpp_core_result_).value();                                                                          \
-    })
-
-#define CPP_CORE_TRY_VOID(expr)                                                                                        \
-    do                                                                                                                 \
-    {                                                                                                                  \
-        auto _cpp_core_result_ = (expr);                                                                               \
-        if (!_cpp_core_result_.has_value())                                                                            \
-            return std::unexpected(std::move(_cpp_core_result_).error());                                              \
-    } while (false)
-// NOLINTEND(cppcoreguidelines-macro-usage)
+template <IsResult R> [[nodiscard]] constexpr auto forwardUnexpected(R &&result) -> std::unexpected<Error>
+{
+    return detail::propagateUnexpected(std::forward<R>(result));
+}
 
 /**
  * Result -> C return code bridge

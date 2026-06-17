@@ -19,7 +19,7 @@ extern "C"
      * @param handle Port handle obtained from serialOpen().
      * @param state Non-zero to assert (HIGH), zero to de-assert (LOW).
      * @param error_callback [optional] Callback to invoke on error. Defined in error_callback.h. Default is `nullptr`.
-     * @return 0 on success or a negative error code from ::cpp_core::StatusCodes on error.
+     * @return 0 on success or a negative error code from ::cpp_core::StatusCode on error.
      */
     MODULE_API auto serialSetRts(int64_t handle, int state, ErrorCallbackT error_callback = nullptr) -> int;
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <limits>
 #include <string_view>
 
 namespace cpp_core::status_codes
@@ -23,17 +24,25 @@ template <typename Category, ValueType NumericValue> struct Code
     {
         return kValue;
     }
+
     [[nodiscard]] constexpr auto value() const noexcept -> ValueType
     {
         return kValue;
     }
+
     [[nodiscard]] constexpr auto name() const noexcept -> std::string_view
     {
         return kName;
     }
+
     [[nodiscard]] constexpr auto category() const noexcept -> std::string_view
     {
         return Category::kCategoryName;
+    }
+
+    [[nodiscard]] static constexpr auto categoryCode() noexcept -> ValueType
+    {
+        return Category::kCategoryCode;
     }
 };
 
@@ -116,14 +125,24 @@ struct StatusCode
         static constexpr Code<5> kSetStateError{"SetStateError"};
     };
 
+    struct Monitor : detail::CategoryBase<Monitor>
+    {
+        static constexpr ValueType kCategoryCode = 5;
+        static constexpr std::string_view kCategoryName{"Monitor"};
+
+        static constexpr Code<0> kMonitorError{"MonitorError"};
+    };
+
     [[nodiscard]] static constexpr auto isError(ValueType code) noexcept -> bool
     {
         return code < 0;
     }
+
     [[nodiscard]] static constexpr auto isSuccess(ValueType code) noexcept -> bool
     {
         return code >= 0;
     }
+
     template <typename Category> [[nodiscard]] static constexpr auto belongsTo(ValueType code) noexcept -> bool
     {
         return code < 0 && (-code) / detail::kCategoryMultiplier == Category::kCategoryCode;
@@ -134,6 +153,8 @@ struct StatusCode
 
 namespace cpp_core
 {
-using StatusCodes = ::cpp_core::status_codes::detail::ValueType;
+
+using StatusCodeValue = ::cpp_core::status_codes::detail::ValueType;
 using ::cpp_core::status_codes::StatusCode;
+
 } // namespace cpp_core

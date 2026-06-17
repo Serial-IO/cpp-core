@@ -39,6 +39,17 @@
                 "value": "x64",
                 "strategy": "external"
             }
+        },
+        {
+            "name": "mingw",
+            "displayName": "MinGW-w64 (cross)",
+            "description": "Cross-compile for Windows using MinGW-w64",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/mingw",
+            "toolchainFile": "${sourceDir}/cmake/mingw-toolchain.cmake",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
         }
     ],
     "buildPresets": [
@@ -76,6 +87,18 @@
             "name": "msvc-release",
             "displayName": "MSVC Release",
             "configurePreset": "msvc",
+            "configuration": "Release"
+        },
+        {
+            "name": "mingw-debug",
+            "displayName": "MinGW Debug",
+            "configurePreset": "mingw",
+            "configuration": "Debug"
+        },
+        {
+            "name": "mingw-release",
+            "displayName": "MinGW Release",
+            "configurePreset": "mingw",
             "configuration": "Release"
         }
     ]

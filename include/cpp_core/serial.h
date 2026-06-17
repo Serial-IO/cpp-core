@@ -1,8 +1,5 @@
 #pragma once
 
-#include "module_api.h"
-#include "version.hpp"
-
 // Aggregated interface headers
 #include "interface/get_version.h"
 #include "interface/serial_abort_read.h"
@@ -14,6 +11,7 @@
 #include "interface/serial_in_bytes_total.h"
 #include "interface/serial_in_bytes_waiting.h"
 #include "interface/serial_list_ports.h"
+#include "interface/serial_monitor_ports.h"
 #include "interface/serial_open.h"
 #include "interface/serial_out_bytes_total.h"
 #include "interface/serial_out_bytes_waiting.h"
