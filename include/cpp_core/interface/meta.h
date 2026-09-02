@@ -20,15 +20,12 @@ extern "C"
         int commits_since_tag = version::GIT_COMMIT_COUNT;
         int is_dirty = version::GIT_IS_DIRTY ? 1 : 0;
 
-        const char *library_name = "cpp-core";
         const char *version_string = version::VERSION;
-        const char *version_string_no_v = version::VERSION_NO_V;
         const char *prerelease = version::PRERELEASE;
         const char *prerelease_type = version::PRERELEASE_TYPE;
         const char *prerelease_number = version::PRERELEASE_NUMBER;
 
         const char *git_tag = version::GIT_TAG;
-        const char *git_tag_no_v = version::GIT_TAG_NO_V;
         const char *git_describe_hash = version::GIT_DESCRIBE_HASH;
         const char *git_commit_hash_short = version::GIT_COMMIT_HASH_SHORT;
         const char *git_commit_hash_full = version::GIT_COMMIT_HASH_FULL;
