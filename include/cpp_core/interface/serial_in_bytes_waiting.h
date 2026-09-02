@@ -15,10 +15,11 @@ extern "C"
      * for data already consumed by the application.  A value of `0` therefore
      * means a read call would have to wait for the next byte to arrive.
      *
-     * @code{.c}
+     * @code{.cpp}
+     * constexpr cpp_core::SerialTimeoutConfig timeout{.timeout_ms = 0, .multiplier = 1};
      * int pending = serialInBytesWaiting(h);
      * if (pending > 0) {
-     *     serialRead(h, buf, pending, 0, 1); // non-blocking read
+     *     serialRead(h, buf, pending, &timeout); // non-blocking read
      * }
      * @endcode
      *

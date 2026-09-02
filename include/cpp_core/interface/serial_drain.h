@@ -19,9 +19,10 @@ extern "C"
      * Typical use-case: ensure a complete command frame has left the UART
      * before toggling RTS/DTR or powering down the device.
      *
-     * @code{.c}
+     * @code{.cpp}
      * // Send a frame and make sure it actually hits the line
-     * serialWrite(h, frame, frame_len, 50, 1);
+     * constexpr cpp_core::SerialTimeoutConfig timeout{.timeout_ms = 50, .multiplier = 1};
+     * serialWrite(h, frame, frame_len, &timeout);
      * if (serialDrain(h) < 0) {
      *     fprintf(stderr, "drain failed\n");
      * }

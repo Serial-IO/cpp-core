@@ -1,6 +1,7 @@
 #pragma once
 
 #include "error_handling.hpp"
+#include "serial_config.hpp"
 #include "status_code.h"
 
 #include <cstdint>
@@ -31,7 +32,7 @@ constexpr auto validateHandle(int64_t handle, Callback &&error_callback) -> Ret
  * Returns kSuccess (0) if all params are valid, or the appropriate negative error code.
  */
 template <StatusConvertible Ret, ErrorCallback Callback>
-constexpr auto validateOpenParams(void *port, int baudrate, int data_bits, Callback &&error_callback) -> Ret
+constexpr auto validateOpenParams(void *port, const SerialConfig *config, Callback &&error_callback) -> Ret
 {
     if (port == nullptr)
     {
@@ -39,17 +40,62 @@ constexpr auto validateOpenParams(void *port, int baudrate, int data_bits, Callb
                             static_cast<StatusCodeValue>(StatusCode::Connection::kNotFoundError),
                             "Port parameter is nullptr");
     }
-    if (baudrate < 300)
+    if (config == nullptr)
     {
         return failMsg<Ret>(std::forward<Callback>(error_callback),
                             static_cast<StatusCodeValue>(StatusCode::Control::kSetStateError),
+                            "Config parameter is nullptr");
+    }
+    if (!detail::validateBaudrate(config->baudrate))
+    {
+        return failMsg<Ret>(std::forward<Callback>(error_callback),
+                            static_cast<StatusCodeValue>(StatusCode::Configuration::kSetBaudrateError),
                             "Invalid baudrate: must be >= 300");
     }
-    if (data_bits < 5 || data_bits > 8)
+    if (!detail::validateDataBits(config->data_bits))
     {
         return failMsg<Ret>(std::forward<Callback>(error_callback),
-                            static_cast<StatusCodeValue>(StatusCode::Control::kSetStateError),
+                            static_cast<StatusCodeValue>(StatusCode::Configuration::kSetDataBitsError),
                             "Invalid data bits: must be 5-8");
+    }
+    if (!detail::validateParity(config->parity))
+    {
+        return failMsg<Ret>(std::forward<Callback>(error_callback),
+                            static_cast<StatusCodeValue>(StatusCode::Configuration::kSetParityError),
+                            "Invalid parity mode");
+    }
+    if (!detail::validateStopBits(config->stop_bits))
+    {
+        return failMsg<Ret>(std::forward<Callback>(error_callback),
+                            static_cast<StatusCodeValue>(StatusCode::Configuration::kSetStopBitsError),
+                            "Invalid stop bits mode");
+    }
+    if (!detail::validateFlowControl(config->flow_mode))
+    {
+        return failMsg<Ret>(std::forward<Callback>(error_callback),
+                            static_cast<StatusCodeValue>(StatusCode::Configuration::kSetFlowControlError),
+                            "Invalid flow-control mode");
+    }
+    return static_cast<Ret>(StatusCode::kSuccess);
+}
+
+/**
+ * Shared timeout validation for serial read and write operations.
+ */
+template <StatusConvertible Ret, ErrorCallback Callback>
+constexpr auto validateTimeoutConfig(const SerialTimeoutConfig *config, Callback &&error_callback) -> Ret
+{
+    if (config == nullptr)
+    {
+        return failMsg<Ret>(std::forward<Callback>(error_callback),
+                            static_cast<StatusCodeValue>(StatusCode::Configuration::kSetTimeoutError),
+                            "Timeout config parameter is nullptr");
+    }
+    if (!config->isValid())
+    {
+        return failMsg<Ret>(std::forward<Callback>(error_callback),
+                            static_cast<StatusCodeValue>(StatusCode::Configuration::kSetTimeoutError),
+                            "Timeout and multiplier must be non-negative and their product must fit into int");
     }
     return static_cast<Ret>(StatusCode::kSuccess);
 }

@@ -19,8 +19,10 @@ static_assert(cpp_core::reflection::enumeratorName<cpp_core::Parity, 0>() == "kN
 static_assert(cpp_core::reflection::enumeratorName<cpp_core::Parity, 1>() == "kEven");
 static_assert(cpp_core::reflection::enumerator_name_v<cpp_core::FlowControl, 2> == "kXonXoff");
 static_assert(cpp_core::reflection::hasPubliclyReflectableFields<cpp_core::SerialConfig>());
-static_assert(cpp_core::reflection::publicFieldCount<cpp_core::SerialConfig>() == 4);
+static_assert(cpp_core::reflection::publicFieldCount<cpp_core::SerialConfig>() == 5);
 static_assert(cpp_core::reflection::publicFieldName<cpp_core::SerialConfig, 2>() == "parity");
+static_assert(cpp_core::reflection::publicFieldName<cpp_core::SerialConfig, 4>() == "flow_mode");
+static_assert(cpp_core::reflection::publicFieldCount<cpp_core::SerialTimeoutConfig>() == 2);
 static_assert(cpp_core::reflection::public_field_name_v<cpp_core::Error, 1> == "message");
 static_assert(cpp_core::reflection::public_field_count_v<cpp_core::Error> == 2);
 static_assert(!cpp_core::reflection::hasPubliclyReflectableFields<PrivateMemberAggregate>());

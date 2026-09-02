@@ -1,5 +1,4 @@
 #pragma once
-#include "../module_api.h"
 #include "../version.hpp"
 
 #ifdef __cplusplus
@@ -31,7 +30,7 @@ extern "C"
      * @param[out] out Pointer to a `cpp_core::Version` structure that receives the version information. May be
      * `nullptr`.
      */
-    inline MODULE_API void getVersion(cpp_core::Version *out)
+    inline void getVersion(cpp_core::Version *out)
     {
         if (out != nullptr)
         {

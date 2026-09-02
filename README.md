@@ -30,7 +30,7 @@ This repository does not provide a ready-to-load shared library by itself. It pr
 
 - `include/cpp_core/serial.h`: aggregated C ABI for serial operations
 - `include/cpp_core/status_code.h`: shared status-code model
-- `include/cpp_core/interface/get_version.h`: version struct and `getVersion`
+- `include/cpp_core/interface/get_version.h`: version struct and inline `getVersion` helper
 
 ## Quick Start
 
@@ -54,10 +54,7 @@ Use the exported headers in your implementation:
 
 auto serialOpen(
     void *port,
-    int baudrate,
-    int data_bits,
-    int parity,
-    int stop_bits,
+    const cpp_core::SerialConfig *config,
     ErrorCallbackT error_callback
 ) -> intptr_t;
 ```
@@ -101,12 +98,26 @@ Example:
 ```cpp
 MODULE_API auto serialOpen(
     void *port,
-    int baudrate,
-    int data_bits,
-    int parity = 0,
-    int stop_bits = 0,
+    const cpp_core::SerialConfig *config,
     ErrorCallbackT error_callback = nullptr
 ) -> intptr_t;
+```
+
+Line settings and per-operation timeout settings use explicit configuration
+structures. `flow_mode` is applied as part of `serialOpen` together with the
+other line settings:
+
+```cpp
+constexpr auto serial_config = cpp_core::SerialConfig::make<
+    115'200,
+    8,
+    cpp_core::Parity::kNone,
+    cpp_core::StopBits::kOne,
+    cpp_core::FlowControl::kRtsCts>();
+constexpr auto timeout_config = cpp_core::SerialTimeoutConfig::make<50, 1>();
+
+const auto handle = serialOpen(port, &serial_config);
+const auto bytes_read = serialRead(handle, buffer, buffer_size, &timeout_config);
 ```
 
 This model keeps the ABI easy to consume from TypeScript hosts, Rust, Python, or other FFI hosts without requiring C++ runtime coupling.
@@ -116,7 +127,7 @@ For C++ callers, the helper surface includes:
 - `include/cpp_core/result.hpp`: `Result<T>`, `Status`, `forwardUnexpected(...)`, plus the native `std::expected` monadic operations
 - `include/cpp_core/scope_guard.hpp`: `onScopeExit(...)`, `onScopeFail(...)`, `onScopeSuccess(...)`, `defer(...)`
 - `include/cpp_core/strong_types.hpp`: arithmetic-preserving strong integral wrappers and enum conversion helpers
-- `include/cpp_core/serial_config.hpp`: typed config construction with `Result<SerialConfig>` validation helpers
+- `include/cpp_core/serial_config.hpp`: typed line and timeout config construction with validation helpers
 - `include/cpp_core/reflection.hpp`: GCC 16 / C++26 reflection helpers such as enum/member counts and names, plus public field counts and names
 
 ## Versioning
@@ -132,7 +143,7 @@ The version data is exposed through:
 
 - the `version` namespace in `include/cpp_core/version.hpp`
 - the `cpp_core::Version` struct
-- the `getVersion(cpp_core::Version *out)` ABI function
+- the inline `getVersion(cpp_core::Version *out)` helper
 
 ## Relationship to Platform Repositories
 
