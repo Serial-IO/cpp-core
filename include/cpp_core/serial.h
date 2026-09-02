@@ -9,7 +9,7 @@
 #include "interface/serial_clear_buffer_in.h"
 #include "interface/serial_clear_buffer_out.h"
 #include "interface/serial_close.h"
-#include "interface/serial_drain.h"
+#include "interface/serial_wait_for_drain.h"
 #include "interface/serial_in_bytes_total.h"
 #include "interface/serial_in_bytes_waiting.h"
 #include "interface/serial_list_ports.h"

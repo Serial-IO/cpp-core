@@ -10,6 +10,7 @@ namespace cpp_core::tests::serial_interface
 {
 
 using MetaFn = void (*)(Meta *);
+using WaitForDrainFn = int (*)(int64_t, ErrorCallbackT);
 using OpenFn = intptr_t (*)(const char *, const SerialConfig *, ErrorCallbackT);
 using ReadFn = int (*)(int64_t, std::uint8_t *, int, const SerialTimeoutConfig *, ErrorCallbackT);
 using ReadUntilSequenceFn = int (*)(int64_t, std::uint8_t *, int, const SerialTimeoutConfig *, const std::uint8_t *,
@@ -23,6 +24,7 @@ using EventCallback = void (*)(PortEvent, const char *);
 using SetEventCallbackFn = int (*)(EventCallback, ErrorCallbackT);
 
 static_assert(std::is_same_v<decltype(&::meta), MetaFn>);
+static_assert(std::is_same_v<decltype(&::serialWaitForDrain), WaitForDrainFn>);
 static_assert(std::is_same_v<decltype(&::serialOpen), OpenFn>);
 static_assert(std::is_same_v<decltype(&::serialRead), ReadFn>);
 static_assert(std::is_same_v<decltype(&::serialReadUntilSequence), ReadUntilSequenceFn>);
