@@ -110,7 +110,7 @@ other line settings:
 ```cpp
 constexpr auto serial_config = cpp_core::SerialConfig::make<
     115'200,
-    8,
+    cpp_core::DataBits::kEight,
     cpp_core::Parity::kNone,
     cpp_core::StopBits::kOne,
     cpp_core::FlowControl::kRtsCts>();

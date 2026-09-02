@@ -15,12 +15,20 @@ using ReadFn = int (*)(int64_t, std::uint8_t *, int, const SerialTimeoutConfig *
 using ReadUntilSequenceFn = int (*)(int64_t, std::uint8_t *, int, const SerialTimeoutConfig *, const std::uint8_t *,
                                     int, ErrorCallbackT);
 using WriteFn = int (*)(int64_t, const std::uint8_t *, int, const SerialTimeoutConfig *, ErrorCallbackT);
+using SetDataBitsFn = int (*)(int64_t, DataBits, ErrorCallbackT);
+using SetParityFn = int (*)(int64_t, Parity, ErrorCallbackT);
+using SetStopBitsFn = int (*)(int64_t, StopBits, ErrorCallbackT);
+using SetFlowControlFn = int (*)(int64_t, FlowControl, ErrorCallbackT);
 
 static_assert(std::is_same_v<decltype(&::meta), MetaFn>);
 static_assert(std::is_same_v<decltype(&::serialOpen), OpenFn>);
 static_assert(std::is_same_v<decltype(&::serialRead), ReadFn>);
 static_assert(std::is_same_v<decltype(&::serialReadUntilSequence), ReadUntilSequenceFn>);
 static_assert(std::is_same_v<decltype(&::serialWrite), WriteFn>);
+static_assert(std::is_same_v<decltype(&::serialSetDataBits), SetDataBitsFn>);
+static_assert(std::is_same_v<decltype(&::serialSetParity), SetParityFn>);
+static_assert(std::is_same_v<decltype(&::serialSetStopBits), SetStopBitsFn>);
+static_assert(std::is_same_v<decltype(&::serialSetFlowControl), SetFlowControlFn>);
 
 static_assert(std::is_standard_layout_v<Meta>);
 static_assert(std::is_trivially_copyable_v<Meta>);
@@ -39,7 +47,7 @@ static_assert(!ByteBuffer<std::array<char, 8>>);
 static_assert(!ConstByteBuffer<std::array<char, 8>>);
 
 inline constexpr char kPort[] = "/dev/ttyUSB0";
-constexpr auto kSerialConfig = SerialConfig::make<115'200, 8>();
+constexpr auto kSerialConfig = SerialConfig::make<115'200, DataBits::kEight>();
 constexpr auto kTimeoutConfig = SerialTimeoutConfig::make<50, 1>();
 inline constexpr std::uint8_t kByte{};
 

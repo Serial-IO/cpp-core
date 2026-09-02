@@ -5,39 +5,40 @@ namespace cpp_core::tests::serial_config
 {
 
 constexpr auto kCompileTimeConfig =
-    SerialConfig::make<115'200, 8, Parity::kEven, StopBits::kTwo, FlowControl::kRtsCts>();
+    SerialConfig::make<115'200, DataBits::kEight, Parity::kEven, StopBits::kTwo, FlowControl::kRtsCts>();
 static_assert(kCompileTimeConfig.isValid());
 static_assert(kCompileTimeConfig.baudrateValue() == Baudrate{115'200});
-static_assert(kCompileTimeConfig.dataBitsValue() == DataBits{8});
+static_assert(kCompileTimeConfig.dataBitsValue() == DataBits::kEight);
 static_assert(kCompileTimeConfig.parityInt() == 1);
 static_assert(kCompileTimeConfig.stopBitsInt() == 2);
 static_assert(kCompileTimeConfig.flowModeInt() == 1);
 
 constexpr auto kRuntimeLikeConfig =
-    SerialConfig::tryMake(Baudrate{57'600}, DataBits{7}, Parity::kOdd, StopBits::kOne, FlowControl::kXonXoff);
+    SerialConfig::tryMake(Baudrate{57'600}, DataBits::kSeven, Parity::kOdd, StopBits::kOne, FlowControl::kXonXoff);
 static_assert(kRuntimeLikeConfig.has_value());
 static_assert(kRuntimeLikeConfig->baudrateValue() == Baudrate{57'600});
-static_assert(kRuntimeLikeConfig->dataBitsValue() == DataBits{7});
+static_assert(kRuntimeLikeConfig->dataBitsValue() == DataBits::kSeven);
 static_assert(kRuntimeLikeConfig->flow_mode == FlowControl::kXonXoff);
 
 consteval auto rejectsBadBaudrate() -> bool
 {
-    return !SerialConfig::tryMake(Baudrate{299}, DataBits{8}).has_value();
+    return !SerialConfig::tryMake(Baudrate{299}, DataBits::kEight).has_value();
 }
 
 consteval auto rejectsBadDataBits() -> bool
 {
-    return !SerialConfig::tryMake(9'600, 4).has_value();
+    return !SerialConfig::tryMake(9'600, static_cast<DataBits>(4)).has_value();
 }
 
 consteval auto rejectsBadParity() -> bool
 {
-    return !SerialConfig::tryMake(9'600, 8, static_cast<Parity>(77)).has_value();
+    return !SerialConfig::tryMake(9'600, DataBits::kEight, static_cast<Parity>(77)).has_value();
 }
 
 consteval auto rejectsBadFlowMode() -> bool
 {
-    return !SerialConfig::tryMake(9'600, 8, Parity::kNone, StopBits::kOne, static_cast<FlowControl>(77)).has_value();
+    return !SerialConfig::tryMake(9'600, DataBits::kEight, Parity::kNone, StopBits::kOne, static_cast<FlowControl>(77))
+                .has_value();
 }
 
 static_assert(rejectsBadBaudrate());

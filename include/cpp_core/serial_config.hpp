@@ -23,9 +23,9 @@ constexpr auto validateBaudrate(int baud) -> bool
     return baud >= 300;
 }
 
-constexpr auto validateDataBits(int bits) -> bool
+constexpr auto validateDataBits(DataBits bits) -> bool
 {
-    return bits >= 5 && bits <= 8;
+    return bits == DataBits::kFive || bits == DataBits::kSix || bits == DataBits::kSeven || bits == DataBits::kEight;
 }
 
 constexpr auto validateParity(Parity parity) -> bool
@@ -55,29 +55,29 @@ constexpr auto validateTimeout(int timeout_ms, int multiplier) -> bool
  * Compile-time validated serial configuration.
  * Invalid configs are rejected at compile time - no runtime overhead.
  *   constexpr auto kCfg =
- *       SerialConfig::make<9600, 8, Parity::kNone, StopBits::kOne, FlowControl::kNone>();
+ *       SerialConfig::make<9600, DataBits::kEight, Parity::kNone, StopBits::kOne, FlowControl::kNone>();
  */
 struct SerialConfig
 {
     int baudrate;          ///< Baud rate in bit/s (>= 300).
-    int data_bits;         ///< Number of data bits (5-8).
+    DataBits data_bits;    ///< Number of data bits.
     Parity parity;         ///< Parity mode.
     StopBits stop_bits;    ///< Stop-bit mode.
     FlowControl flow_mode; ///< None, hardware RTS/CTS, or software XON/XOFF flow control.
 
-    template <int Baud, int DataBitsVal, Parity P = Parity::kNone, StopBits S = StopBits::kOne,
+    template <int Baud, DataBits D, Parity P = Parity::kNone, StopBits S = StopBits::kOne,
               FlowControl F = FlowControl::kNone>
     static consteval auto make() -> SerialConfig
     {
         static_assert(detail::validateBaudrate(Baud), "Baudrate must be >= 300");
-        static_assert(detail::validateDataBits(DataBitsVal), "DataBits must be 5-8");
+        static_assert(detail::validateDataBits(D), "DataBits must be 5-8");
         static_assert(detail::validateParity(P), "Parity must be none, even, or odd");
         static_assert(detail::validateStopBits(S), "StopBits must be one or two");
         static_assert(detail::validateFlowControl(F), "FlowControl must be none, RTS/CTS, or XON/XOFF");
 
         return SerialConfig{
             .baudrate = Baud,
-            .data_bits = DataBitsVal,
+            .data_bits = D,
             .parity = P,
             .stop_bits = S,
             .flow_mode = F,
@@ -88,10 +88,10 @@ struct SerialConfig
                                                 StopBits stop_bits = StopBits::kOne,
                                                 FlowControl flow_mode = FlowControl::kNone) -> Result<SerialConfig>
     {
-        return tryMake(baud.get(), data_bits.get(), parity, stop_bits, flow_mode);
+        return tryMake(baud.get(), data_bits, parity, stop_bits, flow_mode);
     }
 
-    [[nodiscard]] static constexpr auto tryMake(int baud, int data_bits_val, Parity parity = Parity::kNone,
+    [[nodiscard]] static constexpr auto tryMake(int baud, DataBits data_bits, Parity parity = Parity::kNone,
                                                 StopBits stop_bits = StopBits::kOne,
                                                 FlowControl flow_mode = FlowControl::kNone) -> Result<SerialConfig>
     {
@@ -99,7 +99,7 @@ struct SerialConfig
         {
             return fail<SerialConfig>(StatusCode::Configuration::kSetBaudrateError);
         }
-        if (!detail::validateDataBits(data_bits_val))
+        if (!detail::validateDataBits(data_bits))
         {
             return fail<SerialConfig>(StatusCode::Configuration::kSetDataBitsError);
         }
@@ -117,7 +117,7 @@ struct SerialConfig
         }
         return ok(SerialConfig{
             .baudrate = baud,
-            .data_bits = data_bits_val,
+            .data_bits = data_bits,
             .parity = parity,
             .stop_bits = stop_bits,
             .flow_mode = flow_mode,
@@ -138,7 +138,7 @@ struct SerialConfig
 
     [[nodiscard]] constexpr auto dataBitsValue() const noexcept -> DataBits
     {
-        return DataBits{data_bits};
+        return data_bits;
     }
 
     [[nodiscard]] constexpr auto parityInt() const noexcept -> int

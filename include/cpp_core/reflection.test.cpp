@@ -13,9 +13,11 @@ struct PrivateMemberAggregate
     int value;
 };
 
+static_assert(cpp_core::reflection::enumeratorCount<cpp_core::DataBits>() == 4);
 static_assert(cpp_core::reflection::enumeratorCount<cpp_core::Parity>() == 3);
 static_assert(cpp_core::reflection::enumeratorCount<cpp_core::StopBits>() == 2);
 static_assert(cpp_core::reflection::enumeratorCount<cpp_core::FlowControl>() == 3);
+static_assert(cpp_core::reflection::enumeratorName<cpp_core::DataBits, 3>() == "kEight");
 static_assert(cpp_core::reflection::enumeratorName<cpp_core::Parity, 0>() == "kNone");
 static_assert(cpp_core::reflection::enumeratorName<cpp_core::Parity, 1>() == "kEven");
 static_assert(cpp_core::reflection::enumerator_name_v<cpp_core::FlowControl, 2> == "kXonXoff");
