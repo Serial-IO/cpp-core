@@ -9,17 +9,24 @@
 namespace cpp_core::tests::serial_interface
 {
 
+using MetaFn = void (*)(Meta *);
 using OpenFn = intptr_t (*)(const char *, const SerialConfig *, ErrorCallbackT);
 using ReadFn = int (*)(int64_t, std::uint8_t *, int, const SerialTimeoutConfig *, ErrorCallbackT);
 using ReadUntilSequenceFn = int (*)(int64_t, std::uint8_t *, int, const SerialTimeoutConfig *, const std::uint8_t *,
                                     int, ErrorCallbackT);
 using WriteFn = int (*)(int64_t, const std::uint8_t *, int, const SerialTimeoutConfig *, ErrorCallbackT);
 
+static_assert(std::is_same_v<decltype(&::meta), MetaFn>);
 static_assert(std::is_same_v<decltype(&::serialOpen), OpenFn>);
 static_assert(std::is_same_v<decltype(&::serialRead), ReadFn>);
 static_assert(std::is_same_v<decltype(&::serialReadUntilSequence), ReadUntilSequenceFn>);
 static_assert(std::is_same_v<decltype(&::serialWrite), WriteFn>);
 
+static_assert(std::is_standard_layout_v<Meta>);
+static_assert(std::is_trivially_copyable_v<Meta>);
+constexpr Meta kMeta{};
+static_assert(kMeta.commits_since_tag >= 0);
+static_assert(kMeta.is_dirty == 0 || kMeta.is_dirty == 1);
 static_assert(std::is_standard_layout_v<SerialConfig>);
 static_assert(std::is_trivially_copyable_v<SerialConfig>);
 static_assert(sizeof(SerialConfig) == 5 * sizeof(int));

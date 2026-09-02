@@ -30,7 +30,7 @@ This repository does not provide a ready-to-load shared library by itself. It pr
 
 - `include/cpp_core/serial.h`: aggregated C ABI for serial operations
 - `include/cpp_core/status_code.h`: shared status-code model
-- `include/cpp_core/interface/get_version.h`: version struct and inline `getVersion` helper
+- `include/cpp_core/interface/meta.h`: metadata struct and exported `meta` function
 
 ## Quick Start
 
@@ -50,7 +50,7 @@ Use the exported headers in your implementation:
 
 ```cpp
 #include <cpp_core/serial.h>
-#include <cpp_core/interface/get_version.h>
+#include <cpp_core/interface/meta.h>
 
 auto serialOpen(
     const char *port,
@@ -62,10 +62,10 @@ auto serialOpen(
 Read the version data baked into the checkout:
 
 ```cpp
-#include <cpp_core/interface/get_version.h>
+#include <cpp_core/interface/meta.h>
 
-cpp_core::Version version{};
-getVersion(&version);
+cpp_core::Meta metadata{};
+meta(&metadata);
 ```
 
 ## Building This Repository
@@ -142,8 +142,8 @@ Version information is generated from Git during CMake configure and written int
 The version data is exposed through:
 
 - the `version` namespace in `include/cpp_core/version.hpp`
-- the `cpp_core::Version` struct
-- the inline `getVersion(cpp_core::Version *out)` helper
+- the `cpp_core::Meta` struct
+- the exported `meta(cpp_core::Meta *out)` ABI function
 
 ## Relationship to Platform Repositories
 
