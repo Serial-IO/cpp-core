@@ -19,8 +19,8 @@ using SetDataBitsFn = int (*)(int64_t, DataBits, ErrorCallbackT);
 using SetParityFn = int (*)(int64_t, Parity, ErrorCallbackT);
 using SetStopBitsFn = int (*)(int64_t, StopBits, ErrorCallbackT);
 using SetFlowControlFn = int (*)(int64_t, FlowControl, ErrorCallbackT);
-using MonitorCallback = void (*)(PortEvent, const char *);
-using MonitorPortsFn = int (*)(MonitorCallback, ErrorCallbackT);
+using EventCallback = void (*)(PortEvent, const char *);
+using SetEventCallbackFn = int (*)(EventCallback, ErrorCallbackT);
 
 static_assert(std::is_same_v<decltype(&::meta), MetaFn>);
 static_assert(std::is_same_v<decltype(&::serialOpen), OpenFn>);
@@ -31,7 +31,7 @@ static_assert(std::is_same_v<decltype(&::serialSetDataBits), SetDataBitsFn>);
 static_assert(std::is_same_v<decltype(&::serialSetParity), SetParityFn>);
 static_assert(std::is_same_v<decltype(&::serialSetStopBits), SetStopBitsFn>);
 static_assert(std::is_same_v<decltype(&::serialSetFlowControl), SetFlowControlFn>);
-static_assert(std::is_same_v<decltype(&::serialMonitorPorts), MonitorPortsFn>);
+static_assert(std::is_same_v<decltype(&::serialSetEventCallback), SetEventCallbackFn>);
 
 static_assert(std::is_standard_layout_v<Meta>);
 static_assert(std::is_trivially_copyable_v<Meta>);

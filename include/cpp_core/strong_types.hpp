@@ -113,7 +113,7 @@ enum class FlowControl : int
 };
 
 /**
- * Port lifecycle event reported by serialMonitorPorts().
+ * Port lifecycle event reported by serialSetEventCallback().
  */
 enum class PortEvent : int
 {
