@@ -25,10 +25,8 @@ static_assert(cpp_core::reflection::publicFieldName<cpp_core::SerialConfig, 2>()
 static_assert(cpp_core::reflection::publicFieldName<cpp_core::SerialConfig, 4>() == "flow_mode");
 static_assert(cpp_core::reflection::publicFieldCount<cpp_core::SerialTimeoutConfig>() == 2);
 static_assert(cpp_core::reflection::hasPubliclyReflectableFields<cpp_core::Meta>());
-static_assert(cpp_core::reflection::publicFieldCount<cpp_core::Meta>() == 19);
+static_assert(cpp_core::reflection::publicFieldCount<cpp_core::Meta>() == 16);
 static_assert(cpp_core::reflection::publicFieldName<cpp_core::Meta, 0>() == "major");
-static_assert(cpp_core::reflection::publicFieldName<cpp_core::Meta, 5>() == "library_name");
-static_assert(cpp_core::reflection::publicFieldName<cpp_core::Meta, 18>() == "git_dirty_suffix");
 static_assert(cpp_core::reflection::public_field_name_v<cpp_core::Error, 1> == "message");
 static_assert(cpp_core::reflection::public_field_count_v<cpp_core::Error> == 2);
 static_assert(!cpp_core::reflection::hasPubliclyReflectableFields<PrivateMemberAggregate>());
