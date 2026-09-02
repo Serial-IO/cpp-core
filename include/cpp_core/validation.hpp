@@ -32,7 +32,7 @@ constexpr auto validateHandle(int64_t handle, Callback &&error_callback) -> Ret
  * Returns kSuccess (0) if all params are valid, or the appropriate negative error code.
  */
 template <StatusConvertible Ret, ErrorCallback Callback>
-constexpr auto validateOpenParams(void *port, const SerialConfig *config, Callback &&error_callback) -> Ret
+constexpr auto validateOpenParams(const char *port, const SerialConfig *config, Callback &&error_callback) -> Ret
 {
     if (port == nullptr)
     {
@@ -102,7 +102,7 @@ constexpr auto validateTimeoutConfig(const SerialTimeoutConfig *config, Callback
 
 // Validate buffer + size for read/write calls.
 template <StatusConvertible Ret, ErrorCallback Callback>
-constexpr auto validateBuffer(const void *buffer, int buffer_size, Callback &&error_callback) -> Ret
+constexpr auto validateBuffer(const std::uint8_t *buffer, int buffer_size, Callback &&error_callback) -> Ret
 {
     if (buffer == nullptr || buffer_size <= 0)
     {

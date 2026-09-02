@@ -53,7 +53,7 @@ Use the exported headers in your implementation:
 #include <cpp_core/interface/get_version.h>
 
 auto serialOpen(
-    void *port,
+    const char *port,
     const cpp_core::SerialConfig *config,
     ErrorCallbackT error_callback
 ) -> intptr_t;
@@ -97,7 +97,7 @@ Example:
 
 ```cpp
 MODULE_API auto serialOpen(
-    void *port,
+    const char *port,
     const cpp_core::SerialConfig *config,
     ErrorCallbackT error_callback = nullptr
 ) -> intptr_t;

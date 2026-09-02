@@ -5,6 +5,7 @@
 
 #include <concepts>
 #include <cstddef>
+#include <cstdint>
 #include <limits>
 #include <type_traits>
 #include <utility>
@@ -251,14 +252,14 @@ concept NativeHandle = (std::is_integral_v<H> || std::is_pointer_v<H>)
 // A type that can serve as a mutable byte buffer for read operations.
 template <typename B>
 concept ByteBuffer = requires(B buf) {
-    { buf.data() } -> std::convertible_to<void *>;
+    { buf.data() } -> std::convertible_to<std::uint8_t *>;
     { buf.size() } -> std::convertible_to<std::size_t>;
 };
 
 // Read-only byte source for write operations.
 template <typename B>
 concept ConstByteBuffer = requires(const B buf) {
-    { buf.data() } -> std::convertible_to<const void *>;
+    { buf.data() } -> std::convertible_to<const std::uint8_t *>;
     { buf.size() } -> std::convertible_to<std::size_t>;
 };
 

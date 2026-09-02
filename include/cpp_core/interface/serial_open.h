@@ -13,8 +13,8 @@ extern "C"
      * @brief Open and configure a serial port.
      *
      * The function attempts to open the device referenced by @p port and applies
-     * the line settings in @p config. The @p port pointer is interpreted as
-     * a UTF-8 encoded null-terminated string (`const char*`) on all platforms.
+     * the line settings in @p config. @p port is interpreted as a UTF-8 encoded
+     * null-terminated string on all platforms.
      *
      * @param port Null-terminated device identifier (e.g. "COM3", "/dev/ttyUSB0"). Passing `nullptr` results in
      * a failure.
@@ -23,7 +23,7 @@ extern "C"
      * @param error_callback [optional] Callback to invoke on error. Defined in error_callback.h. Default is `nullptr`.
      * @return A positive opaque handle on success or a negative value from ::cpp_core::StatusCode on failure.
      */
-    MODULE_API auto serialOpen(void *port, const cpp_core::SerialConfig *config,
+    MODULE_API auto serialOpen(const char *port, const cpp_core::SerialConfig *config,
                                ErrorCallbackT error_callback = nullptr) -> intptr_t;
 
 #ifdef __cplusplus
