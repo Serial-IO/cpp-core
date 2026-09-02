@@ -11,15 +11,12 @@ namespace cpp_core::tests::serial_interface
 
 using OpenFn = intptr_t (*)(const char *, const SerialConfig *, ErrorCallbackT);
 using ReadFn = int (*)(int64_t, std::uint8_t *, int, const SerialTimeoutConfig *, ErrorCallbackT);
-using ReadUntilFn = int (*)(int64_t, std::uint8_t *, int, const SerialTimeoutConfig *, std::uint8_t, ErrorCallbackT);
 using ReadUntilSequenceFn = int (*)(int64_t, std::uint8_t *, int, const SerialTimeoutConfig *, const std::uint8_t *,
                                     int, ErrorCallbackT);
 using WriteFn = int (*)(int64_t, const std::uint8_t *, int, const SerialTimeoutConfig *, ErrorCallbackT);
 
 static_assert(std::is_same_v<decltype(&::serialOpen), OpenFn>);
 static_assert(std::is_same_v<decltype(&::serialRead), ReadFn>);
-static_assert(std::is_same_v<decltype(&::serialReadLine), ReadFn>);
-static_assert(std::is_same_v<decltype(&::serialReadUntil), ReadUntilFn>);
 static_assert(std::is_same_v<decltype(&::serialReadUntilSequence), ReadUntilSequenceFn>);
 static_assert(std::is_same_v<decltype(&::serialWrite), WriteFn>);
 

@@ -12,9 +12,9 @@ extern "C"
     /**
      * @brief Read until a specific byte sequence appears.
      *
-     * Works like serialReadUntil() but supports an arbitrary byte sequence,
-     * including sequences containing zero bytes.
-     * The terminator is included in the returned data.
+     * Reads bytes using the same timeout semantics as serialRead() and stops as
+     * soon as @p sequence has been received. Sequences may contain zero bytes,
+     * and the complete terminator is included in the returned data.
      *
      * @param handle Port handle.
      * @param buffer Destination buffer.

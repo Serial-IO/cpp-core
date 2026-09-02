@@ -18,8 +18,6 @@
 #include "interface/serial_out_bytes_total.h"
 #include "interface/serial_out_bytes_waiting.h"
 #include "interface/serial_read.h"
-#include "interface/serial_read_line.h"
-#include "interface/serial_read_until.h"
 #include "interface/serial_read_until_sequence.h"
 #include "interface/serial_set_error_callback.h"
 #include "interface/serial_set_read_callback.h"
