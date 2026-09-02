@@ -21,7 +21,7 @@ This repository does not provide a ready-to-load shared library by itself. It pr
 
 ## What It Provides
 
-- Header-only C-compatible serial API definitions under `include/cpp_core`
+- Header-only C++ API definitions with unmangled C linkage under `include/cpp_core`
 - Modern C++26 helper surface for `std::expected`-based error propagation, strong typed config values, and compile-time reflection helpers
 - A generated version surface used consistently across all platform bindings
 - An installable CMake package target: `cpp_core::cpp_core`
@@ -91,7 +91,7 @@ The main aggregated interface lives in:
 #include <cpp_core/serial.h>
 ```
 
-The ABI is intentionally plain-C friendly: functions either return a status code, return a value-or-negative-status, or return an opaque handle-or-negative-status.
+The API requires a C++ compiler, while exported functions use unmangled C linkage through `MODULE_API`. Functions either return a status code, return a value-or-negative-status, or return an opaque handle-or-negative-status.
 
 Example:
 
