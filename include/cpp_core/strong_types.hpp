@@ -112,6 +112,15 @@ enum class FlowControl : int
     kXonXoff = 2, ///< Use software XON/XOFF flow control.
 };
 
+/**
+ * Port lifecycle event reported by serialMonitorPorts().
+ */
+enum class PortEvent : int
+{
+    kDetached = 0, ///< A serial port was removed from the system.
+    kAttached = 1, ///< A serial port became available.
+};
+
 template <typename Enum>
 requires std::is_enum_v<Enum>
 [[nodiscard]] constexpr auto toInt(Enum value) noexcept -> int

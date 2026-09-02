@@ -9,5 +9,6 @@ static_assert(toInt(DataBits::kEight) == 8);
 static_assert(toInt(Parity::kOdd) == 2);
 static_assert(toInt(StopBits::kTwo) == 2);
 static_assert(toInt(FlowControl::kXonXoff) == 2);
+static_assert(toInt(PortEvent::kAttached) == 1);
 
 } // namespace cpp_core::tests::strong_types
