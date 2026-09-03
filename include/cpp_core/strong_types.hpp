@@ -61,9 +61,6 @@ template <typename Tag, std::integral Underlying = int> struct StrongInt
 struct BaudrateTag
 {
 };
-struct DataBitsTag
-{
-};
 struct TimeoutMsTag
 {
 };
@@ -72,30 +69,56 @@ struct MultiplierTag
 };
 
 using Baudrate = StrongInt<BaudrateTag>;
-using DataBits = StrongInt<DataBitsTag>;
 using TimeoutMs = StrongInt<TimeoutMsTag>;
 using Multiplier = StrongInt<MultiplierTag>;
 
-// Parity & StopBits enums
+/**
+ * Number of data bits contained in each serial frame.
+ */
+enum class DataBits : int
+{
+    kFive = 5,  ///< Use five data bits.
+    kSix = 6,   ///< Use six data bits.
+    kSeven = 7, ///< Use seven data bits.
+    kEight = 8, ///< Use eight data bits.
+};
 
+/**
+ * Parity mode used for serial communication.
+ */
 enum class Parity : int
 {
-    kNone = 0,
-    kEven = 1,
-    kOdd = 2,
+    kNone = 0, ///< Disable parity checking and generation.
+    kEven = 1, ///< Use even parity.
+    kOdd = 2,  ///< Use odd parity.
 };
 
+/**
+ * Number of stop bits appended to each serial frame.
+ */
 enum class StopBits : int
 {
-    kOne = 0,
-    kTwo = 2,
+    kOne = 0, ///< Use one stop bit.
+    kTwo = 2, ///< Use two stop bits.
 };
 
+/**
+ * Flow-control mode used by the serial port.
+ */
 enum class FlowControl : int
 {
-    kNone = 0,
-    kRtsCts = 1,
-    kXonXoff = 2,
+    kNone = 0,    ///< Disable flow control.
+    kRtsCts = 1,  ///< Use hardware RTS/CTS flow control.
+    kXonXoff = 2, ///< Use software XON/XOFF flow control.
+};
+
+/**
+ * Port lifecycle event reported by serialSetEventCallback().
+ */
+enum class PortEvent : int
+{
+    kDetached = 0, ///< A serial port was removed from the system.
+    kAttached = 1, ///< A serial port became available.
 };
 
 template <typename Enum>
