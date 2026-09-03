@@ -16,6 +16,10 @@ using ReadFn = int (*)(int64_t, std::uint8_t *, int, const SerialTimeoutConfig *
 using ReadUntilSequenceFn = int (*)(int64_t, std::uint8_t *, int, const SerialTimeoutConfig *, const std::uint8_t *,
                                     int, ErrorCallbackT);
 using WriteFn = int (*)(int64_t, const std::uint8_t *, int, const SerialTimeoutConfig *, ErrorCallbackT);
+using GetDataBitsFn = DataBits (*)(int64_t, ErrorCallbackT);
+using GetParityFn = Parity (*)(int64_t, ErrorCallbackT);
+using GetStopBitsFn = StopBits (*)(int64_t, ErrorCallbackT);
+using GetFlowControlFn = FlowControl (*)(int64_t, ErrorCallbackT);
 using SetDataBitsFn = int (*)(int64_t, DataBits, ErrorCallbackT);
 using SetParityFn = int (*)(int64_t, Parity, ErrorCallbackT);
 using SetStopBitsFn = int (*)(int64_t, StopBits, ErrorCallbackT);
@@ -29,6 +33,10 @@ static_assert(std::is_same_v<decltype(&::serialOpen), OpenFn>);
 static_assert(std::is_same_v<decltype(&::serialRead), ReadFn>);
 static_assert(std::is_same_v<decltype(&::serialReadUntilSequence), ReadUntilSequenceFn>);
 static_assert(std::is_same_v<decltype(&::serialWrite), WriteFn>);
+static_assert(std::is_same_v<decltype(&::serialGetDataBits), GetDataBitsFn>);
+static_assert(std::is_same_v<decltype(&::serialGetParity), GetParityFn>);
+static_assert(std::is_same_v<decltype(&::serialGetStopBits), GetStopBitsFn>);
+static_assert(std::is_same_v<decltype(&::serialGetFlowControl), GetFlowControlFn>);
 static_assert(std::is_same_v<decltype(&::serialSetDataBits), SetDataBitsFn>);
 static_assert(std::is_same_v<decltype(&::serialSetParity), SetParityFn>);
 static_assert(std::is_same_v<decltype(&::serialSetStopBits), SetStopBitsFn>);
