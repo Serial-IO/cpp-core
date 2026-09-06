@@ -21,7 +21,7 @@ This repository does not provide a ready-to-load shared library by itself. It pr
 
 ## What It Provides
 
-- Header-only C-compatible serial API definitions under `include/cpp_core`
+- Header-only C++ API definitions with unmangled C linkage under `include/cpp_core`
 - Modern C++26 helper surface for `std::expected`-based error propagation, strong typed config values, and compile-time reflection helpers
 - A generated version surface used consistently across all platform bindings
 - An installable CMake package target: `cpp_core::cpp_core`
@@ -30,7 +30,7 @@ This repository does not provide a ready-to-load shared library by itself. It pr
 
 - `include/cpp_core/serial.h`: aggregated C ABI for serial operations
 - `include/cpp_core/status_code.h`: shared status-code model
-- `include/cpp_core/interface/get_version.h`: version struct and `getVersion`
+- `include/cpp_core/interface/meta.h`: metadata struct and exported `meta` function
 
 ## Quick Start
 
@@ -50,14 +50,11 @@ Use the exported headers in your implementation:
 
 ```cpp
 #include <cpp_core/serial.h>
-#include <cpp_core/interface/get_version.h>
+#include <cpp_core/interface/meta.h>
 
 auto serialOpen(
-    void *port,
-    int baudrate,
-    int data_bits,
-    int parity,
-    int stop_bits,
+    const char *port,
+    const cpp_core::SerialConfig *config,
     ErrorCallbackT error_callback
 ) -> intptr_t;
 ```
@@ -65,10 +62,10 @@ auto serialOpen(
 Read the version data baked into the checkout:
 
 ```cpp
-#include <cpp_core/interface/get_version.h>
+#include <cpp_core/interface/meta.h>
 
-cpp_core::Version version{};
-getVersion(&version);
+cpp_core::Meta metadata{};
+meta(&metadata);
 ```
 
 ## Building This Repository
@@ -94,19 +91,33 @@ The main aggregated interface lives in:
 #include <cpp_core/serial.h>
 ```
 
-The ABI is intentionally plain-C friendly: functions either return a status code, return a value-or-negative-status, or return an opaque handle-or-negative-status.
+The API requires a C++ compiler, while exported functions use unmangled C linkage through `MODULE_API`. Functions either return a status code, return a value-or-negative-status, or return an opaque handle-or-negative-status.
 
 Example:
 
 ```cpp
 MODULE_API auto serialOpen(
-    void *port,
-    int baudrate,
-    int data_bits,
-    int parity = 0,
-    int stop_bits = 0,
+    const char *port,
+    const cpp_core::SerialConfig *config,
     ErrorCallbackT error_callback = nullptr
 ) -> intptr_t;
+```
+
+Line settings and per-operation timeout settings use explicit configuration
+structures. `flow_mode` is applied as part of `serialOpen` together with the
+other line settings:
+
+```cpp
+constexpr auto serial_config = cpp_core::SerialConfig::make<
+    115'200,
+    cpp_core::DataBits::kEight,
+    cpp_core::Parity::kNone,
+    cpp_core::StopBits::kOne,
+    cpp_core::FlowControl::kRtsCts>();
+constexpr auto timeout_config = cpp_core::SerialTimeoutConfig::make<50, 1>();
+
+const auto handle = serialOpen(port, &serial_config);
+const auto bytes_read = serialRead(handle, buffer, buffer_size, &timeout_config);
 ```
 
 This model keeps the ABI easy to consume from TypeScript hosts, Rust, Python, or other FFI hosts without requiring C++ runtime coupling.
@@ -116,7 +127,7 @@ For C++ callers, the helper surface includes:
 - `include/cpp_core/result.hpp`: `Result<T>`, `Status`, `forwardUnexpected(...)`, plus the native `std::expected` monadic operations
 - `include/cpp_core/scope_guard.hpp`: `onScopeExit(...)`, `onScopeFail(...)`, `onScopeSuccess(...)`, `defer(...)`
 - `include/cpp_core/strong_types.hpp`: arithmetic-preserving strong integral wrappers and enum conversion helpers
-- `include/cpp_core/serial_config.hpp`: typed config construction with `Result<SerialConfig>` validation helpers
+- `include/cpp_core/serial_config.hpp`: typed line and timeout config construction with validation helpers
 - `include/cpp_core/reflection.hpp`: GCC 16 / C++26 reflection helpers such as enum/member counts and names, plus public field counts and names
 
 ## Versioning
@@ -131,8 +142,8 @@ Version information is generated from Git during CMake configure and written int
 The version data is exposed through:
 
 - the `version` namespace in `include/cpp_core/version.hpp`
-- the `cpp_core::Version` struct
-- the `getVersion(cpp_core::Version *out)` ABI function
+- the `cpp_core::Meta` struct
+- the exported `meta(cpp_core::Meta *out)` ABI function
 
 ## Relationship to Platform Repositories
 
