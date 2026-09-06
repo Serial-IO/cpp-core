@@ -4,7 +4,7 @@
 #include <cstdint>
 
 /**
- * @brief Query how many bytes can be read *immediately* without blocking.
+ * @brief Query how many bytes are immediately available to read.
  *
  * The number reflects the size of the driver's RX FIFO **after** accounting
  * for data already consumed by the application.  A value of `0` therefore
@@ -14,7 +14,7 @@
  * constexpr cpp_core::SerialTimeoutConfig timeout{.timeout_ms = 0, .multiplier = 1};
  * int pending = serialInBytesWaiting(h);
  * if (pending > 0) {
- *     serialRead(h, buf, pending, &timeout); // non-blocking read
+ *     serialRead(h, buf, pending, &timeout); // returns immediately
  * }
  * @endcode
  *
